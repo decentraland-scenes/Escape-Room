@@ -2,7 +2,7 @@ import { ToggleComponent, ToggleState } from "./modules/toggleComponent";
 import { TimerSystem, Timer } from "./modules/timerSystem";
 import { ITriggerConfig, ProximityTriggerSystem } from "./modules/proximityTriggerSystem";
 import { TransformSystem } from "./modules/transfromSystem";
-import { GLTFEntity } from "./modules/entityHelpers";
+//import { GLTFEntity } from "./modules/entityHelpers";
 
 export function CreateRoom0() : void{
     //create door entity
@@ -20,8 +20,8 @@ export function CreateRoom0() : void{
     doorAnimator.addClip(new AnimationClip("Close"))
     door.addComponent(doorAnimator)
 
-    //liste ton onclick event to toggle door state
-    door.addComponent(new OnClick(event =>{
+    //listen to onclick event to toggle door state
+    door.addComponent(new OnPointerDown(event =>{
         doorAnimator.getClip("Open").play()
     }))
 
@@ -91,7 +91,7 @@ export function CreateRoom1() : void{
     })
 
     //listen for click event to toggle door state
-    button.addComponent(new OnClick(event =>{
+    button.addComponent(new OnPointerDown(event =>{
         //check if timer is running
         if (!countdownTimer.isRunning()){
             //play Open animation
@@ -143,7 +143,7 @@ export function CreateRoom2() : void{
     //create proximity trigger for spikes
     let spikeTrigger : ITriggerConfig = {
         distance : 3,
-        enable: true,
+        enabled: true,
         positionOffset: Vector3.Zero(),
         parent: spikes.getComponent(Transform),
         onTriggerEnter: ()=> spikes.getComponent(ToggleComponent).set(ToggleState.On),
@@ -163,9 +163,9 @@ export function CreateRoom2() : void{
     button.addComponent(new Transform({position: new Vector3(7.9,0.2,14.65), rotation: Quaternion.Euler(0,0,-90), scale: new Vector3(0.3,0.3,0.3)}))
 
     //listen for click event to toggle spikes state
-    button.addComponent(new OnClick(event =>{
-        if (spikeTrigger.enable){
-            spikeTrigger.enable = false
+    button.addComponent(new OnPointerDown(event =>{
+        if (spikeTrigger.enabled){
+            spikeTrigger.enabled = false
             spikes.getComponent(ToggleComponent).set(ToggleState.Off)
         }
     }))
@@ -192,7 +192,7 @@ export function CreateRoom2() : void{
     }))
 
     //add onclick component to listen for click and change geckobush toggle state
-    fern.addComponent(new OnClick(event=>{
+    fern.addComponent(new OnPointerDown(event=>{
         fern.getComponent(ToggleComponent).toggle()
     }))
 
@@ -334,7 +334,7 @@ export function CreateRoom3() : void{
     }))
 
     //listen for click on chandelier and toggle it's state
-    chandelier.addComponent(new OnClick(event=>{
+    chandelier.addComponent(new OnPointerDown(event=>{
         chandelier.getComponent(ToggleComponent).toggle()
     }))
 
@@ -349,7 +349,7 @@ export function CreateRoom3() : void{
     }))
 
     //listen for click on book
-    book.addComponent(new OnClick(event=>{
+    book.addComponent(new OnPointerDown(event=>{
         book.getComponent(ToggleComponent).toggle()
     }))
 
@@ -364,7 +364,7 @@ export function CreateRoom3() : void{
     }))
 
     //listen for click on wine bottle
-    wineBottle.addComponent(new OnClick(event=>{
+    wineBottle.addComponent(new OnPointerDown(event=>{
         wineBottle.getComponent(ToggleComponent).toggle()
     }))
 
@@ -379,7 +379,7 @@ export function CreateRoom3() : void{
     }))
 
     //listen for click on wine glass
-    wineGlass.addComponent(new OnClick(event=>{
+    wineGlass.addComponent(new OnPointerDown(event=>{
         wineGlass.getComponent(ToggleComponent).toggle()
     }))
 
@@ -394,7 +394,7 @@ export function CreateRoom3() : void{
     }))
 
     //listen for click on chair
-    chair.addComponent(new OnClick(event=>{
+    chair.addComponent(new OnPointerDown(event=>{
         chair.getComponent(ToggleComponent).toggle()
     }))
 
@@ -414,8 +414,8 @@ export function CreateRoom3() : void{
         }
     }))
 
-    //listen for click on wall paiting
-    wallPainting.addComponent(new OnClick(event=>{
+    //listen for click on wall painting
+    wallPainting.addComponent(new OnPointerDown(event=>{
         wallPainting.getComponent(ToggleComponent).toggle()
     }))
 
@@ -430,7 +430,7 @@ export function CreateRoom3() : void{
     }))
 
     //listen for click on couch
-    couch.addComponent(new OnClick(event=>{
+    couch.addComponent(new OnPointerDown(event=>{
         couch.getComponent(ToggleComponent).toggle()
     }))
 

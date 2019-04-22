@@ -1,6 +1,6 @@
 export class TimerSystem implements ISystem {
     private runningTimers: Timer[] = []
-    private removeTimers: number[] = []
+    private removedTimers: number[] = []
 
     private static _instance: TimerSystem = null
 
@@ -41,11 +41,11 @@ export class TimerSystem implements ISystem {
             let timer = this.runningTimers[i]
             timer.update(dt)
             if (timer.hasFinished()){
-                this.removeTimers.push(i)
+                this.removedTimers.push(i)
             }
         }
-        for (let i=0; i<this.removeTimers.length; i++){
-            this.runningTimers.splice(this.removeTimers.pop(), 1)
+        for (let i=0; i<this.removedTimers.length; i++){
+            this.runningTimers.splice(this.removedTimers.pop(), 1)
         }
     }
 

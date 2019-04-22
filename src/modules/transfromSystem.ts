@@ -1,6 +1,6 @@
 export class TransformSystem implements ISystem {
     private tasks: TransformTask[] = []
-    private removeQueue : number[] = []
+    private toRemove : number[] = []
 
     private static _instance: TransformSystem = null
 
@@ -57,11 +57,11 @@ export class TransformSystem implements ISystem {
                 element.update(dt)
             }
             else if (element.isStopped()){
-                this.removeQueue.push(i)
+                this.toRemove.push(i)
             }
         }
-        for (let i=0; i<this.removeQueue.length; i++){
-            this.tasks.splice(this.removeQueue.pop(),1)
+        for (let i=0; i<this.toRemove.length; i++){
+            this.tasks.splice(this.toRemove.pop(),1)
         }
     }
 

@@ -14,7 +14,7 @@ export class ProximityTriggerSystem implements ISystem{
 
     update(dt : number){
         this.triggers.forEach(triggerData => {
-            if (triggerData.triggerSettings.enable){
+            if (triggerData.triggerSettings.enabled){
                 let collided = ProximityTriggerSystem.isPositionInsideTrigger(Camera.instance.position, triggerData.triggerSettings)
                 if (collided && !triggerData.isColliding && triggerData.triggerSettings.onTriggerEnter)triggerData.triggerSettings.onTriggerEnter()
                 if (!collided && triggerData.isColliding && triggerData.triggerSettings.onTriggerExit)triggerData.triggerSettings.onTriggerExit()
@@ -29,7 +29,7 @@ export class ProximityTriggerSystem implements ISystem{
             triggerSettings: trigger
         }
         this.triggers.push(triggerData)
-        if (triggerData.triggerSettings.enable && triggerData.isColliding){
+        if (triggerData.triggerSettings.enabled && triggerData.isColliding){
             if (triggerData.triggerSettings.onTriggerEnter) triggerData.triggerSettings.onTriggerEnter()
         }
     }
@@ -54,7 +54,7 @@ export class ProximityTriggerSystem implements ISystem{
 }
 
 export interface ITriggerConfig {
-    enable : boolean
+    enabled : boolean
     distance : number
     positionOffset : Vector3
     parent : Transform
