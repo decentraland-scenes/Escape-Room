@@ -2,14 +2,14 @@ export const enum ToggleState { Off = 0 , On }
 
 @Component("toggle")
 export class ToggleComponent{
-    public enable: boolean = true
+    public enabled: boolean = true
 
     private onValueChangedCallback : (value: ToggleState) => void
     private state : ToggleState
 
     constructor(startingState: ToggleState = ToggleState.On, onValueChangedCallback : (value: ToggleState) => void = null){
         this.set(startingState)
-        this.onValueChanged(onValueChangedCallback)
+        this.setCallback(onValueChangedCallback)
     }
 
     public set(state : ToggleState): void{
@@ -18,7 +18,7 @@ export class ToggleComponent{
     }
 
     public toggle(): void{
-        if (this.enable){
+        if (this.enabled){
             this.set(1-this.state)
         }
     }
@@ -27,7 +27,7 @@ export class ToggleComponent{
         return this.state == ToggleState.On
     }
 
-    public onValueChanged(onValueChangedCallback : (value: ToggleState) => void): void{
+    public setCallback(onValueChangedCallback : (value: ToggleState) => void): void{
         this.onValueChangedCallback = onValueChangedCallback
     }
 }

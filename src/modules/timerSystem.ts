@@ -1,6 +1,6 @@
 export class TimerSystem implements ISystem {
     private runningTimers: Timer[] = []
-    private removeTimers: number[] = []
+    private removedTimers: number[] = []
 
     private static _instance: TimerSystem = null
 
@@ -39,13 +39,13 @@ export class TimerSystem implements ISystem {
     update(dt: number){
         for (let i=0; i<this.runningTimers.length; i++){
             let timer = this.runningTimers[i]
-            timer.update(dt)
+            timer.updateTime(dt)
             if (timer.hasFinished()){
-                this.removeTimers.push(i)
+                this.removedTimers.push(i)
             }
         }
-        for (let i=0; i<this.removeTimers.length; i++){
-            this.runningTimers.splice(this.removeTimers.pop(), 1)
+        for (let i=0; i<this.removedTimers.length; i++){
+            this.runningTimers.splice(this.removedTimers.pop(), 1)
         }
     }
 
@@ -72,7 +72,7 @@ export class Timer {
         this.finished = false
     }
 
-    public update(dt: number){
+    public updateTime(dt: number){
         if (this.running){
             this.timeElapsed = Scalar.Clamp(this.timeElapsed + dt, 0, this.time)
             if (this.onTimerUpdate)this.onTimerUpdate(dt)
