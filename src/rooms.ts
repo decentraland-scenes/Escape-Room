@@ -2,7 +2,7 @@ import { ToggleComponent, ToggleState } from "./modules/toggleComponent";
 import { TimerSystem, Timer } from "./modules/timerSystem";
 import { ITriggerConfig, ProximityTriggerSystem } from "./modules/proximityTriggerSystem";
 import { TransformSystem } from "./modules/transfromSystem";
-import { GLTFEntity } from "./modules/entityHelpers";
+import { IEmitterConfig, ParticleBasicConfig, ParticleSystem, RandomVector3 } from "./modules/particleSystem";
 
 export function CreateRoom0() : void{
     //create door entity
@@ -195,6 +195,40 @@ export function CreateRoom2() : void{
     fern.addComponent(new OnClick(event=>{
         fern.getComponent(ToggleComponent).toggle()
     }))
+
+    //create material for particle system
+    let leaf = new Material()
+    leaf.albedoTexture = new Texture("images/room2/leaf.png")
+    leaf.hasAlpha = true
+    leaf.transparencyMode = 3
+
+    //create particle emitter configuration
+    let particleCfg: IEmitterConfig = {
+        duration: 0, //it will loop so duration is irrelevant
+        loop: true,
+        maxParticles: 3, //max amount of particles at the same time
+        particleSpawnInterval: 0.4, //interval between particle spawns
+        particlesMaterials: [leaf], //materials used for particles
+        startDelay: 0, //we don't want a delay for starting this particle emission
+        useMaterialClone: true, //a clone of the material will be assign to every particle (so we can change it color independently)
+        particleConfig: new ParticleBasicConfig(
+            1.5, //how many seconds will the particle live
+            new RandomVector3(new Vector3(-0.05,0.5,-0.05), new Vector3(0.05,0.5,0.05)), //random X,Z velocity every time so that the leaf subtly changes direction randomly
+            new RandomVector3(new Vector3(-0.2,1,-0.3), new Vector3(0.2,1,0.3)), //random X,Z spawn position for particle
+            new Color4(1,1,1,0.3), //starting color with a little alpha
+            new Color4(1,1,1,1), //starting color with no alpha
+            new Vector3(0.5,0.5,0.5), //starting scale to make particle smaller
+            new Vector3(0.2,0.2,0.2) //end scale to make particle smaller over time
+        )
+    }
+
+    //create particle system and set it up
+    let leafParticleSystem = new ParticleSystem(particleCfg);
+    leafParticleSystem.setParent(fern.getComponent(Transform))
+    leafParticleSystem.start()
+
+    //add particle system to engine
+    engine.addSystem(leafParticleSystem)
 
     //add entities to engine
     engine.addEntity(spikes)
