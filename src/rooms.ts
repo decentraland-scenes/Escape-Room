@@ -1,8 +1,7 @@
 import { ToggleComponent, ToggleState } from "./modules/toggleComponent";
 import { TimerSystem, Timer } from "./modules/timerSystem";
 import { ITriggerConfig, ProximityTriggerSystem } from "./modules/proximityTriggerSystem";
-import { TransformSystem } from "./modules/transfromSystem";
-import { IEmitterConfig, ParticleBasicConfig, ParticleSystem, RandomVector3 } from "./modules/particleSystem";
+import { MoveTransformComponent, RotateTransformComponent } from "./modules/transfromSystem";
 
 export function CreateRoom0() : void{
     //create door entity
@@ -116,7 +115,7 @@ export function CreateRoom1() : void{
             //reset countdown from previous state
             countdownTimer.reset()
             //make the timer run
-            TimerSystem.instance.run(countdownTimer)
+            TimerSystem.instance.runTimer(countdownTimer)
         }
     }))
 
@@ -211,13 +210,15 @@ export function CreateRoom2() : void{
     //add toggle component to set two states to the entity: normal or moved
     fern.addComponent(new ToggleComponent(ToggleState.Off, value =>{
         if (value == ToggleState.On){
-            TransformSystem.instance.move(fern.getComponent(Transform), fern.getComponent(Transform).position, 
-                fern.getComponent(Transform).position.add(new Vector3(0,0,0.5)), 0.5)
+            fern.addComponentOrReplace(new MoveTransformComponent(fern.getComponent(Transform).position, 
+                fern.getComponent(Transform).position.add(new Vector3(0,0,0.5)), 0.5))
+
             fern.getComponent(AudioSource).playOnce()
         }
         else{
-            TransformSystem.instance.move(fern.getComponent(Transform), fern.getComponent(Transform).position, 
-                new Vector3(8.5,0,14.6), 0.5)
+            fern.addComponentOrReplace(new MoveTransformComponent(fern.getComponent(Transform).position, 
+                new Vector3(8.5,0,14.6), 0.5))
+
             fern.getComponent(AudioSource).playOnce()
         }
     }))
@@ -392,13 +393,13 @@ export function CreateRoom3() : void{
     bookshelf.addComponent(new ToggleComponent(ToggleState.Off, value =>{
         if (value == ToggleState.On){
             //move bookshelf when it's toggled on
-            TransformSystem.instance.move(bookshelf.getComponent(Transform),bookshelf.getComponent(Transform).position,bookshelfDefaultPos.add(new Vector3(0,0,-1.5)), 3)
+            bookshelf.addComponentOrReplace(new MoveTransformComponent(bookshelf.getComponent(Transform).position,bookshelfDefaultPos.add(new Vector3(0,0,-1.5)), 3))
             //play sound when moved
             bookshelf.getComponent(AudioSource).playOnce()
         }
         else{
             //move back to default position when bookshelf's toggled off
-            TransformSystem.instance.move(bookshelf.getComponent(Transform),bookshelf.getComponent(Transform).position,bookshelfDefaultPos, 3)
+            bookshelf.addComponentOrReplace(new MoveTransformComponent(bookshelf.getComponent(Transform).position,bookshelfDefaultPos, 3))
             //play sound when moved
             bookshelf.getComponent(AudioSource).playOnce()
         }
@@ -408,13 +409,13 @@ export function CreateRoom3() : void{
     chandelier.addComponent(new ToggleComponent(ToggleState.Off, value =>{
         if (value == ToggleState.On){
             //rotate chandelier when toggled on
-            TransformSystem.instance.rotate(chandelier.getComponent(Transform),chandelier.getComponent(Transform).rotation,chandelierDefaultRot.multiply(Quaternion.Euler(0,0,-30)), 0.5)
+            chandelier.addComponentOrReplace(new RotateTransformComponent(chandelier.getComponent(Transform).rotation,Quaternion.Euler(0,0,-30), 0.5))
             //play sound when rotated
             chandelier.getComponent(AudioSource).playOnce()
         }
         else{
             //rotate back to default position when off
-            TransformSystem.instance.rotate(chandelier.getComponent(Transform),chandelier.getComponent(Transform).rotation,chandelierDefaultRot, 0.5)
+            chandelier.addComponentOrReplace(new RotateTransformComponent(chandelier.getComponent(Transform).rotation,chandelierDefaultRot, 0.5))
             //play sound when rotated
             chandelier.getComponent(AudioSource).playOnce()
         }
@@ -428,11 +429,11 @@ export function CreateRoom3() : void{
     //toggle for book
     book.addComponent(new ToggleComponent(ToggleState.Off, value =>{
         if (value == ToggleState.On){
-            TransformSystem.instance.rotate(book.getComponent(Transform),book.getComponent(Transform).rotation,bookDefaultRot.multiply(Quaternion.Euler(0,0,25)), 0.5)
+            book.addComponentOrReplace(new RotateTransformComponent(book.getComponent(Transform).rotation,Quaternion.Euler(0,-90,25), 0.5))
             book.getComponent(AudioSource).playOnce()
         }
         else{
-            TransformSystem.instance.rotate(book.getComponent(Transform),book.getComponent(Transform).rotation,bookDefaultRot, 0.5)
+            book.addComponentOrReplace(new RotateTransformComponent(book.getComponent(Transform).rotation,bookDefaultRot, 0.5))
             book.getComponent(AudioSource).playOnce()
         }
     }))
@@ -445,11 +446,11 @@ export function CreateRoom3() : void{
     //toggle for wine bottle
     wineBottle.addComponent(new ToggleComponent(ToggleState.Off, value =>{
         if (value == ToggleState.On){
-            TransformSystem.instance.move(wineBottle.getComponent(Transform),wineBottle.getComponent(Transform).position,wineBottleDefaultPos.add(new Vector3(-0.2,0,0)), 0.5)
+            wineBottle.addComponentOrReplace(new MoveTransformComponent(wineBottle.getComponent(Transform).position,wineBottleDefaultPos.add(new Vector3(-0.2,0,0)), 0.5))
             wineBottle.getComponent(AudioSource).playOnce()
         }
         else{
-            TransformSystem.instance.move(wineBottle.getComponent(Transform),wineBottle.getComponent(Transform).position,wineBottleDefaultPos, 0.5)
+            wineBottle.addComponentOrReplace(new MoveTransformComponent(wineBottle.getComponent(Transform).position,wineBottleDefaultPos, 0.5))
             wineBottle.getComponent(AudioSource).playOnce()
         }
     }))
@@ -462,11 +463,11 @@ export function CreateRoom3() : void{
     //toggle for wine glass
     wineGlass.addComponent(new ToggleComponent(ToggleState.Off, value =>{
         if (value == ToggleState.On){
-            TransformSystem.instance.move(wineGlass.getComponent(Transform),wineGlass.getComponent(Transform).position,wineGlassDefaultPos.add(new Vector3(0,0,-0.2)), 0.5)
+            wineGlass.addComponentOrReplace(new MoveTransformComponent(wineGlass.getComponent(Transform).position,wineGlassDefaultPos.add(new Vector3(0,0,-0.2)), 0.5))
             wineGlass.getComponent(AudioSource).playOnce()
         }
         else{
-            TransformSystem.instance.move(wineGlass.getComponent(Transform),wineGlass.getComponent(Transform).position,wineGlassDefaultPos, 0.5)
+            wineGlass.addComponentOrReplace(new MoveTransformComponent(wineGlass.getComponent(Transform).position,wineGlassDefaultPos, 0.5))
             wineGlass.getComponent(AudioSource).playOnce()
         }
     }))
@@ -479,11 +480,11 @@ export function CreateRoom3() : void{
     //toggle for chair
     chair.addComponent(new ToggleComponent(ToggleState.Off, value =>{
         if (value == ToggleState.On){
-            TransformSystem.instance.rotate(chair.getComponent(Transform),chair.getComponent(Transform).rotation,chairDefaultRot.multiply(Quaternion.Euler(0,15,0)), 0.5)
+            chair.addComponentOrReplace(new RotateTransformComponent(chair.getComponent(Transform).rotation,Quaternion.Euler(0,15,0), 0.5))
             chair.getComponent(AudioSource).playOnce()
         }
         else{
-            TransformSystem.instance.rotate(chair.getComponent(Transform),chair.getComponent(Transform).rotation,chairDefaultRot, 0.5)
+            chair.addComponentOrReplace(new RotateTransformComponent(chair.getComponent(Transform).rotation,chairDefaultRot, 0.5))
             chair.getComponent(AudioSource).playOnce()
         }
     }))
@@ -497,16 +498,16 @@ export function CreateRoom3() : void{
     wallPainting.addComponent(new ToggleComponent(ToggleState.Off, value =>{
         if (value == ToggleState.On){
             //rotate wall painting and toggle ON bookshelf's state when rotation ends
-            TransformSystem.instance.rotate(wallPainting.getComponent(Transform),wallPainting.getComponent(Transform).rotation,wallPaintingDefaultRot.multiply(Quaternion.Euler(0,10,0)), 0.5, ()=>{
+            wallPainting.addComponentOrReplace(new RotateTransformComponent(wallPainting.getComponent(Transform).rotation, Quaternion.Euler(90,10,0), 0.5, ()=>{
                 bookshelf.getComponent(ToggleComponent).set(ToggleState.On)
-            })
+            }))
             wallPainting.getComponent(AudioSource).playOnce()
         }
         else{
             //rotate wall painting back to default and toggle OFF bookshelf's state when rotation ends
-            TransformSystem.instance.rotate(wallPainting.getComponent(Transform),wallPainting.getComponent(Transform).rotation,wallPaintingDefaultRot, 0.5, ()=>{
+            wallPainting.addComponentOrReplace(new RotateTransformComponent(wallPainting.getComponent(Transform).rotation,wallPaintingDefaultRot, 0.5, ()=>{
                 bookshelf.getComponent(ToggleComponent).set(ToggleState.Off)
-            })
+            }))
             wallPainting.getComponent(AudioSource).playOnce()
         }
     }))
@@ -519,11 +520,11 @@ export function CreateRoom3() : void{
     //toggle for couch
     couch.addComponent(new ToggleComponent(ToggleState.Off, value =>{
         if (value == ToggleState.On){
-            TransformSystem.instance.move(couch.getComponent(Transform),couch.getComponent(Transform).position,couchDefaultPos.add(new Vector3(0,0,0.4)), 0.5)
+            couch.addComponentOrReplace(new MoveTransformComponent(couch.getComponent(Transform).position,couchDefaultPos.add(new Vector3(0,0,0.4)), 0.5))
             couch.getComponent(AudioSource).playOnce()
         }
         else{
-            TransformSystem.instance.move(couch.getComponent(Transform),couch.getComponent(Transform).position,couchDefaultPos, 0.5)
+            couch.addComponentOrReplace(new MoveTransformComponent(couch.getComponent(Transform).position,couchDefaultPos, 0.5))
             couch.getComponent(AudioSource).playOnce()
         }
     }))

@@ -15,13 +15,13 @@ export class TimerSystem implements ISystem {
     private constructor(){
     }
 
-    public runTimer(time: number, onTimerEnds: ()=>void) : Timer{
+    public createTimer(time: number, onTimerEnds: ()=>void) : Timer{
         let timer = new Timer(time,onTimerEnds)
-        this.run(timer)
+        this.runTimer(timer)
         return timer
     }
 
-    public run(timer: Timer){
+    public runTimer(timer: Timer){
         timer.reset()
         this.runningTimers.push(timer)
         timer.resume()

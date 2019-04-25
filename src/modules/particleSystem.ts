@@ -25,6 +25,10 @@ export class ParticleSystem implements ISystem{
         this.isRunning = false
     }
 
+    running(): boolean{
+        return this.isRunning
+    }
+
     setParent(parent: Transform){
         this.parent = parent
     }
@@ -63,7 +67,7 @@ export class ParticleSystem implements ISystem{
         }
         for (let i=this.aliveParticles.length-1; i>=0; i--){
             let particleInstance = this.aliveParticles[i]
-            particleInstance.particleComponent.updateParticle(dt, this.position)
+            particleInstance.particleComponent.update(dt)
             if (!particleInstance.particleComponent.shouldBeAlive()){
                 this.removeParticle(i)
             }
@@ -74,18 +78,13 @@ export class ParticleSystem implements ISystem{
         for (let i=0; i<config.maxParticles; i++){
             let entity = new Entity()
             let transform = new Transform()
-            let material = config.particlesMaterials[i % config.particlesMaterials.length]
+            let particleProperties = new ParticleProperties(transform, this)
 
-            if (config.useMaterialClone){
-                material = this.cloneMaterial(material)
-            }
-
-            let particle = new ParticleComponent(config.particleConfig, transform, material)
+            let particle = new ParticleComponent(entity, config.particlesBehavior, particleProperties, config.particleLifeTime)
 
             entity.addComponent(new Billboard())
             entity.addComponent(new PlaneShape())
             entity.addComponent(transform)
-            entity.addComponent(material)
 
             this.availableParticles.push({particleComponent:particle, particleEntity:entity})
         }
@@ -95,8 +94,8 @@ export class ParticleSystem implements ISystem{
         if (this.availableParticles.length > 0){
             let particleInstance = this.availableParticles[0]
             this.availableParticles.splice(0,1)
-            particleInstance.particleComponent.reset()
-            particleInstance.particleComponent.setSourcePosition(this.position)
+            let spwnPosition = this.getSpawnPosition()
+            particleInstance.particleComponent.spawn(this.getSpawnPosition())
             this.aliveParticles.push(particleInstance)
             engine.addEntity(particleInstance.particleEntity)
             return true
@@ -111,30 +110,19 @@ export class ParticleSystem implements ISystem{
         engine.removeEntity(particleInstance.particleEntity)
     }
 
-    private cloneMaterial(source: Material): Material{
-        let mat = new Material()
-        mat.albedoColor = source.albedoColor
-        mat.albedoTexture = source.albedoTexture
-        mat.alpha = source.alpha
-        mat.alphaTexture = source.albedoTexture
-        mat.ambientColor = source.ambientColor
-        mat.bumpTexture = source.bumpTexture
-        mat.directIntensity = source.directIntensity
-        mat.disableLighting = source.disableLighting
-        mat.emissiveColor = source.emissiveColor
-        mat.emissiveIntensity = source.emissiveIntensity
-        mat.emissiveTexture = source.emissiveTexture
-        mat.environmentIntensity = source.environmentIntensity
-        mat.hasAlpha = source.hasAlpha
-        mat.metallic = source.metallic
-        mat.microSurface = source.microSurface
-        mat.reflectionColor = source.reflectionColor
-        mat.reflectivityColor = source.reflectivityColor
-        mat.refractionTexture = source.refractionTexture
-        mat.roughness = source.roughness
-        mat.specularIntensity = source.specularIntensity
-        mat.transparencyMode = source.transparencyMode
-        return mat
+    private getSpawnPosition() : Vector3{        
+        let getSpawnInIndex = (indexSize) =>{
+            if (indexSize == 0) return 0
+            else{
+                let sign = Math.random() < 0.5? 1 : -1
+                return Math.random() * indexSize * sign
+            }
+        }
+        let spawnOffet = Vector3.Zero()
+        spawnOffet.x = getSpawnInIndex(this.config.sourceSize.x)
+        spawnOffet.y = getSpawnInIndex(this.config.sourceSize.y)
+        spawnOffet.z = getSpawnInIndex(this.config.sourceSize.z)
+        return this.position.add(spawnOffet)
     }
 }
 
@@ -142,210 +130,184 @@ export interface IEmitterConfig{
     duration: number
     loop: boolean
     maxParticles: number
-    particlesMaterials: Material[]
     startDelay: number
+    sourceSize: Vector3
     particleSpawnInterval: number
-    useMaterialClone: boolean
-    particleConfig: IParticleConfig
+    particleLifeTime: number
+    particlesBehavior: IParticlesBehavior
 }
 
-export interface IParticleConfig{
-    getColor(particleInitialPosition: ReadOnlyVector3, particleCurrentPosition: ReadOnlyVector3, emitterPosition: ReadOnlyVector3, lifetimeRatio: number): Color4
-    getScale(particleInitialPosition: ReadOnlyVector3, particleCurrentPosition: ReadOnlyVector3, emitterPosition: ReadOnlyVector3, lifetimeRatio: number): Vector3
-    getVelocity(particleInitialPosition: ReadOnlyVector3, particleCurrentPosition: ReadOnlyVector3, emitterPosition: ReadOnlyVector3, lifetimeRatio: number): Vector3
-    getStartPosition(): Vector3
-    getLifeTime(): number
-}
+export class ParticleProperties {
+    private transform : Transform
+    private material : Material
+    private velocity : Vector3
+    private emiterSystem: ParticleSystem
+    private bundle : any
 
-export class ParticleBasicConfig implements IParticleConfig{
-    startScale: IParticleVector3Value
-    endScale: IParticleVector3Value
-    velocity: IParticleVector3Value
-    startPosition : IParticleVector3Value
-    startColor: Color4 = null
-    endColor: Color4 = null
-    lifeTime: number = 2
+    constructor(transform: Transform, emiterSystem: ParticleSystem){
+        this.transform = transform
+        this.emiterSystem = emiterSystem
+    }
 
-    constructor(lifeTime: number, velocity?: Vector3 | RandomVector3 | RandomOnceVector3, startPosition?: Vector3 | RandomVector3 | RandomOnceVector3, 
-    startColor?: Color4, endColor?: Color4, startScale?: Vector3 | RandomVector3 | RandomOnceVector3, endScale?: Vector3 | RandomVector3 | RandomOnceVector3){
-        this.lifeTime = lifeTime
-        if (velocity){
-            if (velocity instanceof Vector3){
-                this.velocity = new JustVector3(velocity)
-            }
-            else{
-                this.velocity = velocity
-            }
-        }
-        else{
-            this.velocity = new JustVector3(Vector3.Zero())
-        }
+    setPosition(position: Vector3){
+        this.transform.position = position
+    }
 
-        if (startPosition){
-            if (startPosition instanceof Vector3){
-                this.startPosition = new JustVector3(startPosition)
-            }
-            else{
-                this.startPosition = startPosition
-            }
-        }
-        else{
-            this.startPosition = new JustVector3(Vector3.Zero())
-        }
+    getPosition(): Vector3{
+        return this.transform.position
+    }
 
-        this.startColor = startColor
-        this.endColor = endColor
+    setRotation(rotation: Quaternion){
+        this.transform.rotation = rotation
+    }
 
-        if (startScale){
-            if (startScale instanceof Vector3){
-                this.startScale = new JustVector3(startScale)
-            }
-            else{
-                this.startScale = startScale
-            }
-        }
-        else{
-            this.startScale = new JustVector3(Vector3.One())
-        }
+    getRotation(): Quaternion{
+        return this.transform.rotation
+    }
 
-        if (endScale){
-            if (endScale instanceof Vector3){
-                this.endScale = new JustVector3(endScale)
-            }
-            else{
-                this.endScale = endScale
-            }
-        }
-        else{
-            this.endScale = new JustVector3(Vector3.One())
+    setScale(scale: Vector3){
+        this.transform.scale = scale
+    }
+
+    getScale(): Vector3{
+        return this.transform.scale
+    }
+
+    setVelocity(velocity: Vector3){
+        this.velocity = velocity
+    }
+
+    getVelocity(): Vector3{
+        return this.velocity
+    }
+
+    getMaterial(): Material{
+        return this.material
+    }
+
+    setColor(color: Color4){
+        if (this.material != null){
+            this.material.albedoColor = new Color3(color.r, color.g, color.b)
+            if (this.material.hasAlpha) this.material.alpha = color.a
         }
     }
 
-    getScale(particleInitialPosition: ReadOnlyVector3, particleCurrentPosition: ReadOnlyVector3, emitterPosition: ReadOnlyVector3, lifetimeRatio: number): Vector3 {
-        return Vector3.Lerp(this.startScale.getValue(), this.endScale.getValue(), lifetimeRatio)
+    setMaterial(material: Material){
+        this.material = material
     }
-    getVelocity(particleInitialPosition: ReadOnlyVector3, particleCurrentPosition: ReadOnlyVector3, emitterPosition: ReadOnlyVector3, lifetimeRatio: number): Vector3 {
-        return this.velocity.getValue()
+
+    setBundle(bundle){
+        this.bundle = bundle
     }
-    getColor(particleInitialPosition: ReadOnlyVector3, particleCurrentPosition: ReadOnlyVector3, emitterPosition: ReadOnlyVector3, lifetimeRatio: number): Color4{
-        if (this.startColor != null && this.endColor != null){
-            return Color4.Lerp(this.startColor, this.endColor, lifetimeRatio)
-        }
-        return null
+
+    getBundle(): any{
+        return this.bundle
     }
-    getStartPosition(): Vector3 {
-        return this.startPosition.getValue()
-    }
-    getLifeTime(): number {
-        return this.lifeTime
+
+    getEmiterPosition(): Vector3{
+        return this.emiterSystem.position
     }
 }
 
-interface IParticleVector3Value{
-    getValue(): Vector3
+export interface IParticlesBehavior{
+    onCreate(particleEntity: Readonly<Entity>, properties: Readonly<ParticleProperties>)
+    onSpawn(properties: Readonly<ParticleProperties>)
+    onUpdate(properties: Readonly<ParticleProperties>, lifeTimeRatio: number)
 }
 
-class JustVector3 implements IParticleVector3Value{
-    value: Vector3
+export class BasicParticlesBehavior implements IParticlesBehavior{
+    startVelocity: Vector3
+    endVelocity: Vector3 = null
+    startScale: Vector3 = null
+    endScale: Vector3 = null
+    startRotation: Quaternion = null
+    endRotation: Quaternion = null
+    material: Material
 
-    constructor(value: ReadOnlyVector3){
-        this.value = new Vector3(value.x, value.y, value.z)
+    constructor(material: Material, startVelocity?: Vector3, startRotation?: Quaternion, startScale?: Vector3, startColor?: Color4,
+    endVelocity?: Vector3, endRotation?: Quaternion, endScale?: Vector3){
+        this.startVelocity = startVelocity
+        this.endVelocity = endVelocity
+        this.startScale = startScale
+        this.endScale = endScale 
+        this.material = material
+        this.startRotation = startRotation
+        this.endRotation = endRotation
     }
 
-    getValue(): Vector3 {
-        return this.value
+    onCreate(particleEntity: Readonly<Entity>, properties: Readonly<ParticleProperties>){
+        if (this.startVelocity == null) this.startVelocity = Vector3.Zero()
+        if (this.startRotation == null) this.startRotation = Quaternion.Identity
+        if (this.startScale == null) this.startScale = Vector3.One()
+        particleEntity.addComponent(this.material)
+        properties.setMaterial(this.material)
+    }
+
+    onSpawn(properties: Readonly<ParticleProperties>){
+        properties.setVelocity(this.startVelocity)
+        properties.setRotation(this.startRotation)
+        properties.setScale(this.startScale)
+    }
+
+    onUpdate(properties: Readonly<ParticleProperties>, lifeTimeRatio: number){
+        this.updateVelocity(properties, lifeTimeRatio)
+        this.updateRotatio(properties, lifeTimeRatio)
+        this.updateScale(properties, lifeTimeRatio)
+    }
+
+    private updateVelocity(properties: Readonly<ParticleProperties>, lifeTimeRatio: number){
+        if (this.endVelocity != null){
+            properties.setVelocity(Vector3.Lerp(this.startVelocity, this.endVelocity, lifeTimeRatio))
+        }
+    }
+    private updateRotatio(properties: Readonly<ParticleProperties>, lifeTimeRatio: number){
+        if (this.endRotation != null){
+            properties.setRotation(Quaternion.Slerp(this.startRotation, this.endRotation, lifeTimeRatio))
+        }
+    }
+    private updateScale(properties: Readonly<ParticleProperties>, lifeTimeRatio: number){
+        if (this.endScale != null){
+            properties.setScale(Vector3.Lerp(this.startScale, this.endScale, lifeTimeRatio))
+        }
     }
 }
 
-export class RandomVector3 implements IParticleVector3Value{
-    minValue: ReadOnlyVector3
-    maxValue: ReadOnlyVector3
-
-    constructor(minValue: ReadOnlyVector3, maxValue: ReadOnlyVector3){
-        this.minValue = minValue
-        this.maxValue = maxValue
-    }
-
-    getValue(): Vector3{
-        let ret = new Vector3()
-        ret.x = this.minValue.x + (this.maxValue.x - this.minValue.x) * Math.random()
-        ret.y = this.minValue.y + (this.maxValue.y - this.minValue.y) * Math.random()
-        ret.z = this.minValue.z + (this.maxValue.z - this.minValue.z) * Math.random()
-        return ret
-    }
-}
-
-export class RandomOnceVector3 implements IParticleVector3Value{
-    value: Vector3
-
-    constructor(minValue: ReadOnlyVector3, maxValue: ReadOnlyVector3){
-        this.value = new Vector3()
-        this.value.x = minValue.x + (maxValue.x - minValue.x) * Math.random()
-        this.value.y = minValue.y + (maxValue.y - minValue.y) * Math.random()
-        this.value.z = minValue.z + (maxValue.z - minValue.z) * Math.random()
-    }
-
-    getValue(): Vector3{
-        return this.value
-    }
-}
 
 Component("particleComponent")
 class ParticleComponent{
-    private particleConfig: IParticleConfig
-    private particleLifeTime: number = 0
-    private particleTransform: Transform
-    private particleMaterial: Material
-    private particleInitialPosition: Vector3
+    private particleBehavior: IParticlesBehavior
+    private particleProperties: Readonly<ParticleProperties>
+    private particleAliveTime: number = 0
+    private particleLifeTime: number
 
-    constructor(particleConfig: IParticleConfig, particleTransform: Transform, particleMaterial: Material){
-        this.particleConfig = particleConfig
-        this.particleTransform = particleTransform
-        this.particleMaterial = particleMaterial
+    constructor(particleEntity: Readonly<Entity>, particleBehavior: Readonly<IParticlesBehavior>, 
+    particleProperties:Readonly<ParticleProperties>, particleLifeTime: number){
+        this.particleBehavior = particleBehavior
+        this.particleProperties = particleProperties
+        this.particleLifeTime = particleLifeTime
+        particleBehavior.onCreate(particleEntity, particleProperties)
         this.reset()
     }
 
-    updateParticle(dt: number, emitterPosition: Vector3){
-        this.particleLifeTime += dt
-
-        let lifeTimeRatio = Scalar.Clamp(this.particleLifeTime/this.particleConfig.getLifeTime(), 0, 1)
-
-        this.particleTransform.scale = this.particleConfig.getScale(this.particleInitialPosition,this.particleTransform.position, emitterPosition, lifeTimeRatio)
-        this.particleTransform.position = this.particleTransform.position.add(
-            this.particleConfig.getVelocity(this.particleInitialPosition,this.particleTransform.position, emitterPosition, lifeTimeRatio).multiplyByFloats(dt,dt,dt))
-
-        let newColor = this.particleConfig.getColor(this.particleInitialPosition,this.particleTransform.position, emitterPosition, lifeTimeRatio)
-        if (newColor != null){
-            let oldColor = this.particleMaterial.albedoColor
-            if (newColor.r != oldColor.r || newColor.g != oldColor.g || newColor.b != oldColor.b){
-                this.particleMaterial.albedoColor = new Color3(newColor.r, newColor.g, newColor.b)
-            }
-            if (this.particleMaterial.alpha != newColor.a){
-                this.particleMaterial.alpha = newColor.a
-            }
-        }
+    spawn(position: Vector3){
+        this.particleProperties.setPosition(position)
+        this.particleBehavior.onSpawn(this.particleProperties)
+        this.reset()
     }
 
-    reset(emitterPosition: Vector3 = Vector3.Zero()){
-        this.particleLifeTime = 0
-        this.particleTransform.position = emitterPosition.add(this.particleConfig.getStartPosition())
-        this.particleInitialPosition = this.particleTransform.position
-        this.particleTransform.scale = this.particleConfig.getScale(this.particleInitialPosition,this.particleTransform.position, emitterPosition, 0)
+    update(dt: number){
+        this.particleAliveTime += dt
+        let lifeTimeRatio = Scalar.Clamp(this.particleAliveTime / this.particleLifeTime, 0, 1)
+        this.particleProperties.setPosition(this.particleProperties.getPosition().add(this.particleProperties.getVelocity().scale(dt)))
+        this.particleBehavior.onUpdate(this.particleProperties, lifeTimeRatio)
+    }
 
-        let color = this.particleConfig.getColor(this.particleInitialPosition,this.particleTransform.position, emitterPosition, 0)
-        if (color != null){
-            this.particleMaterial.albedoColor = new Color3(color.r, color.g, color.b)
-            this.particleMaterial.alpha = color.a
-        }
+    reset(){
+        this.particleAliveTime = 0
     }
 
     shouldBeAlive(): boolean{
-        return this.particleLifeTime < this.particleConfig.getLifeTime()
-    }
-
-    setSourcePosition(position: Vector3){
-        this.particleTransform.position = position.add(this.particleConfig.getStartPosition())
-        this.particleInitialPosition = this.particleTransform.position
+        return this.particleAliveTime < this.particleLifeTime
     }
 }
 
