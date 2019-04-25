@@ -14,6 +14,9 @@ export class ParticleSystem implements ISystem{
         this.createParticles(config)
     }
 
+    /**
+     * Starts particle system
+     */
     start(){
         this.isRunning = true
         this.delayTime = this.config.startDelay
@@ -21,14 +24,24 @@ export class ParticleSystem implements ISystem{
         this.runningTime = 0
     }
 
+    /**
+     * Stop particle system
+     */
     stop(){
         this.isRunning = false
     }
 
+    /**
+     * Get if particle system is running
+     */
     running(): boolean{
         return this.isRunning
     }
 
+    /**
+     * Set a Transform as parent of the particle system
+     * @param parent 
+     */
     setParent(parent: Transform){
         this.parent = parent
     }
@@ -126,17 +139,47 @@ export class ParticleSystem implements ISystem{
     }
 }
 
+/**
+ * Interface to configure particle system emitter
+ */
 export interface IEmitterConfig{
+    /**
+     * duration of the particle system
+     */
     duration: number
+    /**
+     * set particle system to loop
+     */
     loop: boolean
+    /**
+     * max amount of particles at the same time
+     */
     maxParticles: number
+    /**
+     * set a delay between starting the system and particles beginning to spawn
+     */
     startDelay: number
+    /**
+     * emitter source size. Are particles going to spawn from the center (Vector3.Zero()) or in an area arround the center?
+     */
     sourceSize: Vector3
+    /**
+     * interval (in seconds) between particles spawn
+     */
     particleSpawnInterval: number
+    /**
+     * how much seconds will the particle live
+     */
     particleLifeTime: number
+    /**
+     * set a behavior for particles
+     */
     particlesBehavior: IParticlesBehavior
 }
 
+/**
+ * Class holding the properties of a specific particle
+ */
 export class ParticleProperties {
     private transform : Transform
     private material : Material
@@ -144,47 +187,87 @@ export class ParticleProperties {
     private emiterSystem: ParticleSystem
     private bundle : any
 
+    /**
+     * 
+     * @param transform transform of the particle entity
+     * @param emiterSystem system creating this particle
+     */
     constructor(transform: Transform, emiterSystem: ParticleSystem){
         this.transform = transform
         this.emiterSystem = emiterSystem
     }
 
+    /**
+     * set particle position
+     * @param position 
+     */
     setPosition(position: Vector3){
         this.transform.position = position
     }
 
+    /**
+     * get particle position
+     */
     getPosition(): Vector3{
         return this.transform.position
     }
 
+    /**
+     * set particle rotation
+     * @param rotation 
+     */
     setRotation(rotation: Quaternion){
         this.transform.rotation = rotation
     }
 
+    /**
+     * get particle rotation
+     */
     getRotation(): Quaternion{
         return this.transform.rotation
     }
 
+    /**
+     * set particle scale
+     * @param scale 
+     */
     setScale(scale: Vector3){
         this.transform.scale = scale
     }
 
+    /**
+     * get particle scale
+     */
     getScale(): Vector3{
         return this.transform.scale
     }
 
+    /**
+     * set particle velocity
+     * @param velocity 
+     */
     setVelocity(velocity: Vector3){
         this.velocity = velocity
     }
 
+    /**
+     * get particle velocity
+     */
     getVelocity(): Vector3{
         return this.velocity
     }
 
+    /**
+     * get particle material
+     */
     getMaterial(): Material{
         return this.material
     }
 
+    /**
+     * set color to particle material
+     * @param color 
+     */
     setColor(color: Color4){
         if (this.material != null){
             this.material.albedoColor = new Color3(color.r, color.g, color.b)
@@ -192,39 +275,90 @@ export class ParticleProperties {
         }
     }
 
+    /**
+     * set material to particle (it must be added to the entity first)
+     * @param material 
+     */
     setMaterial(material: Material){
         this.material = material
     }
 
+    /**
+     * set a bundle for this particle
+     * @param bundle 
+     */
     setBundle(bundle){
         this.bundle = bundle
     }
 
+    /**
+     * get particle's bundle
+     */
     getBundle(): any{
         return this.bundle
     }
 
-    getEmiterPosition(): Vector3{
+    /**
+     * get current emitter position
+     */
+    getEmitterPosition(): Vector3{
         return this.emiterSystem.position
     }
 }
 
+/**
+ * Interface for particles behavior
+ */
 export interface IParticlesBehavior{
     onCreate(particleEntity: Readonly<Entity>, properties: Readonly<ParticleProperties>)
     onSpawn(properties: Readonly<ParticleProperties>)
     onUpdate(properties: Readonly<ParticleProperties>, lifeTimeRatio: number)
 }
 
+/**
+ * Basic particle behavior for simple particle systems
+ */
 export class BasicParticlesBehavior implements IParticlesBehavior{
+    /**
+     * particles' starting velocity
+     */
     startVelocity: Vector3
+    /**
+     * particles' ending velocity
+     */
     endVelocity: Vector3 = null
+    /**
+     * particles' starting scale
+     */
     startScale: Vector3 = null
+    /**
+     * particles' ending scale
+     */
     endScale: Vector3 = null
+    /**
+     * particles' starting rotation
+     */
     startRotation: Quaternion = null
+    /**
+     * particles' ending rotation
+     */
     endRotation: Quaternion = null
+    /**
+     * particles' material
+     */
     material: Material
 
-    constructor(material: Material, startVelocity?: Vector3, startRotation?: Quaternion, startScale?: Vector3, startColor?: Color4,
+    /**
+     * 
+     * @param material that is going to be used by the particles
+     * @param startVelocity starting velocity
+     * @param startRotation starting rotation
+     * @param startScale starting scale
+     * @param endVelocity ending velocity
+     * @param endRotation ending rotation
+     * @param endScale ending scale
+     */
+    constructor(material: Material, startVelocity?: Vector3, startRotation?: Quaternion, startScale?: Vector3,
     endVelocity?: Vector3, endRotation?: Quaternion, endScale?: Vector3){
         this.startVelocity = startVelocity
         this.endVelocity = endVelocity

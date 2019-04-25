@@ -35,6 +35,9 @@ interface ITransformComponent{
     setValue(transform: Transform)
 }
 
+/**
+ * Component to translate entity from one position (start) to another (end) in an amount of time
+ */
 @Component("moveTransformComponent")
 export class MoveTransformComponent implements ITransformComponent{
     private start: ReadOnlyVector3
@@ -44,6 +47,13 @@ export class MoveTransformComponent implements ITransformComponent{
 
     onFinishCallback : ()=>void
 
+    /**
+     * Create a MoveTransformComponent instance to add as a component to a Entity
+     * @param start starting position
+     * @param end ending position
+     * @param duration duration (in seconds) of start to end translation
+     * @param onFinishCallback called when translation ends
+     */
     constructor(start: ReadOnlyVector3, end: ReadOnlyVector3, duration: number, onFinishCallback?: ()=>void){
         this.start = start
         this.end = end
@@ -76,6 +86,9 @@ export class MoveTransformComponent implements ITransformComponent{
     }
 }
 
+/**
+ * Component to rotate entity from one rotation (start) to another (end) in an amount of time
+ */
 @Component("rotateTransformComponent")
 export class RotateTransformComponent{
     private start: ReadOnlyQuaternion
@@ -85,6 +98,13 @@ export class RotateTransformComponent{
 
     onFinishCallback : ()=>void
 
+    /**
+     * Create a RotateTransformComponent instance to add as a component to a Entity
+     * @param start starting rotation
+     * @param end ending rotation
+     * @param duration duration (in seconds) of start to end rotation
+     * @param onFinishCallback called when rotation ends
+     */
     constructor(start: ReadOnlyQuaternion, end: ReadOnlyQuaternion, duration: number, onFinishCallback?: ()=>void){
         this.start = start
         this.end = end

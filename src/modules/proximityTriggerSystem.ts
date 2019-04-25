@@ -3,7 +3,10 @@ export class ProximityTriggerSystem implements ISystem{
 
     private static _instance: ProximityTriggerSystem = null
 
-    static get instance(){ 
+    /**
+     * Get singleton instance of ProximityTriggerSystem
+     */
+    static get instance(): ProximityTriggerSystem { 
         if (ProximityTriggerSystem._instance == null){
             ProximityTriggerSystem._instance = new ProximityTriggerSystem()
             engine.addSystem(ProximityTriggerSystem._instance)
@@ -23,6 +26,10 @@ export class ProximityTriggerSystem implements ISystem{
         });
     }
 
+    /**
+     * Add a new trigger to system
+     * @param trigger trigger instance
+     */
     public addTrigger(trigger : ITriggerConfig) : void{
         let triggerData = {
             isColliding: ProximityTriggerSystem.isPositionInsideTrigger(Camera.instance.position, trigger), 
@@ -34,6 +41,10 @@ export class ProximityTriggerSystem implements ISystem{
         }
     }
 
+    /**
+     * Remove a trigger from system
+     * @param trigger trigger instance
+     */
     public removeTrigger(trigger : ITriggerConfig) : void{
         for (let i=0; i<this.triggers.length; i++){
             if (this.triggers[i].triggerSettings == trigger){
@@ -43,6 +54,11 @@ export class ProximityTriggerSystem implements ISystem{
         }
     }
 
+    /**
+     * Get if a position is inside a trigger
+     * @param position position to check
+     * @param trigger trigger to check against
+     */
     public static isPositionInsideTrigger(position : Vector3, trigger : ITriggerConfig) : boolean{
         return Vector3.DistanceSquared(position, ProximityTriggerSystem.getTriggerPosition(trigger)) <= trigger.distance * trigger.distance
     }
@@ -54,11 +70,29 @@ export class ProximityTriggerSystem implements ISystem{
 }
 
 export interface ITriggerConfig {
+    /**
+     * is trigger enable?
+     */
     enable : boolean
+    /**
+     * radius size of the trigger
+     */
     distance : number
+    /**
+     * offset position from parent (if it has no parent it is the offset from the root of the scene Vector3.Zero())
+     */
     positionOffset : Vector3
+    /**
+     * transform parent of the trigger (usefull to move the trigger with an entity)
+     */
     parent : Transform
+    /**
+     * callback when trigger is entered
+     */
     onTriggerEnter : () => void
+    /**
+     * callback when trigger is exit
+     */
     onTriggerExit : () => void
 }
 

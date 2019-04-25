@@ -4,7 +4,10 @@ export class TimerSystem implements ISystem {
 
     private static _instance: TimerSystem = null
 
-    static get instance(){ 
+    /**
+     * Get singleton instance of TimerSystem
+     */
+    static get instance(): TimerSystem { 
         if (TimerSystem._instance == null){
             TimerSystem._instance = new TimerSystem()
             engine.addSystem(TimerSystem._instance)
@@ -15,18 +18,31 @@ export class TimerSystem implements ISystem {
     private constructor(){
     }
 
+    /**
+     * Create and run a new timer
+     * @param time amount of time in seconds
+     * @param onTimerEnds callback for when timer ends
+     */
     public createTimer(time: number, onTimerEnds: ()=>void) : Timer{
         let timer = new Timer(time,onTimerEnds)
         this.runTimer(timer)
         return timer
     }
 
+    /**
+     * Run an instance of a timer
+     * @param timer instance of a timer
+     */
     public runTimer(timer: Timer){
         timer.reset()
         this.runningTimers.push(timer)
         timer.resume()
     }
 
+    /**
+     * Stop running timer
+     * @param timer instance of a timer
+     */
     public stop(timer: Timer){
         for (let i=0; i<this.runningTimers.length; i++){
             if (timer == this.runningTimers[i]){
