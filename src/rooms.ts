@@ -93,9 +93,10 @@ export function CreateRoom1() : void{
     countdownTimer.setOnTimerEnds(()=>{
         //reset countdown
         countdownTimer.reset()
+        //stop previous animation as a workaround to a bug with animations
+        doorAnimator.getClip("Open").stop()
         //play Close animation
         doorAnimator.getClip("Close").play()
-        log("door closed")
         //play door sound
         doorAudioSource.playOnce()   
         //reset countdown text value
@@ -106,9 +107,10 @@ export function CreateRoom1() : void{
     button.addComponent(new OnClick(event =>{
         //check if timer is running
         if (!countdownTimer.isRunning()){
+            //stop previous animation as a workaround to a bug with animations
+            doorAnimator.getClip("Close").stop()
             //play Open animation
             doorAnimator.getClip("Open").play()
-            log("door open")
             //play door sound
             doorAudioSource.playOnce()
             //play button sound
@@ -135,7 +137,7 @@ export function CreateRoom2() : void{
     spikes.addComponent(spikesShape)
 
     //add transform and set position
-    spikes.addComponent(new Transform({position: new Vector3(9.9,1.4,8.07), rotation: Quaternion.Euler(0,90,0)}))
+    spikes.addComponent(new Transform({position: new Vector3(10.1,1.4,8.07), rotation: Quaternion.Euler(0,90,0)}))
 
     //create animator and add animation clips
     let spikesAnimator = new Animator()
@@ -151,12 +153,16 @@ export function CreateRoom2() : void{
     //add toggle for spikes up (on) or down (off)
     spikes.addComponent(new ToggleComponent(ToggleState.Off, value =>{
         if (value == ToggleState.On){
+            //stop previous animation as a workaround to a bug with animations
+            spikes.getComponent(Animator).getClip("Disappear").stop()
             //on On play appear animation
             spikes.getComponent(Animator).getClip("Appear").play()
             //play sound
             spikes.getComponent(AudioSource).playOnce()
         }
         else{
+            //stop previous animation as a workaround to a bug with animations
+            spikes.getComponent(Animator).getClip("Appear").stop()
             //on Off play disappear animation
             spikes.getComponent(Animator).getClip("Disappear").play()
         }
@@ -164,7 +170,7 @@ export function CreateRoom2() : void{
 
     //create proximity trigger for spikes
     let spikeTrigger : ITriggerConfig = {
-        distance : 3,
+        distance : 4.5,
         enable: true,
         positionOffset: Vector3.Zero(),
         parent: spikes.getComponent(Transform),
@@ -409,14 +415,18 @@ export function CreateRoom3() : void{
     //toggle for chandelier
     chandelier.addComponent(new ToggleComponent(ToggleState.Off, value =>{
         if (value == ToggleState.On){
-            //rotate chandelier when toggled on
-            chandelier.addComponentOrReplace(new RotateTransformComponent(chandelier.getComponent(Transform).rotation,Quaternion.Euler(0,0,-30), 0.5))
+            //rotate chandelier when toggled on and activate bookshelf
+            chandelier.addComponentOrReplace(new RotateTransformComponent(chandelier.getComponent(Transform).rotation,Quaternion.Euler(0,0,-30), 0.5, ()=>{
+                bookshelf.getComponent(ToggleComponent).set(ToggleState.On)
+            }))
             //play sound when rotated
             chandelier.getComponent(AudioSource).playOnce()
         }
         else{
-            //rotate back to default position when off
-            chandelier.addComponentOrReplace(new RotateTransformComponent(chandelier.getComponent(Transform).rotation,chandelierDefaultRot, 0.5))
+            //rotate back to default position when off and deactivate bookshelf
+            chandelier.addComponentOrReplace(new RotateTransformComponent(chandelier.getComponent(Transform).rotation,chandelierDefaultRot, 0.5, ()=>{
+                bookshelf.getComponent(ToggleComponent).set(ToggleState.Off)
+            }))
             //play sound when rotated
             chandelier.getComponent(AudioSource).playOnce()
         }
@@ -499,16 +509,12 @@ export function CreateRoom3() : void{
     wallPainting.addComponent(new ToggleComponent(ToggleState.Off, value =>{
         if (value == ToggleState.On){
             //rotate wall painting and toggle ON bookshelf's state when rotation ends
-            wallPainting.addComponentOrReplace(new RotateTransformComponent(wallPainting.getComponent(Transform).rotation, Quaternion.Euler(90,10,0), 0.5, ()=>{
-                bookshelf.getComponent(ToggleComponent).set(ToggleState.On)
-            }))
+            wallPainting.addComponentOrReplace(new RotateTransformComponent(wallPainting.getComponent(Transform).rotation, Quaternion.Euler(90,10,0), 0.5))
             wallPainting.getComponent(AudioSource).playOnce()
         }
         else{
-            //rotate wall painting back to default and toggle OFF bookshelf's state when rotation ends
-            wallPainting.addComponentOrReplace(new RotateTransformComponent(wallPainting.getComponent(Transform).rotation,wallPaintingDefaultRot, 0.5, ()=>{
-                bookshelf.getComponent(ToggleComponent).set(ToggleState.Off)
-            }))
+            //rotate wall painting back to default
+            wallPainting.addComponentOrReplace(new RotateTransformComponent(wallPainting.getComponent(Transform).rotation,wallPaintingDefaultRot, 0.5))
             wallPainting.getComponent(AudioSource).playOnce()
         }
     }))
