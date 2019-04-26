@@ -15,7 +15,7 @@ export function CreateRoom0() : void{
 
     //create animator and add animation clips
     let doorAnimator = new Animator()
-    doorAnimator.addClip(new AnimationClip("Open", {looping:false}))
+    doorAnimator.addClip(new AnimationState("Open", {looping:false}))
     door.addComponent(doorAnimator)
 
     //create audio source component, set audio clip and add it to door entity
@@ -53,8 +53,8 @@ export function CreateRoom1() : void{
 
     //creat animator and add animation clips
     let doorAnimator = new Animator()
-    doorAnimator.addClip(new AnimationClip("Open", {looping:false}))
-    doorAnimator.addClip(new AnimationClip("Close", {looping:false}))
+    doorAnimator.addClip(new AnimationState("Open", {looping:false}))
+    doorAnimator.addClip(new AnimationState("Close", {looping:false}))
     door.addComponent(doorAnimator)
 
     //create audio source component, set audio clip and add it to door entity
@@ -141,8 +141,8 @@ export function CreateRoom2() : void{
 
     //create animator and add animation clips
     let spikesAnimator = new Animator()
-    spikesAnimator.addClip(new AnimationClip("Appear", {looping:false}))
-    spikesAnimator.addClip(new AnimationClip("Disappear", {looping:false}))
+    spikesAnimator.addClip(new AnimationState("Appear", {looping:false}))
+    spikesAnimator.addClip(new AnimationState("Disappear", {looping:false}))
 
     //add AudioSource and clip
     spikes.addComponent(new AudioSource(new AudioClip("sounds/room2/whip.mp3")))
