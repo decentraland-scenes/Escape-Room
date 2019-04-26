@@ -15,8 +15,7 @@ export function CreateRoom0() : void{
 
     //create animator and add animation clips
     let doorAnimator = new Animator()
-    doorAnimator.addClip(new AnimationClip("Open"))
-    doorAnimator.addClip(new AnimationClip("Close"))
+    doorAnimator.addClip(new AnimationClip("Open", {looping:false}))
     door.addComponent(doorAnimator)
 
     //create audio source component, set audio clip and add it to door entity
@@ -54,8 +53,8 @@ export function CreateRoom1() : void{
 
     //creat animator and add animation clips
     let doorAnimator = new Animator()
-    doorAnimator.addClip(new AnimationClip("Open"))
-    doorAnimator.addClip(new AnimationClip("Close"))
+    doorAnimator.addClip(new AnimationClip("Open", {looping:false}))
+    doorAnimator.addClip(new AnimationClip("Close", {looping:false}))
     door.addComponent(doorAnimator)
 
     //create audio source component, set audio clip and add it to door entity
@@ -96,6 +95,7 @@ export function CreateRoom1() : void{
         countdownTimer.reset()
         //play Close animation
         doorAnimator.getClip("Close").play()
+        log("door closed")
         //play door sound
         doorAudioSource.playOnce()   
         //reset countdown text value
@@ -108,6 +108,7 @@ export function CreateRoom1() : void{
         if (!countdownTimer.isRunning()){
             //play Open animation
             doorAnimator.getClip("Open").play()
+            log("door open")
             //play door sound
             doorAudioSource.playOnce()
             //play button sound
@@ -138,8 +139,8 @@ export function CreateRoom2() : void{
 
     //create animator and add animation clips
     let spikesAnimator = new Animator()
-    spikesAnimator.addClip(new AnimationClip("Appear"))
-    spikesAnimator.addClip(new AnimationClip("Disappear"))
+    spikesAnimator.addClip(new AnimationClip("Appear", {looping:false}))
+    spikesAnimator.addClip(new AnimationClip("Disappear", {looping:false}))
 
     //add AudioSource and clip
     spikes.addComponent(new AudioSource(new AudioClip("sounds/room2/whip.mp3")))
