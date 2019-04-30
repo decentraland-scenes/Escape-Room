@@ -2,6 +2,7 @@ export class TransformSystem implements ISystem {
     update (dt : number){
         let moveGroup = engine.getComponentGroup(MoveTransformComponent)
         let rotateGroup = engine.getComponentGroup(RotateTransformComponent)
+        let followPathGroup = engine.getComponentGroup(FollowPathComponent)
 
         for (let entity of moveGroup.entities){
             if (entity.hasComponent(Transform)){
@@ -14,6 +15,13 @@ export class TransformSystem implements ISystem {
             if (entity.hasComponent(Transform)){
                 let transform = entity.getComponent(Transform)
                 this.updateComponent(entity.getComponent(RotateTransformComponent), entity, transform, dt)
+            }
+        }
+
+        for (let entity of followPathGroup.entities){
+            if (entity.hasComponent(Transform)){
+                let transform = entity.getComponent(Transform)
+                this.updateComponent(entity.getComponent(FollowPathComponent), entity, transform, dt)
             }
         }
     }
@@ -134,5 +142,73 @@ export class RotateTransformComponent{
 
     setValue(transform: Transform){
         transform.rotation = this.getRotation()
+    }
+}
+
+/**
+ * Component to move a entity down a fixed path in an amount of time
+ */
+@Component("followPathComponent")
+export class FollowPathComponent implements ITransformComponent{
+    private points : Vector3[]
+    private speed: number[] = []
+    private normalizedTime: number
+    private currentIndex: number
+
+    onFinishCallback : ()=>void
+    onPointReachedCallback : (currentPoint:Vector3, nextPoint:Vector3)=>void
+
+    /**
+     * Create a FollowPathComponent instance to add as a component to a Entity
+     * @param points array of points for the path
+     * @param duration duration of the movement through the path
+     * @param onFinishCallback called when movement ends
+     * @param onPointReachedCallback called everytime an entity reaches a point of the path
+     */
+    constructor(points : Vector3[], duration: number, onFinishCallback?: ()=>void, onPointReachedCallback?: (currentPoint:Vector3, nextPoint:Vector3)=>void){
+        this.normalizedTime = 0
+        this.currentIndex = 0
+        this.points = points
+        this.onFinishCallback = onFinishCallback
+        this.onPointReachedCallback = onPointReachedCallback
+
+        if (points.length < 2){
+            throw new Error("At least 2 points are needed for FollowPathComponent.");
+        }
+
+        if (duration > 0){
+            let sqTotalDist = 0
+            let sqPointsDist = []
+            for (let i=0; i<points.length-1; i++){
+                let sqDist = Vector3.DistanceSquared(points[i], points[i+1])
+                sqTotalDist += sqDist
+                sqPointsDist.push(sqDist)
+            }
+            for (let i=0; i<sqPointsDist.length; i++){
+                this.speed.push(1 / (sqPointsDist[i] / sqTotalDist * duration))
+            }
+        }
+        else{
+            this.normalizedTime = 1
+            this.currentIndex = points.length-2
+        }
+    }
+
+    update(dt: number) {
+        this.normalizedTime = Scalar.Clamp(this.normalizedTime + dt * this.speed[this.currentIndex], 0, 1)
+        if (this.normalizedTime >= 1 && this.currentIndex < this.points.length-2){
+            this.currentIndex ++
+            this.normalizedTime = 0
+            if (this.onPointReachedCallback && this.currentIndex < this.points.length-1) this.onPointReachedCallback(this.points[this.currentIndex],this.points[this.currentIndex+1])
+        }
+    }
+    hasFinished(): boolean {
+        return this.currentIndex >= this.points.length-2 && this.normalizedTime >= 1
+    }
+    setValue(transform: Transform) {
+        transform.position = this.getPosition()
+    }
+    getPosition() : Vector3{
+        return Vector3.Lerp(this.points[this.currentIndex], this.points[this.currentIndex+1], this.normalizedTime)
     }
 }
