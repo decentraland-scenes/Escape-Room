@@ -2,6 +2,8 @@ import { Trigger, TriggerBoxShape, ProximityTriggerSystem } from "./modules/prox
 import { FollowPathComponent } from "./modules/transfromSystem";
 
 export function CreateRoom7(): void{
+    //variable to store how many tiles does the player paint
+    let tilesPaintedByPlayer = 0
 
     //create tile's shape
     const tileShape = new PlaneShape()
@@ -17,18 +19,62 @@ export function CreateRoom7(): void{
     const defaultMaterial = new Material()
     defaultMaterial.albedoColor = Color3.Blue()
 
+    //create mouse shape
+    let mouseShape = new GLTFShape("models/room7/mouse.glb")
+
+    //create maice entities
+    let mouse1 = new Entity()
+    let mouse2 = new Entity()
+
+    //add transfrom add shape to maice
+    mouse1.addComponent(new Transform({position: new Vector3(24,0,10)}))
+    mouse1.addComponent(mouseShape)
+    mouse2.addComponent(new Transform({position: new Vector3(32,0,1.5)}))
+    mouse2.addComponent(mouseShape)
+
+    //add maice entities to engine
+    engine.addEntity(mouse1)
+    engine.addEntity(mouse2)
+
+    //create callback for when maice change idle state
+    let onMouseIdleChanged = (): boolean=>{
+        //check if player has painted all tiles
+        if (tilesPaintedByPlayer == (columnCount * rowCount)){
+            //remove maice's behavior component and system cause we just finished the puzzle
+            mouse1.removeComponent(MouseFollowPathComponent)
+            mouse2.removeComponent(MouseFollowPathComponent)
+            engine.removeSystem(maiceBehaviorSystem)
+            //we tell mouse that it can't change it's idle state
+            return false
+        }
+        //tell mouse that it can change it's idle state
+        return true
+    }
+
+    //set/add component for maice behavior
+    mouse1.addComponent(new MouseFollowPathComponent(13, 8, [new Vector3(24,0,10),new Vector3(32,0,10),new Vector3(32,0,13.5)], 4, onMouseIdleChanged)) 
+    mouse2.addComponent(new MouseFollowPathComponent(0, 3, [new Vector3(32,0,1.5),new Vector3(32,0,10),new Vector3(36.5,0,10)], 10, onMouseIdleChanged))
+
+    //add maice behavior system to engine
+    let maiceBehaviorSystem = new MouseFollowPathSystem()
+    engine.addSystem(maiceBehaviorSystem)
+
+    //create trigger for maince
+    ProximityTriggerSystem.instance.addTrigger(new Trigger(new TriggerBoxShape(new Vector3(0.5,0.5,0.5), Vector3.Zero()), mouse1, 2, 2))
+    ProximityTriggerSystem.instance.addTrigger(new Trigger(new TriggerBoxShape(new Vector3(0.5,0.5,0.5), Vector3.Zero()), mouse2, 2, 2))
+
     //set tiles grid
-    const tileSize = new Vector3(1,1,1)
+    const tileSize = new Vector3(2,2,1)
     const columnCount = 5
     const rowCount = 5
     const tileSpacing = 0.03
-    const initialPosition = new Vector3(18,0,1)
+    const initialPosition = new Vector3(26,0,4)
 
     //create grid
     for (let column = 0; column < columnCount; column++){
         for (let row = 0; row < rowCount; row++){
             //calc tile position
-            let tilePos = new Vector3(initialPosition.x + column * (tileSize.x + tileSpacing), 0, initialPosition.z + row * (tileSize.z + tileSpacing))
+            let tilePos = new Vector3(initialPosition.x + column * (tileSize.x + tileSpacing), 0, initialPosition.z + row * (tileSize.y + tileSpacing))
             //create tile entity
             let tileEntity = new Entity()
             //add and set transform
@@ -40,13 +86,24 @@ export function CreateRoom7(): void{
             //add tile to engine
             engine.addEntity(tileEntity)
             //create tile trigger
-            let tileTrigger = new Trigger(new TriggerBoxShape(new Vector3(0.5,0.5,0.5), new Vector3(0,0.25,0)), tileEntity, 2, 2)
+            let tileTrigger = new Trigger(new TriggerBoxShape(new Vector3(1.5,0.5,1.5), new Vector3(0,0.25,0)), tileEntity, 2, 2)
             //set callbacks
             tileTrigger.onCameraEnter = ()=>{
-                tileEntity.addComponentOrReplace(playerMaterial)
+                //check if the tile wasn't already painted by player
+                if (tileEntity.getComponent(Material) != playerMaterial){
+                    //increase tiles painted variable
+                    tilesPaintedByPlayer ++
+                    //change tile material
+                    tileEntity.addComponentOrReplace(playerMaterial)
+                }
             }
             tileTrigger.onTriggerEnter = (trigger)=>{
                 if (trigger.parent != null && trigger.parent.hasComponent(MouseFollowPathComponent)){
+                    //check if the tile was painted by player
+                    if (tileEntity.getComponent(Material) == playerMaterial){
+                        //decrease tiles painted variable
+                        tilesPaintedByPlayer --
+                    }
                     tileEntity.addComponentOrReplace(miceMaterial)
                 }
             }
@@ -54,18 +111,6 @@ export function CreateRoom7(): void{
             ProximityTriggerSystem.instance.addTrigger(tileTrigger)
         }
     }
-
-    let mouse = new Entity()
-    mouse.addComponent(new Transform({scale: new Vector3(0.5,1,0.5), position: new Vector3(18,0,1)}))
-    mouse.addComponent(new GLTFShape("models/room7/mouse.glb"))
-    mouse.addComponent(new MouseFollowPathComponent(3, [new Vector3(18,0,1),new Vector3(19,0,2),new Vector3(19,0,3),new Vector3(18,0,1)], 5))
-    engine.addEntity(mouse)
-
-    let mouseTrigger = new Trigger(new TriggerBoxShape(new Vector3(0.5,0.5,0.5), Vector3.Zero()), mouse, 2, 2)
-    ProximityTriggerSystem.instance.addTrigger(mouseTrigger)
-
-    let mouseSystem = new MouseFollowPathSystem()
-    engine.addSystem(mouseSystem)
 }
 
 @Component("mouseFollowPathComponent")
@@ -76,26 +121,35 @@ class MouseFollowPathComponent {
 
     private reversePath: boolean
     private currentTime: number
-    private isIdle: boolean
+    private isInIdleTime: boolean
+    private startDelay: number
 
-    constructor(idleTime: number, path: Vector3[], movingTime: number){
+    private onIdleChanged: ()=>boolean
+
+    constructor(startDelay: number, idleTime: number, path: Vector3[], movingTime: number, onIdleChanged: ()=>boolean){
         this.idleTime = idleTime
         this.path = path
         this.reversePath = false
-        this.currentTime = 0
-        this.isIdle = true
+        this.currentTime = idleTime
+        this.isInIdleTime = true
         this.movingTime = movingTime
+        this.onIdleChanged = onIdleChanged
+        this.startDelay = startDelay
     }
 
     update(dt: number, mouseEntiy: Entity){
+        //check if waiting for start
+        if (this.startDelay > 0){
+            this.startDelay -= dt
+        }
         //when mouse is idle
-        if (this.isIdle){
+        else if (this.isInIdleTime){
             //increase time in idle state
             this.currentTime += dt
-            //when idle time is reached
-            if (this.currentTime >= this.idleTime){
+            //when idle time is reached and can change idle state
+            if (this.currentTime >= this.idleTime && this.onIdleChanged()){
                 //we are not in idle state any more
-                this.isIdle = false
+                this.isInIdleTime = false
 
                 let path: Vector3[]
                 //check if we shoul reverse the path
@@ -108,13 +162,15 @@ class MouseFollowPathComponent {
                 //rotate mouse to look at it's next point in path
                 mouseEntiy.getComponent(Transform).lookAt(path[1])
                 //add component to follow the path
-                mouseEntiy.addComponent(new FollowPathComponent(path, this.movingTime, 
+                mouseEntiy.addComponentOrReplace(new FollowPathComponent(path, this.movingTime, 
                     ()=>{
                         //when path is finished we reset mouse variables
-                        this.isIdle = true
+                        this.isInIdleTime = true
                         this.currentTime = 0
                         //we set the mouse to go the other way arround next time
-                        this.reversePath = !this.reversePath
+                        this.reversePath = true
+                        //callback that idle state is going to change
+                        this.onIdleChanged()
                     }, 
                     (currentPoint, nextPoint)=>{
                         //when we reach a new point in path we rotate the mouse to look at the next point

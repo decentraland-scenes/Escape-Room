@@ -20,5 +20,5 @@ CreateRoom2()
 CreateRoom3()
 
 
-//CreateRoom6()
-//CreateRoom7()
+CreateRoom6()
+CreateRoom7()
