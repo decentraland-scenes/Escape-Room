@@ -27,9 +27,9 @@ export function CreateRoom7(): void{
     let mouse2 = new Entity()
 
     //add transfrom add shape to maice
-    mouse1.addComponent(new Transform({position: new Vector3(24,0,10)}))
+    mouse1.addComponent(new Transform({position: new Vector3(25.82, 1.46, 4.25), scale: new Vector3(0.3,0.3,0.3)}))
     mouse1.addComponent(mouseShape)
-    mouse2.addComponent(new Transform({position: new Vector3(32,0,1.5)}))
+    mouse2.addComponent(new Transform({position: new Vector3(26.54, 0.85, 3.9), scale: new Vector3(0.3,0.3,0.3)}))
     mouse2.addComponent(mouseShape)
 
     //add maice entities to engine
@@ -52,43 +52,43 @@ export function CreateRoom7(): void{
     }
 
     //set/add component for maice behavior
-    mouse1.addComponent(new MouseFollowPathComponent(13, 8, [new Vector3(24,0,10),new Vector3(32,0,10),new Vector3(32,0,13.5)], 4, onMouseIdleChanged)) 
-    mouse2.addComponent(new MouseFollowPathComponent(0, 3, [new Vector3(32,0,1.5),new Vector3(32,0,10),new Vector3(36.5,0,10)], 10, onMouseIdleChanged))
+    mouse1.addComponent(new MouseFollowPathComponent(7.5, 7, [new Vector3(25.82, 1.46, 4.25),new Vector3(26.54, 1.46, 4.25),new Vector3(26.54, 1.77, 4.43)], 2, onMouseIdleChanged)) 
+    mouse2.addComponent(new MouseFollowPathComponent(0, 6, [new Vector3(26.54, 0.85, 3.9),new Vector3(26.54, 1.46, 4.25),new Vector3(26.9, 1.46, 4.25)], 5, onMouseIdleChanged))
 
     //add maice behavior system to engine
     let maiceBehaviorSystem = new MouseFollowPathSystem()
     engine.addSystem(maiceBehaviorSystem)
 
     //create trigger for maince
-    ProximityTriggerSystem.instance.addTrigger(new Trigger(new TriggerBoxShape(new Vector3(0.5,0.5,0.5), Vector3.Zero()), mouse1, 2, 2))
-    ProximityTriggerSystem.instance.addTrigger(new Trigger(new TriggerBoxShape(new Vector3(0.5,0.5,0.5), Vector3.Zero()), mouse2, 2, 2))
+    ProximityTriggerSystem.instance.addTrigger(new Trigger(new TriggerBoxShape(new Vector3(0.05,0.05,0.05), Vector3.Zero()), mouse1, 2, 2))
+    ProximityTriggerSystem.instance.addTrigger(new Trigger(new TriggerBoxShape(new Vector3(0.05,0.05,0.05), Vector3.Zero()), mouse2, 2, 2))
 
     //set tiles grid
-    const tileSize = new Vector3(2,2,1)
+    const tileSize = new Vector3(0.15,0.15,1)
     const columnCount = 5
     const rowCount = 5
     const tileSpacing = 0.03
-    const initialPosition = new Vector3(26,0,4)
-
+    const initialPosition = new Vector3(26,1,4)
+    const tileDirection = new Vector3(1,0.86,0.49)
+    
     //create grid
     for (let column = 0; column < columnCount; column++){
         for (let row = 0; row < rowCount; row++){
             //calc tile position
-            let tilePos = new Vector3(initialPosition.x + column * (tileSize.x + tileSpacing), 0, initialPosition.z + row * (tileSize.y + tileSpacing))
+            let tilePos = new Vector3()
+            tilePos.x = initialPosition.x + column * tileDirection.x * (tileSize.x + tileSpacing)
+            tilePos.y = initialPosition.y + row * tileDirection.y * (tileSize.y + tileSpacing)
+            tilePos.z = initialPosition.z + row * tileDirection.z * (tileSize.y + tileSpacing)
             //create tile entity
             let tileEntity = new Entity()
             //add and set transform
-            tileEntity.addComponent(new Transform({position: tilePos, scale: tileSize, rotation: Quaternion.Euler(90,0,0)}))
+            tileEntity.addComponent(new Transform({position: tilePos, scale: tileSize, rotation: Quaternion.Euler(30,0,0)}))
             //add shape
             tileEntity.addComponent(tileShape)
             //add material
             tileEntity.addComponent(defaultMaterial)
-            //add tile to engine
-            engine.addEntity(tileEntity)
-            //create tile trigger
-            let tileTrigger = new Trigger(new TriggerBoxShape(new Vector3(1.5,0.5,1.5), new Vector3(0,0.25,0)), tileEntity, 2, 2)
-            //set callbacks
-            tileTrigger.onCameraEnter = ()=>{
+            //listen for click
+            tileEntity.addComponent(new OnClick(event=>{
                 //check if the tile wasn't already painted by player
                 if (tileEntity.getComponent(Material) != playerMaterial){
                     //increase tiles painted variable
@@ -96,7 +96,12 @@ export function CreateRoom7(): void{
                     //change tile material
                     tileEntity.addComponentOrReplace(playerMaterial)
                 }
-            }
+            }))
+            //add tile to engine
+            engine.addEntity(tileEntity)
+            //create tile trigger
+            let tileTrigger = new Trigger(new TriggerBoxShape(new Vector3(0.15,0.15,0.15), new Vector3(0,0,0)), tileEntity, 2, 2)
+            //set trigger callbacks
             tileTrigger.onTriggerEnter = (trigger)=>{
                 if (trigger.parent != null && trigger.parent.hasComponent(MouseFollowPathComponent)){
                     //check if the tile was painted by player
