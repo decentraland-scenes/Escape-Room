@@ -179,7 +179,20 @@ export class ProximityTriggerSystem implements ISystem{
 
     private static getTriggerParentPosition(trigger : Trigger): Vector3{
         if (trigger.parent.hasComponent(Transform)){
-            return trigger.parent.getComponent(Transform).position
+            return ProximityTriggerSystem.getEntityWorldPosition(trigger.parent)
+        }
+        return Vector3.Zero()
+    }
+
+    private static getEntityWorldPosition(entity: Entity) : Vector3{
+        if (entity.hasComponent(Transform)){
+            if (entity.getParent() != null){
+                let parent = entity.getParent()
+                if (parent.hasComponent(Transform)){
+                    return ProximityTriggerSystem.getEntityWorldPosition(parent).add(entity.getComponent(Transform).position.rotate(parent.getComponent(Transform).rotation))
+                }
+            }
+            return entity.getComponent(Transform).position
         }
         return Vector3.Zero()
     }
