@@ -2,6 +2,7 @@ export class TransformSystem implements ISystem {
     update (dt : number){
         let moveGroup = engine.getComponentGroup(MoveTransformComponent)
         let rotateGroup = engine.getComponentGroup(RotateTransformComponent)
+        let scaleGroup = engine.getComponentGroup(ScaleTransformComponent)
         let followPathGroup = engine.getComponentGroup(FollowPathComponent)
 
         for (let entity of moveGroup.entities){
@@ -18,6 +19,13 @@ export class TransformSystem implements ISystem {
             }
         }
 
+        for (let entity of scaleGroup.entities){
+            if (entity.hasComponent(Transform)){
+                let transform = entity.getComponent(Transform)
+                this.updateComponent(entity.getComponent(ScaleTransformComponent), entity, transform, dt)
+            }
+        }
+
         for (let entity of followPathGroup.entities){
             if (entity.hasComponent(Transform)){
                 let transform = entity.getComponent(Transform)
@@ -30,8 +38,8 @@ export class TransformSystem implements ISystem {
         component.update(dt)
         component.setValue(transform)
         if (component.hasFinished()){
-            if (component.onFinishCallback != null) component.onFinishCallback()
             entity.removeComponent(component)
+            if (component.onFinishCallback != null) component.onFinishCallback()
         }
     }
 }
@@ -142,6 +150,57 @@ export class RotateTransformComponent{
 
     setValue(transform: Transform){
         transform.rotation = this.getRotation()
+    }
+}
+
+/**
+ * Component to scale entity from one value (start) to another (end) in an amount of time
+ */
+@Component("scaleTransformComponent")
+export class ScaleTransformComponent implements ITransformComponent{
+    private start: ReadOnlyVector3
+    private end: ReadOnlyVector3
+    private speed: number
+    private normalizedTime: number
+
+    onFinishCallback : ()=>void
+
+    /**
+     * Create a ScaleTransformComponent instance to add as a component to a Entity
+     * @param start starting scale
+     * @param end ending scale
+     * @param duration duration (in seconds) of start to end scaling
+     * @param onFinishCallback called when scaling ends
+     */
+    constructor(start: ReadOnlyVector3, end: ReadOnlyVector3, duration: number, onFinishCallback?: ()=>void){
+        this.start = start
+        this.end = end
+        this.normalizedTime = 0;
+        this.onFinishCallback = onFinishCallback
+
+        if (duration != 0){
+            this.speed = 1 / duration
+        }
+        else{
+            this.speed = 0
+            this.normalizedTime = 1;
+        }
+    }
+
+    update(dt: number){
+        this.normalizedTime = Scalar.Clamp(this.normalizedTime + dt * this.speed, 0, 1)
+    }
+
+    getScale(): Vector3{
+        return Vector3.Lerp(this.start, this.end, this.normalizedTime)
+    }
+
+    hasFinished(): boolean{
+        return this.normalizedTime >= 1
+    }
+
+    setValue(transform: Transform){
+        transform.scale = this.getScale()
     }
 }
 

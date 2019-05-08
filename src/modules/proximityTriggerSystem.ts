@@ -1,6 +1,7 @@
 export class ProximityTriggerSystem implements ISystem{
     private triggers : TriggerData[] = []
     private triggersDebug : DebugShapeData[] = []
+    private triggerDebugMaterial: Material = null
     private cameraTrigger : TriggerData
 
     private static _instance: ProximityTriggerSystem = null
@@ -23,13 +24,10 @@ export class ProximityTriggerSystem implements ISystem{
         return ProximityTriggerSystem._instance
     }
 
-
     update(dt : number){
         //first we update debugging entities if any
         this.triggersDebug.forEach(dbgTrigger=>{
-            let pos = dbgTrigger.thisTrigger.parent != null? dbgTrigger.thisTrigger.parent.getComponent(Transform).position : Vector3.Zero()
-            pos = pos.add(dbgTrigger.thisTrigger.shape.position)
-            dbgTrigger.thisTransform.position = pos
+            dbgTrigger.thisTransform.position = ProximityTriggerSystem.getTriggerPosition(dbgTrigger.thisTrigger)
         })
 
         //get camera position and apply trigger offset
@@ -133,6 +131,13 @@ export class ProximityTriggerSystem implements ISystem{
             dbgEntity.addComponent(entityTransform)
             dbgEntity.addComponent(entityShape)
             engine.addEntity(dbgEntity)
+
+            if (this.triggerDebugMaterial == null){
+                this.triggerDebugMaterial = new Material()
+                this.triggerDebugMaterial.hasAlpha = true
+                this.triggerDebugMaterial.alpha = 0.5
+            }
+            dbgEntity.addComponent(this.triggerDebugMaterial)
 
             this.triggersDebug.push({thisTransform: entityTransform, thisTrigger: trigger, thisEntity: dbgEntity})
         }

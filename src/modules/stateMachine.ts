@@ -36,6 +36,9 @@ export class StateMachine implements ISystem{
                 let temp = this.currentState
                 this.currentState = null
                 temp.onEnd()
+                if (temp.nextState){
+                    this.setState(temp.nextState)
+                }
             }
         }
     }
@@ -43,6 +46,10 @@ export class StateMachine implements ISystem{
 
 export namespace StateMachine{
     export class State {
+        /**
+         * next state to start when this state is finished
+         */
+        nextState: State = null
         /**
          * called when state machine start this state.
          */
