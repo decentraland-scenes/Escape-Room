@@ -44,6 +44,43 @@ export class TransformSystem implements ISystem {
     }
 }
 
+export namespace TransformSystem{
+    export enum Interpolation{
+        LINEAR,
+        EASEINQUAD,
+        EASEOUTQUAD,
+        EASEQUAD
+    }
+
+    export function Interpolate(type: Interpolation, t: number) : number{
+        switch(type){
+            case Interpolation.LINEAR:
+                return InterpolateLinear(t)
+            case Interpolation.EASEINQUAD:
+                return InterpolateEaseInQuad(t)
+            case Interpolation.EASEOUTQUAD:
+                return InterpolateEaseOutQuad(t)
+            case Interpolation.EASEQUAD:
+                return InterpolateEaseQuad(t)
+            default:
+                return InterpolateLinear(t)
+        }
+    }
+    function InterpolateLinear(t: number) : number{
+        return t
+    }
+    function InterpolateEaseInQuad(t: number) : number{
+        return t*t
+    }
+    function InterpolateEaseOutQuad(t: number) : number{
+        return t*(2-t)
+    }
+    function InterpolateEaseQuad(t: number) : number{
+        return (t*t) / (2.0 * ((t*t) - t) + 1.0)
+    }
+}
+
+
 interface ITransformComponent{
     onFinishCallback : ()=>void
     update(dt: number)
@@ -60,6 +97,8 @@ export class MoveTransformComponent implements ITransformComponent{
     private end: ReadOnlyVector3
     private speed: number
     private normalizedTime: number
+    private interpolationType: TransformSystem.Interpolation
+    private lerpTime : number
 
     onFinishCallback : ()=>void
 
@@ -69,12 +108,15 @@ export class MoveTransformComponent implements ITransformComponent{
      * @param end ending position
      * @param duration duration (in seconds) of start to end translation
      * @param onFinishCallback called when translation ends
+     * @param interpolationType type of interpolation to be used (default: LINEAR)
      */
-    constructor(start: ReadOnlyVector3, end: ReadOnlyVector3, duration: number, onFinishCallback?: ()=>void){
+    constructor(start: ReadOnlyVector3, end: ReadOnlyVector3, duration: number, onFinishCallback?: ()=>void, interpolationType: TransformSystem.Interpolation = TransformSystem.Interpolation.LINEAR){
         this.start = start
         this.end = end
         this.normalizedTime = 0;
+        this.lerpTime = 0;
         this.onFinishCallback = onFinishCallback
+        this.interpolationType = interpolationType
 
         if (duration != 0){
             this.speed = 1 / duration
@@ -82,15 +124,17 @@ export class MoveTransformComponent implements ITransformComponent{
         else{
             this.speed = 0
             this.normalizedTime = 1;
+            this.lerpTime = 1;
         }
     }
 
     update(dt: number){
         this.normalizedTime = Scalar.Clamp(this.normalizedTime + dt * this.speed, 0, 1)
+        this.lerpTime = TransformSystem.Interpolate(this.interpolationType, this.normalizedTime)
     }
 
     getPosition(): Vector3{
-        return Vector3.Lerp(this.start, this.end, this.normalizedTime)
+        return Vector3.Lerp(this.start, this.end, this.lerpTime)
     }
 
     hasFinished(): boolean{
@@ -111,6 +155,8 @@ export class RotateTransformComponent{
     private end: ReadOnlyQuaternion
     private speed: number
     private normalizedTime: number
+    private interpolationType: TransformSystem.Interpolation
+    private lerpTime : number
 
     onFinishCallback : ()=>void
 
@@ -120,12 +166,15 @@ export class RotateTransformComponent{
      * @param end ending rotation
      * @param duration duration (in seconds) of start to end rotation
      * @param onFinishCallback called when rotation ends
+     * @param interpolationType type of interpolation to be used (default: LINEAR)
      */
-    constructor(start: ReadOnlyQuaternion, end: ReadOnlyQuaternion, duration: number, onFinishCallback?: ()=>void){
+    constructor(start: ReadOnlyQuaternion, end: ReadOnlyQuaternion, duration: number, onFinishCallback?: ()=>void, interpolationType: TransformSystem.Interpolation = TransformSystem.Interpolation.LINEAR){
         this.start = start
         this.end = end
         this.normalizedTime = 0;
+        this.lerpTime = 0;
         this.onFinishCallback = onFinishCallback
+        this.interpolationType = interpolationType
 
         if (duration != 0){
             this.speed = 1 / duration
@@ -133,15 +182,17 @@ export class RotateTransformComponent{
         else{
             this.speed = 0
             this.normalizedTime = 1;
+            this.lerpTime = 1;
         }
     }
 
     update(dt: number){
         this.normalizedTime = Scalar.Clamp(this.normalizedTime + dt * this.speed, 0, 1)
+        this.lerpTime = TransformSystem.Interpolate(this.interpolationType, this.normalizedTime)
     }
 
     getRotation(): Quaternion{
-        return Quaternion.Slerp(this.start, this.end, this.normalizedTime)
+        return Quaternion.Slerp(this.start, this.end, this.lerpTime)
     }
 
     hasFinished(): boolean{
@@ -162,6 +213,8 @@ export class ScaleTransformComponent implements ITransformComponent{
     private end: ReadOnlyVector3
     private speed: number
     private normalizedTime: number
+    private interpolationType: TransformSystem.Interpolation
+    private lerpTime : number
 
     onFinishCallback : ()=>void
 
@@ -172,11 +225,13 @@ export class ScaleTransformComponent implements ITransformComponent{
      * @param duration duration (in seconds) of start to end scaling
      * @param onFinishCallback called when scaling ends
      */
-    constructor(start: ReadOnlyVector3, end: ReadOnlyVector3, duration: number, onFinishCallback?: ()=>void){
+    constructor(start: ReadOnlyVector3, end: ReadOnlyVector3, duration: number, onFinishCallback?: ()=>void, interpolationType: TransformSystem.Interpolation = TransformSystem.Interpolation.LINEAR){
         this.start = start
         this.end = end
         this.normalizedTime = 0;
+        this.lerpTime = 0;
         this.onFinishCallback = onFinishCallback
+        this.interpolationType = interpolationType
 
         if (duration != 0){
             this.speed = 1 / duration
@@ -184,15 +239,17 @@ export class ScaleTransformComponent implements ITransformComponent{
         else{
             this.speed = 0
             this.normalizedTime = 1;
+            this.lerpTime = 1;
         }
     }
 
     update(dt: number){
         this.normalizedTime = Scalar.Clamp(this.normalizedTime + dt * this.speed, 0, 1)
+        this.lerpTime = TransformSystem.Interpolate(this.interpolationType, this.normalizedTime)
     }
 
     getScale(): Vector3{
-        return Vector3.Lerp(this.start, this.end, this.normalizedTime)
+        return Vector3.Lerp(this.start, this.end, this.lerpTime)
     }
 
     hasFinished(): boolean{
