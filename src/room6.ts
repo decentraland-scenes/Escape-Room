@@ -17,8 +17,8 @@ export function CreateRoom6(): void{
     let buttonShape = new GLTFShape("models/generic/redbutton.gltf")
 
     //instance shapes for light bulbs
-    let bulbOnShape = new ConeShape()
-    let bulbOffShape = new SphereShape()
+    const bulbOnShape = new GLTFShape("models/room6/bulb_on.glb")
+    const bulbOffShape = new GLTFShape("models/room6/bulb_off.glb")
 
     //array to store bulbs
     let lightBulbs: Entity[] = []
@@ -32,7 +32,7 @@ export function CreateRoom6(): void{
         lightBulb.addComponent(bulbOffShape)
 
         //create and set transform
-        lightBulb.addComponent(new Transform({position: new Vector3(18 -1.5 + 1 * i, 1, 2), scale: new Vector3(0.3,0.3,0.3)}))
+        lightBulb.addComponent(new Transform({position: new Vector3(18 -1.5 + 1 * i, 1, 2)}))
 
         //create toggle component
         lightBulb.addComponent(new ToggleComponent(ToggleState.Off, value =>{
