@@ -1,33 +1,34 @@
-export class ProximityTriggerSystem implements ISystem{
+export class TriggerSystem implements ISystem{
     private triggers : TriggerData[] = []
     private triggersDebug : DebugShapeData[] = []
     private triggerDebugMaterial: Material = null
     private cameraTrigger : TriggerData
 
-    private static _instance: ProximityTriggerSystem = null
+    private static _instance: TriggerSystem = null
 
     /**
      * Get singleton instance of ProximityTriggerSystem
      */
-    static get instance(): ProximityTriggerSystem { 
-        if (ProximityTriggerSystem._instance == null){
-            ProximityTriggerSystem._instance = new ProximityTriggerSystem()
-            engine.addSystem(ProximityTriggerSystem._instance)
+    static get instance(): TriggerSystem { 
+        if (TriggerSystem._instance == null){
+            TriggerSystem._instance = new TriggerSystem()
+            engine.addSystem(TriggerSystem._instance)
 
             //create trigger for camera
-            ProximityTriggerSystem._instance.cameraTrigger = {
-                 trigger: new Trigger(new TriggerBoxShape(new Vector3(0.5,1.8,0.5), new Vector3(0,0.91,0))),
+            TriggerSystem._instance.cameraTrigger = {
+                 trigger: new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(0.5,1.8,0.5), new Vector3(0,0.91,0))),
                  collidingWith: [],
-                 debugging: false
+                 debugging: false,
+                 enabled: true
                 }
         }
-        return ProximityTriggerSystem._instance
+        return TriggerSystem._instance
     }
 
     update(dt : number){
         //first we update debugging entities if any
         this.triggersDebug.forEach(dbgTrigger=>{
-            dbgTrigger.thisTransform.position = ProximityTriggerSystem.getTriggerPosition(dbgTrigger.thisTrigger)
+            dbgTrigger.thisTransform.position = TriggerSystem.getTriggerPosition(dbgTrigger.thisTrigger)
         })
 
         //get camera position and apply trigger offset
@@ -37,9 +38,12 @@ export class ProximityTriggerSystem implements ISystem{
         this.triggers.forEach(t1 => {
             //check if trigger is enable
             if (t1.trigger.enable){
+                //store enable value
+                t1.enabled = true
+
                 //check collision with camera trigger (only if trigger has proper callbacks set)
                 if (t1.trigger.onCameraEnter != null || t1.trigger.onCameraExit != null){
-                    let isColliding = ProximityTriggerSystem.isColliding(ProximityTriggerSystem.getTriggerPosition(t1.trigger), t1.trigger.shape,
+                    let isColliding = TriggerSystem.isColliding(TriggerSystem.getTriggerPosition(t1.trigger), t1.trigger.shape,
                         cameraTriggerPosition, this.cameraTrigger.trigger.shape)
 
                     //check if trigger were already colliding
@@ -69,7 +73,7 @@ export class ProximityTriggerSystem implements ISystem{
                         //check that we are not checking against the same collider and that the other collider is enable
                         if (t1 != t2 && t2.trigger.enable){
                             //check triggers layer/triggeredByLayer relation to see if triggers can collide
-                            if (ProximityTriggerSystem.canCollideWithTrigger(t1.trigger,  t2.trigger)){
+                            if (TriggerSystem.canCollideWithTrigger(t1.trigger,  t2.trigger)){
                                  //check if trigger were already colliding
                                 let wasCollidingIndex = -1
                                 for (let i=0; i<t1.collidingWith.length; i++){
@@ -79,8 +83,8 @@ export class ProximityTriggerSystem implements ISystem{
                                     }
                                 }
                                 //get if triggers are colliding
-                                let isColliding = ProximityTriggerSystem.isColliding(ProximityTriggerSystem.getTriggerPosition(t1.trigger), t1.trigger.shape,
-                                    ProximityTriggerSystem.getTriggerPosition(t2.trigger), t2.trigger.shape)
+                                let isColliding = TriggerSystem.isColliding(TriggerSystem.getTriggerPosition(t1.trigger), t1.trigger.shape,
+                                    TriggerSystem.getTriggerPosition(t2.trigger), t2.trigger.shape)
 
                                 //if trigger were colliding but they are not colliding any more
                                 if (wasCollidingIndex != -1 && !isColliding){
@@ -98,6 +102,11 @@ export class ProximityTriggerSystem implements ISystem{
                     })
                 }
             }
+            //if is not enable but was enable
+            else if (t1.enabled){
+                TriggerSystem.clearTriggerCollisions(t1)
+                t1.enabled = false
+            }
         });
     }
 
@@ -105,12 +114,13 @@ export class ProximityTriggerSystem implements ISystem{
      * Add a new trigger to system
      * @param trigger trigger instance
      */
-    public addTrigger(trigger : Trigger, addDebugginShape: boolean = false) : void{
+    public addTrigger(trigger : TriggerSystem.Trigger, addDebugginShape: boolean = false) : void{
         //create data for this trigger
         let triggerData = {
             collidingWith: [],
             trigger: trigger,
-            debugging: addDebugginShape
+            debugging: addDebugginShape,
+            enabled: false
         }
         this.triggers.push(triggerData)
 
@@ -119,11 +129,11 @@ export class ProximityTriggerSystem implements ISystem{
             let dbgEntity = new Entity()
             let entityTransform = new Transform()
             let entityShape
-            if (trigger.shape instanceof TriggerBoxShape){
+            if (trigger.shape instanceof TriggerSystem.TriggerBoxShape){
                 entityShape = new BoxShape()
                 entityTransform.scale = trigger.shape.size
             }
-            else if (trigger.shape instanceof TriggerSphereShape){
+            else if (trigger.shape instanceof TriggerSystem.TriggerSphereShape){
                 entityShape = new SphereShape()
                 entityTransform.scale = new Vector3(trigger.shape.radius,trigger.shape.radius,trigger.shape.radius)
             }
@@ -147,7 +157,7 @@ export class ProximityTriggerSystem implements ISystem{
      * Remove a trigger from system
      * @param trigger trigger instance
      */
-    public removeTrigger(trigger : Trigger) : void{
+    public removeTrigger(trigger : TriggerSystem.Trigger) : void{
         for (let i=0; i<this.triggers.length; i++){
             if (this.triggers[i].trigger == trigger){
                 //remove debugging data
@@ -161,40 +171,47 @@ export class ProximityTriggerSystem implements ISystem{
                     }
                 }
                 //remove trigger from other triggers list
-                for (let j=0; j<this.triggers[i].collidingWith.length; j++){
-                    for (let k=0; k<this.triggers[i].collidingWith[j].collidingWith.length; k++){
-                        if (this.triggers[i].collidingWith[j].collidingWith[k].trigger == trigger){
-                            this.triggers[i].collidingWith[j].collidingWith.splice(k,1)
-                            break
-                        }
-                    }
-                }
+                TriggerSystem.clearTriggerCollisions(this.triggers[i])
+
+                //remove from list
                 this.triggers.splice(i,1)
                 break
             }
         }
     }
 
-    private static getTriggerPosition(trigger : Trigger) : Vector3{
+    private static clearTriggerCollisions(triggerData : TriggerData){
+        for (let j=0; j<triggerData.collidingWith.length; j++){
+            for (let k=0; k<triggerData.collidingWith[j].collidingWith.length; k++){
+                if (triggerData.collidingWith[j].collidingWith[k].trigger == triggerData.trigger){
+                    triggerData.collidingWith[j].collidingWith.splice(k,1)
+                    break
+                }
+            }
+        }
+        triggerData.collidingWith = []
+    }
+
+    private static getTriggerPosition(trigger : TriggerSystem.Trigger) : Vector3{
         if (trigger.parent){
-            return ProximityTriggerSystem.getTriggerParentPosition(trigger).add(trigger.shape.position)
+            return TriggerSystem.getTriggerParentPosition(trigger).add(trigger.shape.position)
         }
         return trigger.shape.position
     }
 
-    private static getTriggerParentPosition(trigger : Trigger): Vector3{
+    private static getTriggerParentPosition(trigger : TriggerSystem.Trigger): Vector3{
         if (trigger.parent.hasComponent(Transform)){
-            return ProximityTriggerSystem.getEntityWorldPosition(trigger.parent)
+            return TriggerSystem.getEntityWorldPosition(trigger.parent)
         }
         return Vector3.Zero()
     }
 
-    private static getEntityWorldPosition(entity: Entity) : Vector3{
+    private static getEntityWorldPosition(entity: IEntity) : Vector3{
         if (entity.hasComponent(Transform)){
             if (entity.getParent() != null){
                 let parent = entity.getParent()
                 if (parent.hasComponent(Transform)){
-                    return ProximityTriggerSystem.getEntityWorldPosition(parent).add(entity.getComponent(Transform).position.rotate(parent.getComponent(Transform).rotation))
+                    return TriggerSystem.getEntityWorldPosition(parent).add(entity.getComponent(Transform).position.rotate(parent.getComponent(Transform).rotation))
                 }
             }
             return entity.getComponent(Transform).position
@@ -202,41 +219,41 @@ export class ProximityTriggerSystem implements ISystem{
         return Vector3.Zero()
     }
 
-    private static canCollideWithTrigger(t1: Trigger, t2: Trigger): boolean{
+    private static canCollideWithTrigger(t1: TriggerSystem.Trigger, t2: TriggerSystem.Trigger): boolean{
         if (t1.triggeredByLayer == 0) return true
         return (t2.layer & t1.triggeredByLayer) != 0
     }
 
     private static isColliding(center1: Vector3, shape1 : TriggerShape, center2: Vector3, shape2 : TriggerShape) : boolean{
         //AABB vs AABB
-        if (shape1 instanceof TriggerBoxShape && shape2 instanceof TriggerBoxShape){
-            let t1 = ProximityTriggerSystem.getBoxShapeValues(center1,shape1)
-            let t2 = ProximityTriggerSystem.getBoxShapeValues(center2,shape2)
+        if (shape1 instanceof TriggerSystem.TriggerBoxShape && shape2 instanceof TriggerSystem.TriggerBoxShape){
+            let t1 = TriggerSystem.getBoxShapeValues(center1,shape1)
+            let t2 = TriggerSystem.getBoxShapeValues(center2,shape2)
             return (t1.min.x <= t2.max.x && t1.max.x >= t2.min.x) && (t1.min.y <= t2.max.y && t1.max.y >= t2.min.y) && (t1.min.z <= t2.max.z && t1.max.z >= t2.min.z)
         }
         //Sphere vs Sphere
-        else if (shape1 instanceof TriggerSphereShape && shape2 instanceof TriggerSphereShape){
+        else if (shape1 instanceof TriggerSystem.TriggerSphereShape && shape2 instanceof TriggerSystem.TriggerSphereShape){
             let sqDist = Vector3.DistanceSquared(center1, center2)
             return sqDist < (shape1.radius * shape1.radius) + (shape2.radius * shape2.radius)
         }
         //AABB vs Sphere
-        else if ((shape1 instanceof TriggerBoxShape && shape2 instanceof TriggerSphereShape) || (shape1 instanceof TriggerSphereShape && shape2 instanceof TriggerBoxShape)){
+        else if ((shape1 instanceof TriggerSystem.TriggerBoxShape && shape2 instanceof TriggerSystem.TriggerSphereShape) || (shape1 instanceof TriggerSystem.TriggerSphereShape && shape2 instanceof TriggerSystem.TriggerBoxShape)){
             let box = {min: Vector3.Zero(), max: Vector3.Zero()}
             let sphere = {center: Vector3.Zero(), radius: 0}
             let boxCenter = center1
 
-            if (shape1 instanceof TriggerBoxShape){
-                box = ProximityTriggerSystem.getBoxShapeValues(center1,shape1)
+            if (shape1 instanceof TriggerSystem.TriggerBoxShape){
+                box = TriggerSystem.getBoxShapeValues(center1,shape1)
             }
-            else if (shape2 instanceof TriggerBoxShape){
-                box = ProximityTriggerSystem.getBoxShapeValues(center2,shape2)
+            else if (shape2 instanceof TriggerSystem.TriggerBoxShape){
+                box = TriggerSystem.getBoxShapeValues(center2,shape2)
                 boxCenter = center2
             }
-            if (shape1 instanceof TriggerSphereShape){
+            if (shape1 instanceof TriggerSystem.TriggerSphereShape){
                 sphere.center = center1
                 sphere.radius = shape1.radius
             }
-            else if (shape2 instanceof TriggerSphereShape){
+            else if (shape2 instanceof TriggerSystem.TriggerSphereShape){
                 sphere.center = center2
                 sphere.radius = shape2.radius
             }
@@ -257,7 +274,7 @@ export class ProximityTriggerSystem implements ISystem{
         return false
     }
 
-    private static getBoxShapeValues(center: Vector3, shape : TriggerBoxShape): {min: Vector3, max: Vector3}{
+    private static getBoxShapeValues(center: Vector3, shape : TriggerSystem.TriggerBoxShape): {min: Vector3, max: Vector3}{
         return {
             min: center.subtract(shape.size.scale(0.5)), 
             max: center.add(shape.size.scale(0.5))
@@ -267,97 +284,100 @@ export class ProximityTriggerSystem implements ISystem{
 
 class DebugShapeData{
     thisTransform: Transform
-    thisTrigger: Trigger
+    thisTrigger: TriggerSystem.Trigger
     thisEntity: Entity
 }
 
 class TriggerData{
     collidingWith : TriggerData[] = []
-    trigger : Trigger
+    trigger : TriggerSystem.Trigger
+    enabled: boolean = false
     debugging : boolean = false
-}
-
-export class Trigger {
-    /**
-     * is trigger enable?
-     */
-    enable : boolean = true
-    /**
-     * parent of the trigger (usefull to move the trigger with an entity)
-     */
-    parent : Entity = null
-    /**
-     * shape of the collider
-     */
-    shape : TriggerShape
-    /**
-     * byte layer of the Tigger (usefull to discriminate between trigger events)
-     */
-    layer : number = 0
-    /**
-     * against which layer are we going to check trigger's collisions
-     */
-    triggeredByLayer: number = 0
-    /**
-     * callback when trigger is entered
-     */
-    onTriggerEnter : (trigger: Trigger) => void = null
-    /**
-     * callback when trigger is exit
-     */
-    onTriggerExit : (trigger: Trigger) => void = null
-    /**
-     * callback when trigger is entered
-     */
-    onCameraEnter : () => void = null
-    /**
-     * callback when trigger is exit
-     */
-    onCameraExit : () => void = null
-    /**
-     * 
-     * @param shape trigger's shape
-     * @param parent trigger's parent (if any)
-     * @param layer trigger's layer
-     * @param triggeredByLayer which layers are we going to check collision against
-     * @param onTriggerEnter triggered when another trigger enter
-     * @param onTriggerExit triggered when another trigger exit
-     * @param onCameraEnter triggered when camera enter trigger
-     * @param onCameraExit triggered when camera exit trigger
-     */
-    constructor(shape: TriggerShape, parent?: Entity, layer: number= 0, triggeredByLayer: number= 0, onTriggerEnter:(trigger: Trigger)=>void = null, onTriggerExit:(trigger: Trigger)=>void = null,
-    onCameraEnter:()=>void= null, onCameraExit:()=>void= null){
-        this.shape = shape
-        this.parent = parent
-        this.layer = layer
-        this.triggeredByLayer = triggeredByLayer
-        this.onTriggerEnter = onTriggerEnter
-        this.onTriggerExit = onTriggerExit
-        this.onCameraEnter = onCameraEnter
-        this.onCameraExit = onCameraExit
-    }
 }
 
 interface TriggerShape{
     position: Vector3
 }
 
-export class TriggerBoxShape implements TriggerShape{
-    size: Vector3
-    position: Vector3
-
-    constructor(size: Vector3, position: Vector3){
-        this.size = size
-        this.position = position
+export namespace TriggerSystem{
+    export class Trigger {
+        /**
+         * is trigger enable?
+         */
+        enable : boolean = true
+        /**
+         * parent of the trigger (usefull to move the trigger with an entity)
+         */
+        parent : Entity = null
+        /**
+         * shape of the collider
+         */
+        shape : TriggerShape
+        /**
+         * byte layer of the Tigger (usefull to discriminate between trigger events)
+         */
+        layer : number = 0
+        /**
+         * against which layer are we going to check trigger's collisions
+         */
+        triggeredByLayer: number = 0
+        /**
+         * callback when trigger is entered
+         */
+        onTriggerEnter : (trigger: Trigger) => void = null
+        /**
+         * callback when trigger is exit
+         */
+        onTriggerExit : (trigger: Trigger) => void = null
+        /**
+         * callback when trigger is entered
+         */
+        onCameraEnter : () => void = null
+        /**
+         * callback when trigger is exit
+         */
+        onCameraExit : () => void = null
+        /**
+         * 
+         * @param shape trigger's shape
+         * @param parent trigger's parent (if any)
+         * @param layer trigger's layer
+         * @param triggeredByLayer which layers are we going to check collision against
+         * @param onTriggerEnter triggered when another trigger enter
+         * @param onTriggerExit triggered when another trigger exit
+         * @param onCameraEnter triggered when camera enter trigger
+         * @param onCameraExit triggered when camera exit trigger
+         */
+        constructor(shape: TriggerShape, parent?: Entity, layer: number= 0, triggeredByLayer: number= 0, onTriggerEnter:(trigger: Trigger)=>void = null, onTriggerExit:(trigger: Trigger)=>void = null,
+        onCameraEnter:()=>void= null, onCameraExit:()=>void= null){
+            this.shape = shape
+            this.parent = parent
+            this.layer = layer
+            this.triggeredByLayer = triggeredByLayer
+            this.onTriggerEnter = onTriggerEnter
+            this.onTriggerExit = onTriggerExit
+            this.onCameraEnter = onCameraEnter
+            this.onCameraExit = onCameraExit
+        }
     }
-}
 
-export class TriggerSphereShape implements TriggerShape{
-    radius: number
-    position: Vector3
+    export class TriggerBoxShape implements TriggerShape{
+        size: Vector3
+        position: Vector3
 
-    constructor(radius: number, position: Vector3){
-        this.radius = radius
-        this.position = position
+        constructor(size: Vector3, position: Vector3){
+            this.size = size
+            this.position = position
+        }
+    }
+
+    export class TriggerSphereShape implements TriggerShape{
+        radius: number
+        position: Vector3
+
+        constructor(radius: number, position: Vector3){
+            this.radius = radius
+            this.position = position
+        }
     }
 }

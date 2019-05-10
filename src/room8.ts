@@ -1,5 +1,5 @@
-import { ProximityTriggerSystem, Trigger, TriggerBoxShape } from "./modules/proximityTriggerSystem";
-import { ToggleComponent, ToggleState } from "./modules/toggleComponent";
+import { TriggerSystem } from "./modules/triggerSystem";
+import { ToggleComponent } from "./modules/toggleComponent";
 import { StateMachine } from "./modules/stateMachine";
 import { ScaleTransformComponent, MoveTransformComponent, TransformSystem, RotateTransformComponent } from "./modules/transfromSystem";
 import { ParticleSystem } from "./modules/particleSystem";
@@ -62,8 +62,8 @@ export function CreateRoom8(): void{
     const mouseComponent = new MouseComponent(mouseEntity)
     mouseEntity.addComponent(mouseComponent)
     //create trigger for mouse
-    ProximityTriggerSystem.instance.addTrigger(new Trigger(new TriggerBoxShape(new Vector3(0.2,0.4,0.2), new Vector3(0,0.15,0)), mouseEntity, MouseLayer, PikesLayer | BoxLayer | FanLayer | CageLayer, 
-    (trigger: Trigger)=>{
+    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(0.2,0.4,0.2), new Vector3(0,0.15,0)), mouseEntity, MouseLayer, PikesLayer | BoxLayer | FanLayer | CageLayer, 
+    (trigger: TriggerSystem.Trigger)=>{
         let triggerType = StateMachineCollisionEvent.BOXES
         if (trigger.layer == PikesLayer){
             triggerType = StateMachineCollisionEvent.PIKES
@@ -204,13 +204,13 @@ export function CreateRoom8(): void{
         triggerSize.x = Math.abs(triggerSize.x)
         triggerSize.y = Math.abs(triggerSize.y)
         triggerSize.z = Math.abs(triggerSize.z)
-        let triggerPosition = new Vector3(0,1.5,1.25).rotate(transform.rotation)
+        let triggerPosition = new Vector3(0.2,1.5,1.25).rotate(transform.rotation)
         //create trigger
-        let trigger = new Trigger(new TriggerBoxShape(triggerSize,triggerPosition),fanEntity, FanLayer)
+        let trigger = new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(triggerSize,triggerPosition),fanEntity, FanLayer)
         trigger.enable = false
         //add toggle component
-        fanEntity.addComponent(new ToggleComponent(ToggleState.Off, newValue=>{
-            if (newValue == ToggleState.On){
+        fanEntity.addComponent(new ToggleComponent(ToggleComponent.ToggleState.Off, newValue=>{
+            if (newValue == ToggleComponent.ToggleState.On){
                 fanAnimation.play()
                 trigger.enable = true
             }
@@ -224,29 +224,29 @@ export function CreateRoom8(): void{
             fanEntity.getComponent(ToggleComponent).toggle()
         }))
         //add trigger to system
-        ProximityTriggerSystem.instance.addTrigger(trigger)
+        TriggerSystem.instance.addTrigger(trigger)
         //add entity to array
         fans.push(fanEntity)
     });
 
     //set some fans to ON state
-    fans[0].getComponent(ToggleComponent).set(ToggleState.On)
-    fans[3].getComponent(ToggleComponent).set(ToggleState.On)
-    fans[4].getComponent(ToggleComponent).set(ToggleState.On)
+    fans[0].getComponent(ToggleComponent).set(ToggleComponent.ToggleState.On)
+    fans[3].getComponent(ToggleComponent).set(ToggleComponent.ToggleState.On)
+    fans[4].getComponent(ToggleComponent).set(ToggleComponent.ToggleState.On)
 
     //create pikes' triggers
-    ProximityTriggerSystem.instance.addTrigger(new Trigger(new TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(0.5,0.25,0.5)), roomEntity, PikesLayer))
-    ProximityTriggerSystem.instance.addTrigger(new Trigger(new TriggerBoxShape(new Vector3(1,0.7,1),new Vector3(0.5,0.95,0.5)), roomEntity, PikesLayer))
-    ProximityTriggerSystem.instance.addTrigger(new Trigger(new TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(3.5,0.25,4.5)), roomEntity, PikesLayer))
-    ProximityTriggerSystem.instance.addTrigger(new Trigger(new TriggerBoxShape(new Vector3(1,0.7,1),new Vector3(3.5,0.95,4.5)), roomEntity, PikesLayer))
+    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(0.5,0.25,0.5)), roomEntity, PikesLayer))
+    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.7,1),new Vector3(0.5,0.95,0.5)), roomEntity, PikesLayer))
+    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(3.5,0.25,4.5)), roomEntity, PikesLayer))
+    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.7,1),new Vector3(3.5,0.95,4.5)), roomEntity, PikesLayer))
 
     //create boxes's triggers
-    ProximityTriggerSystem.instance.addTrigger(new Trigger(new TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(1.5,0.25,1.5)), roomEntity, BoxLayer))
-    ProximityTriggerSystem.instance.addTrigger(new Trigger(new TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(2.5,0.25,2.5)), roomEntity, BoxLayer))
-    ProximityTriggerSystem.instance.addTrigger(new Trigger(new TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(1.5,0.25,4.5)), roomEntity, BoxLayer))
+    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(1.5,0.25,1.5)), roomEntity, BoxLayer))
+    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(2.5,0.25,2.5)), roomEntity, BoxLayer))
+    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(1.5,0.25,4.5)), roomEntity, BoxLayer))
 
     //create cage's trigger
-    ProximityTriggerSystem.instance.addTrigger(new Trigger(new TriggerBoxShape(new Vector3(0.5,1,1),new Vector3(-0.5,0.5,0)), cageEntity, CageLayer))
+    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(0.5,1,1),new Vector3(-0.5,0.5,0)), cageEntity, CageLayer))
 }
 
 @Component("mouseComponent")
@@ -735,7 +735,7 @@ class StateMachineCollisionEvent implements StateMachine.IStateEvent{
     static readonly CAGE = 3
 
     stateMachine: StateMachine
-    trigger: Trigger
+    trigger: TriggerSystem.Trigger
     triggerType: number
 
     /**
@@ -744,7 +744,7 @@ class StateMachineCollisionEvent implements StateMachine.IStateEvent{
      * @param trigger reference of the trigger we collide with
      * @param triggerType type of the trigger we collide with
      */
-    constructor(stateMachine: StateMachine, trigger: Trigger, triggerType: number){
+    constructor(stateMachine: StateMachine, trigger: TriggerSystem.Trigger, triggerType: number){
         this.stateMachine = stateMachine
         this.trigger = trigger
         this.triggerType = triggerType

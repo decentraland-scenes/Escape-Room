@@ -1,4 +1,4 @@
-import { Trigger, TriggerBoxShape, ProximityTriggerSystem } from "./modules/proximityTriggerSystem";
+import { TriggerSystem } from "./modules/triggerSystem";
 import { FollowPathComponent } from "./modules/transfromSystem";
 
 export function CreateRoom7(): void{
@@ -60,8 +60,8 @@ export function CreateRoom7(): void{
     engine.addSystem(maiceBehaviorSystem)
 
     //create trigger for maince
-    ProximityTriggerSystem.instance.addTrigger(new Trigger(new TriggerBoxShape(new Vector3(0.05,0.05,0.05), Vector3.Zero()), mouse1, 2, 2))
-    ProximityTriggerSystem.instance.addTrigger(new Trigger(new TriggerBoxShape(new Vector3(0.05,0.05,0.05), Vector3.Zero()), mouse2, 2, 2))
+    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(0.05,0.05,0.05), Vector3.Zero()), mouse1, 2, 2))
+    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(0.05,0.05,0.05), Vector3.Zero()), mouse2, 2, 2))
 
     //set tiles grid
     const tileSize = new Vector3(0.15,0.15,1)
@@ -100,7 +100,7 @@ export function CreateRoom7(): void{
             //add tile to engine
             engine.addEntity(tileEntity)
             //create tile trigger
-            let tileTrigger = new Trigger(new TriggerBoxShape(new Vector3(0.15,0.15,0.15), new Vector3(0,0,0)), tileEntity, 2, 2)
+            let tileTrigger = new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(0.15,0.15,0.15), new Vector3(0,0,0)), tileEntity, 2, 2)
             //set trigger callbacks
             tileTrigger.onTriggerEnter = (trigger)=>{
                 if (trigger.parent != null && trigger.parent.hasComponent(MouseFollowPathComponent)){
@@ -113,7 +113,7 @@ export function CreateRoom7(): void{
                 }
             }
             //add trigger to system
-            ProximityTriggerSystem.instance.addTrigger(tileTrigger)
+            TriggerSystem.instance.addTrigger(tileTrigger)
         }
     }
 }
@@ -142,7 +142,7 @@ class MouseFollowPathComponent {
         this.startDelay = startDelay
     }
 
-    update(dt: number, mouseEntiy: Entity){
+    update(dt: number, mouseEntiy: IEntity){
         //check if waiting for start
         if (this.startDelay > 0){
             this.startDelay -= dt

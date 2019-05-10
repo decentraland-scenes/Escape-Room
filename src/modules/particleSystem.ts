@@ -109,7 +109,9 @@ export class ParticleSystem implements ISystem{
             this.availableParticles.splice(0,1)
             particleInstance.particleComponent.spawn(this.getSpawnPosition())
             this.aliveParticles.push(particleInstance)
-            engine.addEntity(particleInstance.particleEntity)
+            if (!particleInstance.particleEntity.isAddedToEngine()){
+                engine.addEntity(particleInstance.particleEntity)
+            }
             return true
         }
         return false
@@ -119,7 +121,9 @@ export class ParticleSystem implements ISystem{
         let particleInstance = this.aliveParticles[particleIndex]
         this.aliveParticles.splice(particleIndex, 1)
         this.availableParticles.push(particleInstance)
-        engine.removeEntity(particleInstance.particleEntity)
+        if (particleInstance.particleEntity.isAddedToEngine()){
+            engine.removeEntity(particleInstance.particleEntity)
+        }
     }
 
     private getSpawnPosition() : Vector3{        
@@ -137,7 +141,7 @@ export class ParticleSystem implements ISystem{
         return this.position.add(spawnOffet)
     }
 
-    private getEntityWorldPosition(entity: Entity) : Vector3{
+    private getEntityWorldPosition(entity: IEntity) : Vector3{
         if (entity.hasComponent(Transform)){
             if (entity.getParent() != null){
                 let parent = entity.getParent()

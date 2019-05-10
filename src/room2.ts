@@ -1,5 +1,5 @@
-import { ToggleComponent, ToggleState } from "./modules/toggleComponent";
-import { ProximityTriggerSystem, Trigger, TriggerSphereShape } from "./modules/proximityTriggerSystem";
+import { ToggleComponent } from "./modules/toggleComponent";
+import { TriggerSystem } from "./modules/triggerSystem";
 import { MoveTransformComponent } from "./modules/transfromSystem";
 
 export function CreateRoom2() : void{
@@ -25,8 +25,8 @@ export function CreateRoom2() : void{
     spikes.addComponent(spikesAnimator)
 
     //add toggle for spikes up (on) or down (off)
-    spikes.addComponent(new ToggleComponent(ToggleState.Off, value =>{
-        if (value == ToggleState.On){
+    spikes.addComponent(new ToggleComponent(ToggleComponent.ToggleState.Off, value =>{
+        if (value == ToggleComponent.ToggleState.On){
             //stop previous animation as a workaround to a bug with animations
             spikes.getComponent(Animator).getClip("Disappear").stop()
             //on On play appear animation
@@ -43,16 +43,16 @@ export function CreateRoom2() : void{
     }))
 
     //create proximity trigger for spikes
-    let spikeTrigger = new Trigger(new TriggerSphereShape(2.5,new Vector3(9,1,9)), null, 1, 1)
+    let spikeTrigger = new TriggerSystem.Trigger(new TriggerSystem.TriggerSphereShape(2.5,new Vector3(9,1,9)), null, 1, 1)
     spikeTrigger.onCameraEnter = ()=> {
-        spikes.getComponent(ToggleComponent).set(ToggleState.On)
+        spikes.getComponent(ToggleComponent).set(ToggleComponent.ToggleState.On)
     }
     spikeTrigger.onCameraExit = ()=> {
-        spikes.getComponent(ToggleComponent).set(ToggleState.Off)
+        spikes.getComponent(ToggleComponent).set(ToggleComponent.ToggleState.Off)
     }
 
     //add trigger to trigger system
-    ProximityTriggerSystem.instance.addTrigger(spikeTrigger)
+    TriggerSystem.instance.addTrigger(spikeTrigger)
 
     //create the button that we'll use to open the door
     let button = new Entity()
@@ -70,7 +70,7 @@ export function CreateRoom2() : void{
     button.addComponent(new OnClick(event =>{
         if (spikeTrigger.enable){
             spikeTrigger.enable = false
-            spikes.getComponent(ToggleComponent).set(ToggleState.Off)
+            spikes.getComponent(ToggleComponent).set(ToggleComponent.ToggleState.Off)
         }
         button.getComponent(AudioSource).playOnce()
     }))
@@ -88,8 +88,8 @@ export function CreateRoom2() : void{
     fern.addComponent(new AudioSource(new AudioClip("sounds/move_object1.mp3")))
 
     //add toggle component to set two states to the entity: normal or moved
-    fern.addComponent(new ToggleComponent(ToggleState.Off, value =>{
-        if (value == ToggleState.On){
+    fern.addComponent(new ToggleComponent(ToggleComponent.ToggleState.Off, value =>{
+        if (value == ToggleComponent.ToggleState.On){
             fern.addComponentOrReplace(new MoveTransformComponent(fern.getComponent(Transform).position, 
                 fern.getComponent(Transform).position.add(new Vector3(0,0,0.5)), 0.5))
 

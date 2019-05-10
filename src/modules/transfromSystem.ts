@@ -34,7 +34,7 @@ export class TransformSystem implements ISystem {
         }
     }
 
-    private updateComponent(component: ITransformComponent, entity: Entity, transform: Transform, dt: number){
+    private updateComponent(component: ITransformComponent, entity: IEntity, transform: Transform, dt: number){
         component.update(dt)
         component.setValue(transform)
         if (component.hasFinished()){

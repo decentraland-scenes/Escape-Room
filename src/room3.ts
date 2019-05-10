@@ -1,4 +1,4 @@
-import { ToggleComponent, ToggleState } from "./modules/toggleComponent";
+import { ToggleComponent } from "./modules/toggleComponent";
 
 import { MoveTransformComponent, RotateTransformComponent } from "./modules/transfromSystem";
 
@@ -141,8 +141,8 @@ export function CreateRoom3() : void{
     fakeDoor.addComponent(new Transform({position: new Vector3(10.5,0,0.4)}))
 
     //toggle for bookshelf
-    bookshelf.addComponent(new ToggleComponent(ToggleState.Off, value =>{
-        if (value == ToggleState.On){
+    bookshelf.addComponent(new ToggleComponent(ToggleComponent.ToggleState.Off, value =>{
+        if (value == ToggleComponent.ToggleState.On){
             //move bookshelf when it's toggled on
             bookshelf.addComponentOrReplace(new MoveTransformComponent(bookshelf.getComponent(Transform).position,bookshelfDefaultPos.add(new Vector3(0,0,-1.5)), 3))
             //play sound when moved
@@ -157,11 +157,11 @@ export function CreateRoom3() : void{
     }))
 
     //toggle for chandelier
-    chandelier.addComponent(new ToggleComponent(ToggleState.Off, value =>{
-        if (value == ToggleState.On){
+    chandelier.addComponent(new ToggleComponent(ToggleComponent.ToggleState.Off, value =>{
+        if (value == ToggleComponent.ToggleState.On){
             //rotate chandelier when toggled on and activate bookshelf
             chandelier.addComponentOrReplace(new RotateTransformComponent(chandelier.getComponent(Transform).rotation,Quaternion.Euler(0,0,-30), 0.5, ()=>{
-                bookshelf.getComponent(ToggleComponent).set(ToggleState.On)
+                bookshelf.getComponent(ToggleComponent).set(ToggleComponent.ToggleState.On)
             }))
             //play sound when rotated
             chandelier.getComponent(AudioSource).playOnce()
@@ -169,7 +169,7 @@ export function CreateRoom3() : void{
         else{
             //rotate back to default position when off and deactivate bookshelf
             chandelier.addComponentOrReplace(new RotateTransformComponent(chandelier.getComponent(Transform).rotation,chandelierDefaultRot, 0.5, ()=>{
-                bookshelf.getComponent(ToggleComponent).set(ToggleState.Off)
+                bookshelf.getComponent(ToggleComponent).set(ToggleComponent.ToggleState.Off)
             }))
             //play sound when rotated
             chandelier.getComponent(AudioSource).playOnce()
@@ -182,8 +182,8 @@ export function CreateRoom3() : void{
     }))
 
     //toggle for book
-    book.addComponent(new ToggleComponent(ToggleState.Off, value =>{
-        if (value == ToggleState.On){
+    book.addComponent(new ToggleComponent(ToggleComponent.ToggleState.Off, value =>{
+        if (value == ToggleComponent.ToggleState.On){
             book.addComponentOrReplace(new RotateTransformComponent(book.getComponent(Transform).rotation,Quaternion.Euler(0,-90,25), 0.5))
             book.getComponent(AudioSource).playOnce()
         }
@@ -199,8 +199,8 @@ export function CreateRoom3() : void{
     }))
 
     //toggle for wine bottle
-    wineBottle.addComponent(new ToggleComponent(ToggleState.Off, value =>{
-        if (value == ToggleState.On){
+    wineBottle.addComponent(new ToggleComponent(ToggleComponent.ToggleState.Off, value =>{
+        if (value == ToggleComponent.ToggleState.On){
             wineBottle.addComponentOrReplace(new MoveTransformComponent(wineBottle.getComponent(Transform).position,wineBottleDefaultPos.add(new Vector3(-0.2,0,0)), 0.5))
             wineBottle.getComponent(AudioSource).playOnce()
         }
@@ -216,8 +216,8 @@ export function CreateRoom3() : void{
     }))
 
     //toggle for wine glass
-    wineGlass.addComponent(new ToggleComponent(ToggleState.Off, value =>{
-        if (value == ToggleState.On){
+    wineGlass.addComponent(new ToggleComponent(ToggleComponent.ToggleState.Off, value =>{
+        if (value == ToggleComponent.ToggleState.On){
             wineGlass.addComponentOrReplace(new MoveTransformComponent(wineGlass.getComponent(Transform).position,wineGlassDefaultPos.add(new Vector3(0,0,-0.2)), 0.5))
             wineGlass.getComponent(AudioSource).playOnce()
         }
@@ -233,8 +233,8 @@ export function CreateRoom3() : void{
     }))
 
     //toggle for chair
-    chair.addComponent(new ToggleComponent(ToggleState.Off, value =>{
-        if (value == ToggleState.On){
+    chair.addComponent(new ToggleComponent(ToggleComponent.ToggleState.Off, value =>{
+        if (value == ToggleComponent.ToggleState.On){
             chair.addComponentOrReplace(new RotateTransformComponent(chair.getComponent(Transform).rotation,Quaternion.Euler(0,15,0), 0.5))
             chair.getComponent(AudioSource).playOnce()
         }
@@ -250,8 +250,8 @@ export function CreateRoom3() : void{
     }))
 
     //toggle for wall painting
-    wallPainting.addComponent(new ToggleComponent(ToggleState.Off, value =>{
-        if (value == ToggleState.On){
+    wallPainting.addComponent(new ToggleComponent(ToggleComponent.ToggleState.Off, value =>{
+        if (value == ToggleComponent.ToggleState.On){
             //rotate wall painting and toggle ON bookshelf's state when rotation ends
             wallPainting.addComponentOrReplace(new RotateTransformComponent(wallPainting.getComponent(Transform).rotation, Quaternion.Euler(90,10,0), 0.5))
             wallPainting.getComponent(AudioSource).playOnce()
@@ -269,8 +269,8 @@ export function CreateRoom3() : void{
     }))
 
     //toggle for couch
-    couch.addComponent(new ToggleComponent(ToggleState.Off, value =>{
-        if (value == ToggleState.On){
+    couch.addComponent(new ToggleComponent(ToggleComponent.ToggleState.Off, value =>{
+        if (value == ToggleComponent.ToggleState.On){
             couch.addComponentOrReplace(new MoveTransformComponent(couch.getComponent(Transform).position,couchDefaultPos.add(new Vector3(0,0,0.4)), 0.5))
             couch.getComponent(AudioSource).playOnce()
         }
@@ -287,8 +287,6 @@ export function CreateRoom3() : void{
 
     //add entities to engine
     engine.addEntity(bookshelf)
-    engine.addEntity(chandelier)
-    engine.addEntity(book)
     engine.addEntity(couch)
     engine.addEntity(table)
     engine.addEntity(wineBottle)
