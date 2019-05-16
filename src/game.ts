@@ -6,6 +6,7 @@ import { CreateRoom3 } from "./room3";
 import { CreateRoom6 } from "./room6";
 import { CreateRoom7 } from "./room7";
 import { CreateRoom8 } from "./room8";
+import { CreateRoom4 } from "./room4";
 
 const scene = new Entity()
 scene.addComponent(new GLTFShape("models/scene.glb"))
@@ -19,7 +20,7 @@ CreateRoom0()
 CreateRoom1()
 CreateRoom2()
 CreateRoom3()
-
+CreateRoom4()
 
 CreateRoom6()
 CreateRoom7()
