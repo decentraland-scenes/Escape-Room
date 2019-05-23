@@ -1,11 +1,66 @@
-export class ActionsSequenceSystem implements ISystem{
+export class ActionsSequenceSystem{
     private beginSequenceNode : SequenceNode = null
+    private currentSequenceNode : SequenceNode = null
 
-    setSequence(sequenceBuilt: ActionsSequenceSystem.SequenceBuilder){
+    private running: boolean = false
+    private started: boolean = false
+
+    private onFinishCallback: ()=>void
+
+    startSequence(sequenceBuilt: ActionsSequenceSystem.SequenceBuilder){
         this.beginSequenceNode = sequenceBuilt.beginSequenceNode
+        this.currentSequenceNode = this.beginSequenceNode
+        this.running = true
+        this.started = false
+    }
+
+    setOnFinishCallback(onFinishCallback: ()=>void){
+        this.onFinishCallback = onFinishCallback
+    }
+
+    isRunning(): boolean{
+        return this.running
+    }
+
+    stop(){
+        this.running = false
+    }
+
+    resume(){
+        if (this.beginSequenceNode != null){
+            this.running = true
+        }
+    }
+
+    reset(){
+        this.currentSequenceNode = this.beginSequenceNode
+        this.running = true
+        this.started = false
     }
 
     update(dt: number): void{
+        if (this.running){
+            if (!this.started){
+                this.currentSequenceNode.onStart()
+                this.started = true
+            }
+            else{
+                if (!this.currentSequenceNode.hasFinish()){
+                    this.currentSequenceNode.update(dt)
+                }
+                else{
+                    this.currentSequenceNode.onFinish()
+                    this.currentSequenceNode = this.currentSequenceNode.next
+                    if (this.currentSequenceNode){
+                        this.currentSequenceNode.onStart()   
+                    }
+                    else{
+                        this.running = false
+                        if (this.onFinishCallback)this.onFinishCallback()
+                    }              
+                }
+            }
+        }
     }
 }
 
@@ -21,6 +76,9 @@ export namespace ActionsSequenceSystem {
     export class SequenceBuilder{
         private currentSequenceNode : SequenceNode = null
         public beginSequenceNode : SequenceNode = null
+
+        private whileNodeStack : WhileSequenceNode[] = []
+
     
         then(action: ActionsSequenceSystem.IAction): SequenceBuilder{
             if (this.currentSequenceNode == null){
@@ -29,28 +87,31 @@ export namespace ActionsSequenceSystem {
                 this.beginSequenceNode = this.currentSequenceNode
             }
             else{
-                this.currentSequenceNode = this.currentSequenceNode.then(action)
+                let next = new SequenceNode()
+                next.action = action
+                this.currentSequenceNode = this.currentSequenceNode.then(next)
             }
             return this
         }
     
         if (condition: ()=>boolean): SequenceBuilder{
             let ifSeq = new IfSequenceNode(condition)
-            if (this.currentSequenceNode != null){
+            if (this.currentSequenceNode == null){
                 this.currentSequenceNode.next = ifSeq
-            }
-            else{
                 this.beginSequenceNode = ifSeq
             }
-            this.currentSequenceNode = ifSeq
+            else{
+                this.currentSequenceNode = this.currentSequenceNode.then(ifSeq)
+            }
             return this
         }
     
         else (): SequenceBuilder{
-            if (this.currentSequenceNode instanceof IfSequenceNode){
-                let elseSeq = new ElseSequenceNode(this.currentSequenceNode)
-                this.currentSequenceNode.next = elseSeq
-                this.currentSequenceNode = elseSeq
+            let seq = this.currentSequenceNode.getSequence()
+            if (seq instanceof IfSequenceNode){
+                seq.closed = true
+                let elseSeq = new ElseSequenceNode(seq)
+                this.currentSequenceNode = this.currentSequenceNode.then(elseSeq)
             }
             else{
                 throw new Error("IF statement is needed to be called before ELSE statement.");
@@ -59,10 +120,9 @@ export namespace ActionsSequenceSystem {
         }
     
         endIf (): SequenceBuilder{
-            if (this.currentSequenceNode instanceof IfSequenceNode || this.currentSequenceNode instanceof ElseSequenceNode){
-                let endifSeq = new SequenceNode()
-                this.currentSequenceNode.next = endifSeq
-                this.currentSequenceNode = endifSeq
+            let seq = this.currentSequenceNode.getSequence()
+            if (seq instanceof IfSequenceNode || seq instanceof ElseSequenceNode){
+                seq.closed = true
             }
             else{
                 throw new Error("IF statement is needed to be called before ENDIF statement.");
@@ -72,27 +132,40 @@ export namespace ActionsSequenceSystem {
     
         while (condition: ()=>boolean): SequenceBuilder{
             let whileSeq = new WhileSequenceNode(condition)
-            if (this.currentSequenceNode != null){
+            if (this.currentSequenceNode == null){
                 this.currentSequenceNode.next = whileSeq
-            }
-            else{
                 this.beginSequenceNode = whileSeq
             }
-            this.currentSequenceNode = whileSeq
+            else{
+                this.currentSequenceNode = this.currentSequenceNode.then(whileSeq)
+            }
+            this.whileNodeStack.push(whileSeq)
             return this
         }
     
         endWhile (): SequenceBuilder{
-            if (this.currentSequenceNode instanceof WhileSequenceNode){
-                let endWhileSeq = new SequenceNode()
-                this.currentSequenceNode.next = endWhileSeq
-                this.currentSequenceNode = endWhileSeq
+            let seq = this.currentSequenceNode.getSequence()
+            if (seq instanceof WhileSequenceNode){
+                seq.closed = true
+                if (this.whileNodeStack.length > 0){
+                    this.whileNodeStack.splice(this.whileNodeStack.length-1,1)
+                }
             }
             else{
                 throw new Error("WHILE statement is needed to be called before ENDWHILE statement.");
             }
             return this
-        }        
+        }
+
+        breakWhile() : SequenceBuilder{
+            if (this.whileNodeStack.length > 0){
+                this.currentSequenceNode = this.currentSequenceNode.then(new BreakWhileSequenceNode(this.whileNodeStack[this.whileNodeStack.length-1]))
+            }
+            else{
+                throw new Error("WHILE statement is needed to be called before BREAKWHILE statement.");
+            }
+            return this
+        }
     }
 }
 
@@ -101,25 +174,89 @@ class SequenceNode {
     action: ActionsSequenceSystem.IAction = null
     next: SequenceNode = null
 
-    then(action: ActionsSequenceSystem.IAction) : SequenceNode{
-        this.next = new SequenceNode()
-        this.next.action = action
-        return this.next
+    then(next: SequenceNode) : SequenceNode{
+        this.next = next
+        return next
+    }
+
+    onStart(){
+        if (this.action)this.action.onStart()
+    }
+
+    update(dt: number){
+        if (this.action)this.action.update(dt)
+    }
+
+    onFinish(){
+        if (this.action)this.action.onFinish()
+    }
+
+    hasFinish() : boolean{
+        if (this.action) return this.action.hasFinished
+        else return true
+    }
+
+    getSequence(): SequenceNode{
+        return this
     }
 }
 
 class SubSequenceNode extends SequenceNode {
-    currentSequence: SequenceNode = null
-    startingSequence: SequenceNode = null
+    protected currentInnerSequence: SequenceNode = null
+    protected startingInnerSequence: SequenceNode = null
+    closed: boolean = false
 
-    then(action: ActionsSequenceSystem.IAction) : SequenceNode{
-        if (this.currentSequence == null){
-            this.currentSequence = new SequenceNode()
-            this.currentSequence.action = action
-            this.startingSequence = this.currentSequence
+    then(next: SequenceNode) : SequenceNode{
+        if (this.currentInnerSequence == null){
+            this.currentInnerSequence = next
+            this.startingInnerSequence = next
         }
         else{
-            this.currentSequence = this.currentSequence.then(action)
+            if (this.closed){
+                this.next = next
+                return next
+            }
+            else{
+                this.currentInnerSequence = this.currentInnerSequence.then(next)
+            }
+        }
+        return this
+    }
+
+    onStart(){
+        this.currentInnerSequence = this.startingInnerSequence
+        if (this.currentInnerSequence) this.currentInnerSequence.onStart()
+    }
+
+    update(dt: number){
+        if (this.currentInnerSequence){
+            if (!this.currentInnerSequence.hasFinish()){
+                this.currentInnerSequence.update(dt)
+            }
+            else{
+                this.currentInnerSequence.onFinish()
+                this.currentInnerSequence = this.currentInnerSequence.next
+                if (this.currentInnerSequence) this.currentInnerSequence.onStart()                
+            }
+        }
+    }
+
+    onFinish(){
+        if (this.currentInnerSequence) this.currentInnerSequence.onFinish()
+    }
+
+    hasFinish(): boolean{
+        return this.currentInnerSequence == null
+    }
+
+    getSequence(): SequenceNode{
+        if (this.currentInnerSequence){
+            let innerSeq = this.currentInnerSequence.getSequence()
+            if (innerSeq instanceof SubSequenceNode){
+                if (!innerSeq.closed){
+                    return innerSeq
+                }
+            }
         }
         return this
     }
@@ -127,27 +264,77 @@ class SubSequenceNode extends SequenceNode {
 
 class IfSequenceNode extends SubSequenceNode {
     condition: ()=> boolean
+    result: boolean
 
     constructor(condition: ()=> boolean){
         super()
         this.condition = condition
     }
+
+    onStart(){
+        this.result = this.condition()
+        if (this.result) super.onStart()
+        else this.currentInnerSequence = null
+    }
 }
 
 class ElseSequenceNode extends SubSequenceNode {
-    ifSequence: SequenceNode = null
+    ifSequence: IfSequenceNode = null
 
-    constructor(ifSequence: SequenceNode){
+    constructor(ifSequence: IfSequenceNode){
         super()
         this.ifSequence = ifSequence
+    }
+
+    onStart(){
+        if (!this.ifSequence.result) super.onStart()
+        else this.currentInnerSequence = null
     }
 }
 
 class WhileSequenceNode extends SubSequenceNode {
     condition: ()=> boolean
+    breakWhile: boolean = false
 
     constructor(condition: ()=> boolean){
         super()
         this.condition = condition
+    }
+
+    onStart(){
+        this.breakWhile = false
+        if (this.condition()) super.onStart()
+        else this.currentInnerSequence = null
+    }
+
+    update(dt: number){
+        if (this.currentInnerSequence){
+            if (!this.currentInnerSequence.hasFinish()){
+                this.currentInnerSequence.update(dt)
+            }
+            else{
+                this.currentInnerSequence.onFinish()
+                this.currentInnerSequence = this.currentInnerSequence.next
+                if (this.currentInnerSequence == null) this.currentInnerSequence = this.startingInnerSequence
+                this.currentInnerSequence.onStart()
+            }
+        }
+    }
+
+    hasFinish(): boolean{
+        return this.breakWhile || !this.condition()
+    }
+}
+
+class BreakWhileSequenceNode extends SequenceNode{
+    whileNode: WhileSequenceNode
+
+    constructor(whileNode: WhileSequenceNode){
+        super()
+        this.whileNode = whileNode
+    }
+
+    onStart(){
+        this.whileNode.breakWhile = true
     }
 }
