@@ -26,20 +26,32 @@ export function CreateRoom5() : void{
         },
         dialogText:{
             width: "25%",
-            height: "25%"
+            height: "25%",
+            textSpeed: 15,
+            textConfig: {fontSize: 16}
         },
         optionsContainer:{
+            stackOrientation: UIStackOrientation.VERTICAL,
+            spacing: 2,
+            vAlign: "bottom",
+            positionY: "10%"
         }
     }
 
     const dialog = new SimpleDialog(dialogConfig)
-    dialog.setPortrait(SimpleDialog.PortraitIndex.LEFT, playerPortraitDefault)
-    dialog.setPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitDefault)
-    dialog.setText("Bitcoin (BTC) is a cryptocurrency or a form of digital asset." 
-        +"Bitcoin (BTC) price for today is $7,834.61 with a 24-hour trading volume of $26,387,597,401. Price is down -1.4% in the last 24 hours. "+
-        "It has a circulating supply of 17.7 Million coins and a max supply of 21 Million coins. The most active exchange that is trading Bitcoin is "
-        +"Binance. Explore the address and transactions of Bitcoin on block explorers such as blockchair.com, blockchain.info, live.blockcypher.com, "
-        +"bitcoinblockexplorers.com, and btc.tokenview.com")
+
+    const dialogTree = new SimpleDialog.DialogTree()
+        .showPortrait(SimpleDialog.PortraitIndex.LEFT, playerPortraitDefault)
+        .say(()=>"Hi! hi! where are you?")
+        .showPortrait(SimpleDialog.PortraitIndex.LEFT, npcPortraitDefault)
+        .say(()=>"I'm here!!",{color: Color4.Green()})
+        .showPortrait(SimpleDialog.PortraitIndex.RIGHT, playerPortraitDefault)
+        .say(()=>"Where have you been?",{color: Color4.White()})
+        .say(()=>"Not of your business... bye",{color: Color4.Green()})
+        .hidePortrait(SimpleDialog.PortraitIndex.LEFT)
+        .say(()=>"b-ye... ?",{color: Color4.White()})
+
+    dialog.startDialog(dialogTree)
 
     /*const dialogContainer = new UIContainerRect(canvas)
     dialogContainer.width = "100%"

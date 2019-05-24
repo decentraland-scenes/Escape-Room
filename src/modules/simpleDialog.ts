@@ -2,27 +2,36 @@ import { ActionsSequenceSystem } from "./actionsSequenceSystem";
 
 export class SimpleDialog{
     actionsSequenceSystem: ActionsSequenceSystem
-    private dialogConfig: SimpleDialog.DialogConfig
 
     private dialogContainer: UIContainerRect
-    private portraitContainers: PortraitContainerData[] = []
+    private portraitContainers: PortraitContainer[] = []
     private textContainer: DialogTextContainer
+    private optionsContainer: OptionContainer
 
     constructor(dialogConfig: SimpleDialog.DialogConfig){
         this.actionsSequenceSystem = new ActionsSequenceSystem()
-        this.dialogConfig = dialogConfig
+        engine.addSystem(this.actionsSequenceSystem)
 
         this.dialogContainer = new UIContainerRect(dialogConfig.canvas)
         this.dialogContainer.width = "100%"
         this.dialogContainer.height = "100%"
 
-        this.portraitContainers.push(new PortraitContainerData(dialogConfig.leftPortrait, this.dialogContainer))
-        this.portraitContainers.push(new PortraitContainerData(dialogConfig.rightPortrait, this.dialogContainer))
+        this.portraitContainers.push(new PortraitContainer(dialogConfig.leftPortrait, this.dialogContainer))
+        this.portraitContainers.push(new PortraitContainer(dialogConfig.rightPortrait, this.dialogContainer))
 
         this.textContainer = new DialogTextContainer(dialogConfig.dialogText, this.dialogContainer)
+        this.optionsContainer = new OptionContainer(dialogConfig.optionsContainer, this.dialogContainer)
+
+        this.hide()
     }
 
     startDialog(dialogTree: SimpleDialog.DialogTree){
+        this.portraitContainers.forEach(portrait => {
+            portrait.hide()
+        });
+        this.optionsContainer.hideAndClearOptions()
+        this.show()
+        dialogTree.simpleDialogInstance = this
         this.actionsSequenceSystem.startSequence(dialogTree.actionsSequenceBuilder)
     }
 
@@ -34,23 +43,71 @@ export class SimpleDialog{
         this.portraitContainers[portraitIndex].setImage(texture, imageConfig)
     }
 
+    setPortraitImageConfig(portraitIndex: SimpleDialog.PortraitIndex, imageConfig: SimpleDialog.ImageConfig){
+        this.portraitContainers[portraitIndex].configPortraitImage(imageConfig)
+    }
+
     setText(text: string, textConfig?: SimpleDialog.TextConfig){
         this.textContainer.text.value = text
-        if (textConfig) configText(this.textContainer.text, textConfig)
+        if (textConfig){
+            configText(this.textContainer.text, textConfig)
+            this.textContainer.config.textConfig = textConfig
+        }
+    }
+
+    setTextConfig(textConfig: SimpleDialog.TextConfig){
+        if (textConfig){
+            configText(this.textContainer.text, textConfig)
+            this.textContainer.config.textConfig = textConfig
+        }
+    }
+
+    show(){
+        this.dialogContainer.visible = true
+    }
+
+    hide(){
+        this.dialogContainer.visible = false
+    }
+
+    showPortrait(portraitIndex: SimpleDialog.PortraitIndex){
+        this.portraitContainers[portraitIndex].show()
+    }
+
+    hidePortrait(portraitIndex: SimpleDialog.PortraitIndex){
+        this.portraitContainers[portraitIndex].hide()
+    }
+
+    getTextSpeed(): number{
+        if (this.textContainer.config.textSpeed)
+            return this.textContainer.config.textSpeed
+        return 15
     }
 }
 
 export namespace SimpleDialog{
     export class DialogTree{
         actionsSequenceBuilder: ActionsSequenceSystem.SequenceBuilder
+        simpleDialogInstance: SimpleDialog
+
         private optionsGroupStack: OptionsGroupData[] = []
 
         constructor(){
             this.actionsSequenceBuilder = new ActionsSequenceSystem.SequenceBuilder()
         }
 
-        say(stringFunction: ()=>string): DialogTree{
-            this.actionsSequenceBuilder.then(new SayWithCallbackAction(stringFunction))
+        say(stringFunction: ()=>string, textConfig?: TextConfig): DialogTree{
+            this.actionsSequenceBuilder.then(new SayWithCallbackAction(stringFunction, textConfig, ()=>this.simpleDialogInstance))
+            return this
+        }
+
+        showPortrait(index: SimpleDialog.PortraitIndex, changeTexture?: Texture, changeConfig?: ImageConfig): DialogTree{
+            this.actionsSequenceBuilder.then(new ShowPortraitAction(index, changeTexture, changeConfig, ()=>this.simpleDialogInstance))
+            return this
+        }
+
+        hidePortrait(index: SimpleDialog.PortraitIndex): DialogTree{
+            this.actionsSequenceBuilder.then(new HidePortraitAction(index, ()=>this.simpleDialogInstance))
             return this
         }
     
@@ -137,6 +194,7 @@ export namespace SimpleDialog{
         height: string | number
         positionX?: string | number
         positionY?: string | number
+        textSpeed?: number
     }
 
     export class OptionsContainerConfig{
@@ -267,7 +325,7 @@ function configText(text: UIText, textConfig: SimpleDialog.TextConfig){
 }
 
 
-class PortraitContainerData{
+class PortraitContainer{
     container: UIContainerRect
     image: UIImage
     config: SimpleDialog.PortraitConfig
@@ -287,6 +345,12 @@ class PortraitContainerData{
         if (config.width) this.container.width = config.width
     }
 
+    configPortraitImage(imageConfig: SimpleDialog.ImageConfig){
+        configImage(this.image, imageConfig)
+        if (imageConfig.sourceWidth == null && this.config.sourceWidth) this.image.sourceWidth = this.config.sourceWidth
+        if (imageConfig.sourceHeight == null && this.config.sourceHeight) this.image.sourceHeight = this.config.sourceHeight
+    }
+
     setImage(texture: Texture, imageConfig?: SimpleDialog.ImageConfig){
         if (this.image){
             this.image.source = texture
@@ -300,10 +364,16 @@ class PortraitContainerData{
         }
 
         if (imageConfig){
-            configImage(this.image, imageConfig)
-            if (imageConfig.sourceWidth == null && this.config.sourceWidth) this.image.sourceWidth = this.config.sourceWidth
-            if (imageConfig.sourceHeight == null && this.config.sourceHeight) this.image.sourceHeight = this.config.sourceHeight
+            this.configPortraitImage(imageConfig)
         }
+    }
+
+    show(){
+        this.container.visible = true
+    }
+
+    hide(){
+        this.container.visible = false
     }
 
 }
@@ -337,9 +407,9 @@ class DialogTextContainer{
     }
 }
 
-class OptionContainerData{
+class OptionContainer{
     container : UIContainerStack
-    options: {container: UIContainerRect, text: UIText}[] = []
+    options: {container: UIContainerRect, text: UIText, active: boolean}[] = []
     config: SimpleDialog.OptionsContainerConfig
 
     constructor(config: SimpleDialog.OptionsContainerConfig, parent: UIContainerRect){
@@ -361,23 +431,60 @@ class OptionContainerData{
         if(config.positionX) this.container.positionX = config.positionX
         if(config.positionY) this.container.positionY = config.positionY
 
-        if (config.optionsTextConfig){
-            this.options.forEach(option => {
+        this.options.forEach(option => {
+            if (config.optionsTextConfig){
                 configText(option.text, config.optionsTextConfig)
-            });
-        }
+            }
+            if(config.optionsTextConfig == null || config.optionsTextConfig.fontAutoSize == null){
+                option.text.fontSize = 10
+            }
+        });
     }
 
     addOption(text: string){
-        //TODO: Pool
-        let container = new UIContainerRect(this.container)
-        let uitext = new UIText(container)
+        let optionData = null
+
+        for (let i=0; i<this.options.length; i++){
+            if (!this.options[i].active){
+                optionData = this.options[i]
+                break
+            }
+        }
+
+        let container: UIContainerRect
+        let uitext: UIText
+
+        if (optionData != null){
+            container = optionData.container
+            uitext = optionData.text
+            optionData.active = true
+        }
+        else{
+            container = new UIContainerRect(this.container)
+            uitext = new UIText(container)
+        }
+
         uitext.value = text
 
         if (this.config.optionsTextConfig){
             configText(uitext, this.config.optionsTextConfig)
         }
-        this.options.push({container: container, text: uitext})
+        if(this.config.optionsTextConfig == null || this.config.optionsTextConfig.fontAutoSize == null){
+            uitext.fontSize = 10
+        }
+
+        container.height = uitext.fontSize
+
+        if (optionData == null){
+            this.options.push({container: container, text: uitext, active: true})
+        }
+    }
+
+    hideAndClearOptions(){
+        for (let i=0; i<this.options.length; i++){
+            this.options[i].active = false
+        }
+        this.container.visible = false
     }
 }
 
@@ -388,15 +495,47 @@ class OptionsGroupData{
 
 class SayWithCallbackAction implements ActionsSequenceSystem.IAction{
     private callback: ()=>string
+    private getDialogInstance: ()=>SimpleDialog
+    private textConfig: SimpleDialog.TextConfig
+    private charIndex: number
+    private time: number
+    private text: string
+    private writting: boolean
 
-    constructor(text: ()=>string){
+    constructor(text: ()=>string, textConfig: SimpleDialog.TextConfig, getDialogInstance: ()=>SimpleDialog){
         this.callback = text
+        this.textConfig = textConfig
+        this.getDialogInstance = getDialogInstance
     }
     onStart(): void {
-        log("SAY: " + this.callback())
-        this.hasFinished = true
+        if (this.textConfig) this.getDialogInstance().setTextConfig(this.textConfig)
+        this.hasFinished = false
+        this.charIndex = -1
+        this.time = 0
+        this.text = this.callback()
+        this.writting = true
+        this.getDialogInstance().setText("")
     }    
     update(dt: number): void {
+        if (this.writting){
+            this.time += dt * this.getDialogInstance().getTextSpeed()
+            let floorTime = Math.ceil(this.time)
+            if (floorTime > this.charIndex){
+                this.charIndex = Scalar.Clamp(floorTime,0,this.text.length)
+                if (this.charIndex >= this.text.length){
+                    this.writting = false
+                    this.time = 0
+                }
+                this.getDialogInstance().setText(this.text.substr(0,this.charIndex))
+            }
+        }
+        else{
+            this.time += dt
+            if (this.time > 3){
+                this.hasFinished = true
+            }
+        }
+
     }
     onFinish(): void {
     }
@@ -452,6 +591,54 @@ class WaitForInputAction implements ActionsSequenceSystem.IAction{
         /*this.hasFinished = true
         this.group.options[0].selected = true
         this.group.optionSelected = 0*/
+    }
+    onFinish(): void {
+    }
+    hasFinished: boolean;
+}
+
+class ShowPortraitAction implements ActionsSequenceSystem.IAction{
+    private getDialogInstance: ()=>SimpleDialog
+    private changeTexture: Texture
+    private changeConfig: SimpleDialog.ImageConfig
+    private index: SimpleDialog.PortraitIndex
+
+    constructor(index: SimpleDialog.PortraitIndex, changeTexture: Texture, changeConfig: SimpleDialog.ImageConfig, getDialogInstance: ()=>SimpleDialog){
+        this.getDialogInstance = getDialogInstance
+        this.changeTexture = changeTexture
+        this.changeConfig = changeConfig
+        this.index = index
+    }
+    onStart(): void {
+        if (this.changeTexture){
+            this.getDialogInstance().setPortrait(this.index, this.changeTexture, this.changeConfig)
+        }
+        else if (this.changeConfig){
+            this.getDialogInstance().setPortraitImageConfig(this.index, this.changeConfig)            
+        }
+        this.getDialogInstance().showPortrait(this.index)
+        this.hasFinished = true
+    }    
+    update(dt: number): void {
+    }
+    onFinish(): void {
+    }
+    hasFinished: boolean;
+}
+
+class HidePortraitAction implements ActionsSequenceSystem.IAction{
+    private getDialogInstance: ()=>SimpleDialog
+    private index: SimpleDialog.PortraitIndex
+
+    constructor(index: SimpleDialog.PortraitIndex, getDialogInstance: ()=>SimpleDialog){
+        this.getDialogInstance = getDialogInstance
+        this.index = index
+    }
+    onStart(): void {
+        this.getDialogInstance().hidePortrait(this.index)
+        this.hasFinished = true
+    }    
+    update(dt: number): void {
     }
     onFinish(): void {
     }
