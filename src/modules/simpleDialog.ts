@@ -1,12 +1,14 @@
 import { ActionsSequenceSystem } from "./actionsSequenceSystem";
 
 export class SimpleDialog{
-    actionsSequenceSystem: ActionsSequenceSystem
+    private actionsSequenceSystem: ActionsSequenceSystem
 
     private dialogContainer: UIContainerRect
     private portraitContainers: PortraitContainer[] = []
     private textContainer: DialogTextContainer
     private optionsContainer: OptionContainer
+
+    private onFinishCallback: ()=>void
 
     constructor(dialogConfig: SimpleDialog.DialogConfig){
         this.actionsSequenceSystem = new ActionsSequenceSystem()
@@ -33,7 +35,14 @@ export class SimpleDialog{
         this.show()
         dialogTree.simpleDialogInstance = this
         this.actionsSequenceSystem.startSequence(dialogTree.actionsSequenceBuilder)
-        this.actionsSequenceSystem.setOnFinishCallback(()=>this.hide())
+        this.actionsSequenceSystem.setOnFinishCallback(()=>{
+            if(this.onFinishCallback) this.onFinishCallback()
+            this.hide()
+        })
+    }
+
+    setFinishCallback(onFinishCallback: ()=>void){
+        this.onFinishCallback = onFinishCallback
     }
 
     isRunning(): boolean{
