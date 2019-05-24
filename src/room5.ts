@@ -17,7 +17,7 @@ export function CreateRoom5() : void{
             height: 192,
             sourceWidth: 128,
             sourceHeight: 192,
-            positionX: "-15%"
+            positionX: "-17%"
         },
         rightPortrait: {
             width: 128,
