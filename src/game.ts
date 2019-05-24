@@ -7,8 +7,9 @@ import { CreateRoom6 } from "./room6";
 import { CreateRoom7 } from "./room7";
 import { CreateRoom8 } from "./room8";
 import { CreateRoom4 } from "./room4";
+import { CreateRoom5 } from "./room5";
 
-const scene = new Entity()
+/*const scene = new Entity()
 scene.addComponent(new GLTFShape("models/scene.glb"))
 scene.addComponent(new Transform({rotation: Quaternion.Euler(0,180,0)}))
 engine.addEntity(scene)
@@ -21,7 +22,9 @@ CreateRoom1()
 CreateRoom2()
 CreateRoom3()
 CreateRoom4()
-
+CreateRoom5()
 CreateRoom6()
 CreateRoom7()
-CreateRoom8()
+CreateRoom8()*/
+
+CreateRoom5()

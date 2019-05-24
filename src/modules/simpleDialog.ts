@@ -29,10 +29,11 @@ export class SimpleDialog{
         this.portraitContainers.forEach(portrait => {
             portrait.hide()
         });
-        this.optionsContainer.hideAndClearOptions()
+        this.hideOptions()
         this.show()
         dialogTree.simpleDialogInstance = this
         this.actionsSequenceSystem.startSequence(dialogTree.actionsSequenceBuilder)
+        this.actionsSequenceSystem.setOnFinishCallback(()=>this.hide())
     }
 
     isRunning(): boolean{
@@ -83,6 +84,26 @@ export class SimpleDialog{
             return this.textContainer.config.textSpeed
         return 15
     }
+
+    addOption(text: string, callback: ()=>void){
+        this.optionsContainer.addOption(text, callback)
+    }
+
+    showOptions(){
+        this.optionsContainer.show()
+    }
+
+    hideOptions(){
+        this.optionsContainer.hideAndClearOptions()
+    }
+
+    getDialogTextContainer(): UIContainerRect{
+        return this.textContainer.container
+    }
+
+    getOptionsContainer(): UIContainerStack{
+        return this.optionsContainer.optionsStack
+    }
 }
 
 export namespace SimpleDialog{
@@ -131,21 +152,21 @@ export namespace SimpleDialog{
             this.optionsGroupStack.push(groupData)
 
             this.actionsSequenceBuilder.while(()=>true)
-            this.actionsSequenceBuilder.if(()=>groupData.optionSelected != -1)
-            this.actionsSequenceBuilder.endIf()
+            //this.actionsSequenceBuilder.if(()=>groupData.optionSelected != -1)
+            //this.actionsSequenceBuilder.endIf()
             return this
         }
 
         endOptionsGroup(): DialogTree{
-            this.actionsSequenceBuilder.then(new WaitForInputAction(this.optionsGroupStack[this.optionsGroupStack.length-1]))
+            this.actionsSequenceBuilder.then(new WaitForInputAction(this.optionsGroupStack[this.optionsGroupStack.length-1], ()=>this.simpleDialogInstance))
             this.actionsSequenceBuilder.endWhile()
             this.optionsGroupStack.splice(this.optionsGroupStack.length-1,1)
             return this
         }
 
-        option(text: string): DialogTree{
+        option(stringFunction: ()=>string): DialogTree{
             let group = this.optionsGroupStack[this.optionsGroupStack.length-1]
-            let optionAction = new OptionAction(text, group)
+            let optionAction = new OptionAction(stringFunction, ()=>this.simpleDialogInstance)
             group.options.push(optionAction)
             this.actionsSequenceBuilder.if(()=>group.optionSelected == -1)
             this.actionsSequenceBuilder.then(optionAction)
@@ -161,8 +182,13 @@ export namespace SimpleDialog{
             return this
         }
 
-        callback(callback:()=>void): DialogTree{
+        call(callback:()=>void): DialogTree{
             this.actionsSequenceBuilder.then(new CallbackAction(callback))
+            return this
+        }
+
+        customAction(action: ActionsSequenceSystem.IAction): DialogTree{
+            this.actionsSequenceBuilder.then(action)
             return this
         }
     }
@@ -195,6 +221,8 @@ export namespace SimpleDialog{
         positionX?: string | number
         positionY?: string | number
         textSpeed?: number
+        background?: Texture
+        backgroundConfig?: ImageConfig
     }
 
     export class OptionsContainerConfig{
@@ -203,13 +231,15 @@ export namespace SimpleDialog{
         adaptHeight?: boolean
         color?: Color4
         stackOrientation?: UIStackOrientation
-        spacing?: Number
+        spacing?: number
         hAlign?: string
         vAlign?: string
         width?: string | number
         height?: string | number
         positionX?: string | number
         positionY?: string | number
+        background?: Texture
+        backgroundConfig?: ImageConfig
     }
 
     export class ShapeConfig{
@@ -385,12 +415,20 @@ class DialogTextContainer{
 
     constructor(config: SimpleDialog.DialogTextConfig, parent: UIContainerRect){
         this.container = new UIContainerRect(parent)
+        if (config.background){
+            let bg = new UIImage(this.container, config.background)
+            bg.width = "100%"
+            bg.height = "100%"
+            if (config.backgroundConfig) configImage(bg, config.backgroundConfig)
+        }
+
         this.text = new UIText(this.container)
         this.text.width = "100%"
         this.text.height = "100%"
         this.text.hTextAlign = "left"
         this.text.vTextAlign = "center"
         this.text.textWrapping = true
+        if (config.textConfig) configText(this.text, config.textConfig)
         this.setConfig(config)
     }
 
@@ -407,29 +445,58 @@ class DialogTextContainer{
     }
 }
 
+class OptionContainerData{
+    image: UIImage
+    text: UIText
+    active: boolean
+    callback: ()=>void
+}
+
 class OptionContainer{
-    container : UIContainerStack
-    options: {container: UIContainerRect, text: UIText, active: boolean}[] = []
+    container: UIContainerRect
+    optionsStack: UIContainerStack
+    background: UIImage
+    options: OptionContainerData[] = []
     config: SimpleDialog.OptionsContainerConfig
 
     constructor(config: SimpleDialog.OptionsContainerConfig, parent: UIContainerRect){
-        this.container = new UIContainerStack(parent)
+        this.container = new UIContainerRect(parent)
+        this.background = new UIImage(this.container, null)
+        this.background.opacity = 0
+        this.background.width = "100%"
+        this.background.height = "100%"
+
+        this.optionsStack = new UIContainerStack(this.container)
+        this.optionsStack.adaptHeight = false
+        this.optionsStack.adaptWidth = false
+        this.optionsStack.width = "100%"
+        this.optionsStack.height = "100%"
         this.setConfig(config)
     }
 
     setConfig(config: SimpleDialog.OptionsContainerConfig){
         this.config = config
-        if(config.adaptWidth) this.container.adaptWidth = config.adaptWidth
-        if(config.adaptHeight) this.container.adaptHeight = config.adaptHeight
+        if(config.adaptWidth) this.optionsStack.adaptWidth = config.adaptWidth
+        if(config.adaptHeight) this.optionsStack.adaptHeight = config.adaptHeight
         if(config.color) this.container.color = config.color
-        if(config.stackOrientation) this.container.stackOrientation = config.stackOrientation
-        if(config.spacing) this.container.spacing = config.spacing
+        if(config.spacing) this.optionsStack.spacing = config.spacing
+        if(config.stackOrientation) this.optionsStack.stackOrientation = config.stackOrientation
         if(config.hAlign) this.container.hAlign = config.hAlign
         if(config.vAlign) this.container.vAlign = config.vAlign
         if(config.width) this.container.width = config.width
         if(config.height) this.container.height = config.height
         if(config.positionX) this.container.positionX = config.positionX
         if(config.positionY) this.container.positionY = config.positionY
+
+        if (config.background){
+            if (this.background){
+                this.background.source = config.background
+                this.background.opacity = 1
+            }
+            if (config.backgroundConfig){
+                configImage(this.background, config.backgroundConfig)
+            }
+        }
 
         this.options.forEach(option => {
             if (config.optionsTextConfig){
@@ -441,8 +508,9 @@ class OptionContainer{
         });
     }
 
-    addOption(text: string){
-        let optionData = null
+    addOption(text: string, callback: ()=>void){
+        let optionData: OptionContainerData = null
+        const defaultFontSize = 10
 
         for (let i=0; i<this.options.length; i++){
             if (!this.options[i].active){
@@ -451,40 +519,67 @@ class OptionContainer{
             }
         }
 
-        let container: UIContainerRect
         let uitext: UIText
+        let uiImage: UIImage
 
         if (optionData != null){
-            container = optionData.container
             uitext = optionData.text
+            uiImage = optionData.image
             optionData.active = true
+            uiImage.visible = false
         }
         else{
-            container = new UIContainerRect(this.container)
-            uitext = new UIText(container)
+            uitext = new UIText(this.optionsStack)
+            uiImage = new UIImage(uitext, null)
+            
+            uitext.adaptHeight = true
+            uitext.adaptWidth = true
+            uitext.fontSize = defaultFontSize
+
+            uiImage.width = "100%"
+            uiImage.height = "100%"
+            uiImage.opacity = 0
         }
+
+        uiImage.onClick = new OnClick(callback)
+        uiImage.paddingLeft = uitext.paddingLeft
+        uiImage.paddingRight = uitext.paddingRight
+        uiImage.paddingTop = uitext.paddingTop
+        uiImage.paddingBottom = uitext.paddingBottom
 
         uitext.value = text
 
         if (this.config.optionsTextConfig){
             configText(uitext, this.config.optionsTextConfig)
         }
-        if(this.config.optionsTextConfig == null || this.config.optionsTextConfig.fontAutoSize == null){
-            uitext.fontSize = 10
+        if(this.config.optionsTextConfig == null || this.config.optionsTextConfig.fontSize == null){
+            uitext.fontSize = defaultFontSize
         }
 
-        container.height = uitext.fontSize
-
         if (optionData == null){
-            this.options.push({container: container, text: uitext, active: true})
+            optionData = {text: uitext, active: true, callback: callback, image: uiImage}
+            this.options.push(optionData)
+        }
+        else{
+            optionData.callback = callback
         }
     }
 
     hideAndClearOptions(){
         for (let i=0; i<this.options.length; i++){
             this.options[i].active = false
+            this.options[i].image.visible = false
         }
         this.container.visible = false
+    }
+
+    show(){
+        for (let i=0; i<this.options.length; i++){
+            if(this.options[i].active){
+                this.options[i].image.visible = true
+            }
+        }
+        this.container.visible = true
     }
 }
 
@@ -543,17 +638,19 @@ class SayWithCallbackAction implements ActionsSequenceSystem.IAction{
 }
 
 class OptionAction implements ActionsSequenceSystem.IAction{
-    private text: string
-    private id: number
+    private textCallback: ()=>string
+    private getDialogInstance: ()=>SimpleDialog
     selected: boolean = false
 
-    constructor(text: string, group: OptionsGroupData){
-        this.text = text
+    constructor(textCallback: ()=>string, getDialogInstance: ()=>SimpleDialog){
+        this.textCallback = textCallback
+        this.getDialogInstance = getDialogInstance
         this.selected = false
-        this.id = group.options.length
     }
     onStart(): void {
-        log("OPTION "+ this.id + ": " + this.text)
+        this.getDialogInstance().addOption(this.textCallback(), ()=>{
+            this.selected = true
+        })
         this.hasFinished = true
     }    
     update(dt: number): void {
@@ -581,16 +678,24 @@ class CallbackAction implements ActionsSequenceSystem.IAction{
 
 class WaitForInputAction implements ActionsSequenceSystem.IAction{
     private group: OptionsGroupData
-    constructor(group: OptionsGroupData){
+    private getDialogInstance: ()=>SimpleDialog
+    constructor(group: OptionsGroupData,getDialogInstance: ()=>SimpleDialog){
         this.group = group
+        this.getDialogInstance = getDialogInstance
     }
     onStart(): void {
         this.hasFinished = false
+        this.getDialogInstance().showOptions()
     }    
     update(dt: number): void {
-        /*this.hasFinished = true
-        this.group.options[0].selected = true
-        this.group.optionSelected = 0*/
+        for (let i=0; i<this.group.options.length; i++){
+            if (this.group.options[i].selected){
+                this.group.optionSelected = i
+                this.hasFinished = true
+                this.getDialogInstance().hideOptions()
+                break
+            }
+        }
     }
     onFinish(): void {
     }
