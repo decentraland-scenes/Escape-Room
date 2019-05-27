@@ -29,7 +29,7 @@ export function CreateRoom5() : void{
         dialogText:{
             width: "25%",
             height: "25%",
-            textSpeed: 15,
+            textSpeed: 30,
             textConfig: {fontSize: 16, paddingLeft:10, paddingRight:10},
             background: new Texture("images/dialogs/textContainer.png"),
             backgroundConfig: {sourceWidth: 284, sourceHeight:192}

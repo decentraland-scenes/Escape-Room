@@ -38,6 +38,17 @@ export class ActionsSequenceSystem{
         this.started = false
     }
 
+    getRunningAction(): ActionsSequenceSystem.IAction{
+        let currentNode: SequenceNode = this.currentSequenceNode
+
+        if (this.currentSequenceNode instanceof SubSequenceNode){
+            do{
+                currentNode = (currentNode as SubSequenceNode).currentInnerSequence
+            }while(currentNode instanceof SubSequenceNode)
+        }
+        return currentNode.action
+    }
+
     update(dt: number): void{
         if (this.running){
             if (!this.started){
@@ -202,8 +213,8 @@ class SequenceNode {
 }
 
 class SubSequenceNode extends SequenceNode {
-    protected currentInnerSequence: SequenceNode = null
-    protected startingInnerSequence: SequenceNode = null
+    currentInnerSequence: SequenceNode = null
+    startingInnerSequence: SequenceNode = null
     closed: boolean = false
 
     then(next: SequenceNode) : SequenceNode{

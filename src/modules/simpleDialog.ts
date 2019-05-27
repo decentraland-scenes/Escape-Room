@@ -11,9 +11,6 @@ export class SimpleDialog{
     private onFinishCallback: ()=>void
 
     constructor(dialogConfig: SimpleDialog.DialogConfig){
-        this.actionsSequenceSystem = new ActionsSequenceSystem()
-        engine.addSystem(this.actionsSequenceSystem)
-
         this.dialogContainer = new UIContainerRect(dialogConfig.canvas)
         this.dialogContainer.width = "100%"
         this.dialogContainer.height = "100%"
@@ -23,6 +20,16 @@ export class SimpleDialog{
 
         this.textContainer = new DialogTextContainer(dialogConfig.dialogText, this.dialogContainer)
         this.optionsContainer = new OptionContainer(dialogConfig.optionsContainer, this.dialogContainer)
+
+        if (this.textContainer.background){
+            this.textContainer.background.onClick = new OnClick(()=>{
+                if (this.actionsSequenceSystem){
+                    if (this.actionsSequenceSystem.getRunningAction() instanceof SayWithCallbackAction){
+                        (this.actionsSequenceSystem.getRunningAction() as SayWithCallbackAction).skipDialog()
+                    }
+                }
+            })
+        }
 
         this.hide()
     }
@@ -34,11 +41,16 @@ export class SimpleDialog{
         this.hideOptions()
         this.show()
         dialogTree.simpleDialogInstance = this
+        
+        this.actionsSequenceSystem = new ActionsSequenceSystem()
         this.actionsSequenceSystem.startSequence(dialogTree.actionsSequenceBuilder)
         this.actionsSequenceSystem.setOnFinishCallback(()=>{
+            engine.removeSystem(this.actionsSequenceSystem)
+            this.actionsSequenceSystem = null
             if(this.onFinishCallback) this.onFinishCallback()
             this.hide()
         })
+        engine.addSystem(this.actionsSequenceSystem)
     }
 
     setFinishCallback(onFinishCallback: ()=>void){
@@ -46,7 +58,8 @@ export class SimpleDialog{
     }
 
     isRunning(): boolean{
-        return this.actionsSequenceSystem.isRunning()
+        if (this.actionsSequenceSystem == null) return false
+        else return this.actionsSequenceSystem.isRunning()
     }
 
     setPortrait(portraitIndex: SimpleDialog.PortraitIndex, texture: Texture, imageConfig?: SimpleDialog.ImageConfig){
@@ -88,10 +101,16 @@ export class SimpleDialog{
         this.portraitContainers[portraitIndex].hide()
     }
 
-    getTextSpeed(): number{
+    getConfigDialogTextSpeed(): number{
         if (this.textContainer.config.textSpeed)
             return this.textContainer.config.textSpeed
         return 15
+    }
+
+    getConfigDialogTextIdleTime(): number{
+        if (this.textContainer.config.textIdleTime)
+            return this.textContainer.config.textIdleTime
+        return 3
     }
 
     addOption(text: string, callback: ()=>void){
@@ -126,8 +145,8 @@ export namespace SimpleDialog{
             this.actionsSequenceBuilder = new ActionsSequenceSystem.SequenceBuilder()
         }
 
-        say(stringFunction: ()=>string, textConfig?: TextConfig): DialogTree{
-            this.actionsSequenceBuilder.then(new SayWithCallbackAction(stringFunction, textConfig, ()=>this.simpleDialogInstance))
+        say(stringFunction: ()=>string, textConfig?: TextConfig, textSpeed?: number, textIdleTime?: number): DialogTree{
+            this.actionsSequenceBuilder.then(new SayWithCallbackAction(stringFunction, textConfig, ()=>this.simpleDialogInstance, textSpeed, textIdleTime))
             return this
         }
 
@@ -161,8 +180,6 @@ export namespace SimpleDialog{
             this.optionsGroupStack.push(groupData)
 
             this.actionsSequenceBuilder.while(()=>true)
-            //this.actionsSequenceBuilder.if(()=>groupData.optionSelected != -1)
-            //this.actionsSequenceBuilder.endIf()
             return this
         }
 
@@ -230,6 +247,7 @@ export namespace SimpleDialog{
         positionX?: string | number
         positionY?: string | number
         textSpeed?: number
+        textIdleTime?: number
         background?: Texture
         backgroundConfig?: ImageConfig
     }
@@ -421,6 +439,7 @@ class DialogTextContainer{
     container: UIContainerRect
     text: UIText
     config: SimpleDialog.DialogTextConfig
+    background: UIImage
 
     constructor(config: SimpleDialog.DialogTextConfig, parent: UIContainerRect){
         this.container = new UIContainerRect(parent)
@@ -428,6 +447,8 @@ class DialogTextContainer{
             let bg = new UIImage(this.container, config.background)
             bg.width = "100%"
             bg.height = "100%"
+            bg.isPointerBlocker = true
+            this.background = bg
             if (config.backgroundConfig) configImage(bg, config.backgroundConfig)
         }
 
@@ -437,6 +458,7 @@ class DialogTextContainer{
         this.text.hTextAlign = "left"
         this.text.vTextAlign = "center"
         this.text.textWrapping = true
+        this.text.isPointerBlocker = false
         if (config.textConfig) configText(this.text, config.textConfig)
         this.setConfig(config)
     }
@@ -577,6 +599,7 @@ class OptionContainer{
     hideAndClearOptions(){
         for (let i=0; i<this.options.length; i++){
             this.options[i].active = false
+            this.options[i].text.visible = false
             this.options[i].image.visible = false
         }
         this.container.visible = false
@@ -585,6 +608,7 @@ class OptionContainer{
     show(){
         for (let i=0; i<this.options.length; i++){
             if(this.options[i].active){
+                this.options[i].text.visible = true
                 this.options[i].image.visible = true
             }
         }
@@ -605,11 +629,16 @@ class SayWithCallbackAction implements ActionsSequenceSystem.IAction{
     private time: number
     private text: string
     private writting: boolean
+    private textSpeed: number
+    private idleTime: number
+    private lastSkipTime: number
 
-    constructor(text: ()=>string, textConfig: SimpleDialog.TextConfig, getDialogInstance: ()=>SimpleDialog){
+    constructor(text: ()=>string, textConfig: SimpleDialog.TextConfig, getDialogInstance: ()=>SimpleDialog, textSpeed: number, idleTime: number){
         this.callback = text
         this.textConfig = textConfig
         this.getDialogInstance = getDialogInstance
+        this.textSpeed = textSpeed
+        this.idleTime = idleTime
     }
     onStart(): void {
         if (this.textConfig) this.getDialogInstance().setTextConfig(this.textConfig)
@@ -619,10 +648,13 @@ class SayWithCallbackAction implements ActionsSequenceSystem.IAction{
         this.text = this.callback()
         this.writting = true
         this.getDialogInstance().setText("")
+        if(!this.textSpeed) this.textSpeed = this.getDialogInstance().getConfigDialogTextSpeed()
+        if(!this.idleTime) this.idleTime = this.getDialogInstance().getConfigDialogTextIdleTime()
+        this.lastSkipTime = 0
     }    
     update(dt: number): void {
         if (this.writting){
-            this.time += dt * this.getDialogInstance().getTextSpeed()
+            this.time += dt * this.textSpeed
             let floorTime = Math.ceil(this.time)
             if (floorTime > this.charIndex){
                 this.charIndex = Scalar.Clamp(floorTime,0,this.text.length)
@@ -635,13 +667,24 @@ class SayWithCallbackAction implements ActionsSequenceSystem.IAction{
         }
         else{
             this.time += dt
-            if (this.time > 3){
+            if (this.time > this.idleTime){
                 this.hasFinished = true
             }
         }
 
     }
     onFinish(): void {
+    }
+    skipDialog(): void{
+        if (this.writting){
+            this.writting = false
+            this.time = 0
+            this.getDialogInstance().setText(this.text)
+            this.lastSkipTime = Date.now()
+        }
+        else if (Date.now() - this.lastSkipTime >= 1500){
+            this.hasFinished = true
+        }
     }
     hasFinished: boolean = false;
 }
