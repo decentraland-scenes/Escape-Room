@@ -108,7 +108,7 @@ export namespace ActionsSequenceSystem {
         if (condition: ()=>boolean): SequenceBuilder{
             let ifSeq = new IfSequenceNode(condition)
             if (this.currentSequenceNode == null){
-                this.currentSequenceNode.next = ifSeq
+                this.currentSequenceNode = ifSeq
                 this.beginSequenceNode = ifSeq
             }
             else{
@@ -144,7 +144,7 @@ export namespace ActionsSequenceSystem {
         while (condition: ()=>boolean): SequenceBuilder{
             let whileSeq = new WhileSequenceNode(condition)
             if (this.currentSequenceNode == null){
-                this.currentSequenceNode.next = whileSeq
+                this.currentSequenceNode = whileSeq
                 this.beginSequenceNode = whileSeq
             }
             else{

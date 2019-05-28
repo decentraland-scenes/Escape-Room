@@ -217,6 +217,11 @@ export namespace SimpleDialog{
             this.actionsSequenceBuilder.then(action)
             return this
         }
+
+        wait(seconds: number): DialogTree{
+            this.actionsSequenceBuilder.then(new WaitAction(seconds))
+            return this
+        }
     }
 
     export class DialogConfig{
@@ -796,6 +801,25 @@ class HidePortraitAction implements ActionsSequenceSystem.IAction{
         this.hasFinished = true
     }    
     update(dt: number): void {
+    }
+    onFinish(): void {
+    }
+    hasFinished: boolean;
+}
+
+class WaitAction implements ActionsSequenceSystem.IAction{
+    private seconds: number
+    private startingTime: number
+
+    constructor(seconds: number){
+        this.seconds = seconds
+    }
+    onStart(): void {
+        this.startingTime = Date.now()
+        this.hasFinished = false
+    }    
+    update(dt: number): void {
+        this.hasFinished = (Date.now() - this.startingTime) >= this.seconds * 1000
     }
     onFinish(): void {
     }
