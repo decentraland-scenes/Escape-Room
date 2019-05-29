@@ -1,13 +1,9 @@
 import { ToggleComponent } from "./modules/toggleComponent";
 import { RotateTransformComponent } from "./modules/transfromSystem";
 
-export function CreateRoom4() : void{
-    //create canvas for UI elements
-    const uiCanvas = new UICanvas()
-    uiCanvas.visible = false
-
+export function CreateRoom4(gameCanvas: UICanvas) : void{
     //create rect to contain numerical pad
-    const panelRect = new UIContainerRect(uiCanvas)
+    const panelRect = new UIContainerRect(gameCanvas)
     panelRect.positionX = -50
     panelRect.positionY = 50
     panelRect.width = "100%"
@@ -15,12 +11,12 @@ export function CreateRoom4() : void{
     panelRect.visible = false
 
     //create texture for buttons
-    const buttonTexture = new Texture("images/room4/pwdpanel_buttons.png")
-    const inputTexture = new Texture("images/room4/pwdpanel_input.png")
-    const closeTexture = new Texture("images/room4/button_close.png")
+    const buttonTexture = new Texture("images/codepad/pwdpanel_buttons.png")
+    const inputTexture = new Texture("images/codepad/pwdpanel_input.png")
+    const closeTexture = new Texture("images/codepad/button_close.png")
 
     //background for numerical pad
-    const panelBg = new UIImage(panelRect, new Texture("images/room4/pwdpanel_bg.png"))
+    const panelBg = new UIImage(panelRect, new Texture("images/codepad/pwdpanel_bg.png"))
     panelBg.sourceWidth = 222
     panelBg.sourceHeight = 297
     panelBg.width = 310
@@ -38,7 +34,7 @@ export function CreateRoom4() : void{
     panelCloseButton.height = 32
     panelCloseButton.onClick = new OnClick(event=>{
         panelRect.visible = false
-        uiCanvas.visible = false
+        gameCanvas.visible = false
     })
 
     //text dor numerical pad
@@ -79,7 +75,7 @@ export function CreateRoom4() : void{
             //at the bottom left we have the "clear" button
             if (col == 0 && row == 3){
                 //create image for button
-                buttonImage = new UIImage(panelRect, new Texture("images/room4/pwdpanel_clear.png"))
+                buttonImage = new UIImage(panelRect, new Texture("images/codepad/pwdpanel_clear.png"))
                 //when clicked we reset text values and set digit index to 0
                 buttonImage.onClick = new OnClick(event =>{
                     panelInputs.forEach(inputSlot => {
@@ -92,7 +88,7 @@ export function CreateRoom4() : void{
             //bottom right is "enter" button
             else if (col == 2 && row == 3){
                 //create image for button
-                buttonImage = new UIImage(panelRect, new Texture("images/room4/pwdpanel_enter.png"))
+                buttonImage = new UIImage(panelRect, new Texture("images/codepad/pwdpanel_enter.png"))
                 //when clicked we check if entered password is correct
                 buttonImage.onClick = new OnClick(event =>{
                     let inputPwd = ""
@@ -207,12 +203,12 @@ export function CreateRoom4() : void{
     coin.addComponent(new Transform({position: new Vector3(18,0,10.5)}))
     coin.addComponent(new OnClick(event =>{
         coinHintRect.visible = true
-        uiCanvas.visible = true
+        gameCanvas.visible = true
     }))
     engine.addEntity(coin)
 
     //create hint ui image to show when coin is clicked
-    const coinHintRect = new UIContainerRect(uiCanvas)
+    const coinHintRect = new UIContainerRect(gameCanvas)
     coinHintRect.width = "100%"
     coinHintRect.height = "100%"
     coinHintRect.visible = false
@@ -232,7 +228,7 @@ export function CreateRoom4() : void{
     coinHintClose.positionY = 256 - 32
     coinHintClose.onClick = new OnClick(event =>{
         coinHintRect.visible = false
-        uiCanvas.visible = false
+        gameCanvas.visible = false
     })
 
     //create a painting on the wall
@@ -245,12 +241,12 @@ export function CreateRoom4() : void{
     painting.addComponent(paintingMat)
     painting.addComponent(new OnClick(event =>{
         paintingHintRect.visible = true
-        uiCanvas.visible = true
+        gameCanvas.visible = true
     }))
     engine.addEntity(painting)
 
     //create hint ui image to show when painting is clicked
-    const paintingHintRect = new UIContainerRect(uiCanvas)
+    const paintingHintRect = new UIContainerRect(gameCanvas)
     paintingHintRect.width = "100%"
     paintingHintRect.height = "100%"
     paintingHintRect.visible = false
@@ -270,16 +266,16 @@ export function CreateRoom4() : void{
     paintingHintClose.positionY = 256 - 32
     paintingHintClose.onClick = new OnClick(event =>{
         paintingHintRect.visible = false
-        uiCanvas.visible = false
+        gameCanvas.visible = false
     })
 
     //create the numpad lock
     const numPadLock = new Entity()
-    numPadLock.addComponent(new GLTFShape("models/room4/codePad.glb"))
+    numPadLock.addComponent(new GLTFShape("models/generic/codePad.glb"))
     numPadLock.addComponent(new Transform({position: new Vector3(19.5,1.5,13)}))
     numPadLock.addComponent(new OnClick(event =>{
         panelRect.visible = true
-        uiCanvas.visible = true
+        gameCanvas.visible = true
     }))
     engine.addEntity(numPadLock)
 

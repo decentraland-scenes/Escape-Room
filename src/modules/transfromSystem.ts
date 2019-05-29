@@ -1,9 +1,9 @@
 export class TransformSystem implements ISystem {
     update (dt : number){
-        let moveGroup = engine.getComponentGroup(MoveTransformComponent)
-        let rotateGroup = engine.getComponentGroup(RotateTransformComponent)
-        let scaleGroup = engine.getComponentGroup(ScaleTransformComponent)
-        let followPathGroup = engine.getComponentGroup(FollowPathComponent)
+        let moveGroup = engine.getComponentGroup(MoveTransformComponent, Transform)
+        let rotateGroup = engine.getComponentGroup(RotateTransformComponent, Transform)
+        let scaleGroup = engine.getComponentGroup(ScaleTransformComponent, Transform)
+        let followPathGroup = engine.getComponentGroup(FollowPathComponent, Transform)
 
         for (let entity of moveGroup.entities){
             if (entity.hasComponent(Transform)){

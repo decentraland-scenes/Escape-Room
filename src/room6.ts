@@ -1,4 +1,5 @@
 import { ToggleComponent } from "./modules/toggleComponent";
+import { RotateTransformComponent } from "./modules/transfromSystem";
 
 export function CreateRoom6(): void{
     //create base for light bulbs
@@ -100,6 +101,7 @@ export function CreateRoom6(): void{
                 button.getComponent(AudioSource).playOnce()
                 if (areAllLightBulbsOn()){
                     areButtonsEnable = false
+                    chestTop.addComponent(new RotateTransformComponent(Quaternion.Euler(0,180,0),Quaternion.Euler(90,180,0),0.5))
                 }
             }
         }))
@@ -117,4 +119,27 @@ export function CreateRoom6(): void{
         }
         return true
     }
+
+
+    //create chest that contain muna's statue question hint
+    const chest = new Entity()
+    chest.addComponent(new GLTFShape("models/generic/chestBase.glb"))
+    chest.addComponent(new Transform({position: new Vector3(21,0,2)}))
+    engine.addEntity(chest)
+
+    //create chest top
+    const chestTop = new Entity()
+    chestTop.addComponent(new GLTFShape("models/generic/chestTop.glb"))
+    chestTop.addComponent(new Transform({position: new Vector3(0,0.36,0.32), rotation: Quaternion.Euler(0,180,0)}))
+    chestTop.setParent(chest)
+
+    //create hint for muna's question
+    const hint = new Entity()
+    const hintMaterial = new Material()
+    hintMaterial.albedoTexture = new Texture("images/room6/vampire_cover.png",{hasAlpha: true})
+    hintMaterial.hasAlpha = true
+    hint.addComponent(new PlaneShape())
+    hint.addComponent(hintMaterial)
+    hint.addComponent(new Transform({position: new Vector3(0,0.4,0), rotation: Quaternion.Euler(90,0,90), scale: new Vector3(0.6,0.6,0.6)}))
+    hint.setParent(chest)
 }

@@ -2,6 +2,7 @@ import { ActionsSequenceSystem } from "./actionsSequenceSystem";
 
 export class SimpleDialog{
     private actionsSequenceSystem: ActionsSequenceSystem
+    private gameCanvas: UICanvas
 
     private dialogContainer: UIContainerRect
     private portraitContainers: PortraitContainer[] = []
@@ -30,10 +31,14 @@ export class SimpleDialog{
                 }
             })
         }
-
+        this.gameCanvas = dialogConfig.canvas
         this.hide()
     }
 
+    /**
+     * play dialog tree
+     * @param dialogTree dialog tree instance
+     */
     startDialog(dialogTree: SimpleDialog.DialogTree){
         this.portraitContainers.forEach(portrait => {
             portrait.hide()
@@ -53,23 +58,46 @@ export class SimpleDialog{
         engine.addSystem(this.actionsSequenceSystem)
     }
 
+    /**
+     * set callback for when dialog finish
+     * @param onFinishCallback callback
+     */
     setFinishCallback(onFinishCallback: ()=>void){
         this.onFinishCallback = onFinishCallback
     }
 
+    /**
+     * get if dialog is running
+     */
     isRunning(): boolean{
         if (this.actionsSequenceSystem == null) return false
         else return this.actionsSequenceSystem.isRunning()
     }
 
+    /**
+     * set portrait
+     * @param portraitIndex portrait index
+     * @param texture texture for portrait
+     * @param imageConfig portrait's image configuration
+     */
     setPortrait(portraitIndex: SimpleDialog.PortraitIndex, texture: Texture, imageConfig?: SimpleDialog.ImageConfig){
         this.portraitContainers[portraitIndex].setImage(texture, imageConfig)
     }
 
+    /**
+     * set protrait image configuration
+     * @param portraitIndex portrait index
+     * @param imageConfig portrait's image configuration
+     */
     setPortraitImageConfig(portraitIndex: SimpleDialog.PortraitIndex, imageConfig: SimpleDialog.ImageConfig){
         this.portraitContainers[portraitIndex].configPortraitImage(imageConfig)
     }
 
+    /**
+     * set text in dialog box
+     * @param text text value
+     * @param textConfig configuration for text
+     */
     setText(text: string, textConfig?: SimpleDialog.TextConfig){
         this.textContainer.text.value = text
         if (textConfig){
@@ -78,6 +106,10 @@ export class SimpleDialog{
         }
     }
 
+    /**
+     * configure text in dialog box
+     * @param textConfig text's configuration
+     */
     setTextConfig(textConfig: SimpleDialog.TextConfig){
         if (textConfig){
             configText(this.textContainer.text, textConfig)
@@ -85,50 +117,89 @@ export class SimpleDialog{
         }
     }
 
+    /**
+     * show dialog
+     */
     show(){
+        this.gameCanvas. visible = true
         this.dialogContainer.visible = true
     }
 
+    /**
+     * hide dialog
+     */
     hide(){
+        this.gameCanvas.visible = false
         this.dialogContainer.visible = false
     }
 
+    /**
+     * show a portrait
+     * @param portraitIndex portrait's index to show
+     */
     showPortrait(portraitIndex: SimpleDialog.PortraitIndex){
         this.portraitContainers[portraitIndex].show()
     }
 
+    /**
+     * hide a portrait
+     * @param portraitIndex portrait's index to hide
+     */
     hidePortrait(portraitIndex: SimpleDialog.PortraitIndex){
         this.portraitContainers[portraitIndex].hide()
     }
 
+    /**
+     * get configured dialog text speed
+     */
     getConfigDialogTextSpeed(): number{
         if (this.textContainer.config.textSpeed)
             return this.textContainer.config.textSpeed
         return 15
     }
 
+    /**
+     * get configured idle time for text (idle time between dialogs)
+     */
     getConfigDialogTextIdleTime(): number{
         if (this.textContainer.config.textIdleTime)
             return this.textContainer.config.textIdleTime
         return 3
     }
 
+    /**
+     * add an option to dialog system
+     * @param text text value
+     * @param callback callback for when option is pressed
+     */
     addOption(text: string, callback: ()=>void){
         this.optionsContainer.addOption(text, callback)
     }
 
+    /**
+     * show dialog's options
+     */
     showOptions(){
         this.optionsContainer.show()
     }
 
+    /**
+     * hide dialog's options
+     */
     hideOptions(){
         this.optionsContainer.hideAndClearOptions()
     }
 
+    /**
+     * get dialog box container
+     */
     getDialogTextContainer(): UIContainerRect{
         return this.textContainer.container
     }
 
+    /**
+     * get options container
+     */
     getOptionsContainer(): UIContainerStack{
         return this.optionsContainer.optionsStack
     }
@@ -145,36 +216,66 @@ export namespace SimpleDialog{
             this.actionsSequenceBuilder = new ActionsSequenceSystem.SequenceBuilder()
         }
 
+        /**
+         * start text displaying on dialog box
+         * @param stringFunction function to get text from
+         * @param textConfig text configuration
+         * @param textSpeed text type writing animation speed
+         * @param textIdleTime idle time to wait after full text is displayed
+         */
         say(stringFunction: ()=>string, textConfig?: TextConfig, textSpeed?: number, textIdleTime?: number): DialogTree{
             this.actionsSequenceBuilder.then(new SayWithCallbackAction(stringFunction, textConfig, ()=>this.simpleDialogInstance, textSpeed, textIdleTime))
             return this
         }
 
+        /**
+         * show one of the portraits
+         * @param index index of portrait to show
+         * @param changeTexture texture to change portrait's image
+         * @param changeConfig change configuration for portrait's image
+         */
         showPortrait(index: SimpleDialog.PortraitIndex, changeTexture?: Texture, changeConfig?: ImageConfig): DialogTree{
             this.actionsSequenceBuilder.then(new ShowPortraitAction(index, changeTexture, changeConfig, ()=>this.simpleDialogInstance))
             return this
         }
 
+        /**
+         * hide one of the portraits
+         * @param index index of portrait to hide
+         */
         hidePortrait(index: SimpleDialog.PortraitIndex): DialogTree{
             this.actionsSequenceBuilder.then(new HidePortraitAction(index, ()=>this.simpleDialogInstance))
             return this
         }
     
+        /**
+         * IF conditional statement
+         * @param condition condition function
+         */
         if(condition: ()=>boolean): DialogTree{
             this.actionsSequenceBuilder.if(condition)
             return this
         }
     
+        /**
+         * ELSE conditional statement
+         */
         else(): DialogTree{
             this.actionsSequenceBuilder.else()
             return this
         }
 
+        /**
+         * ends a conditional block
+         */
         endif(): DialogTree{
             this.actionsSequenceBuilder.endIf()
             return this
         }
     
+        /**
+         * begin an options block group
+         */
         beginOptionsGroup(): DialogTree{
             let groupData = new OptionsGroupData()
             this.optionsGroupStack.push(groupData)
@@ -183,6 +284,9 @@ export namespace SimpleDialog{
             return this
         }
 
+        /**
+         * ends options block group
+         */
         endOptionsGroup(): DialogTree{
             this.actionsSequenceBuilder.then(new WaitForInputAction(this.optionsGroupStack[this.optionsGroupStack.length-1], ()=>this.simpleDialogInstance))
             this.actionsSequenceBuilder.endWhile()
@@ -190,6 +294,10 @@ export namespace SimpleDialog{
             return this
         }
 
+        /**
+         * add a option to the options block
+         * @param stringFunction function to get text for option
+         */
         option(stringFunction: ()=>string): DialogTree{
             let group = this.optionsGroupStack[this.optionsGroupStack.length-1]
             let optionAction = new OptionAction(stringFunction, ()=>this.simpleDialogInstance)
@@ -202,22 +310,37 @@ export namespace SimpleDialog{
             return this
         }
 
+        /**
+         * ends a option block
+         */
         endOption(): DialogTree{
             this.actionsSequenceBuilder.breakWhile()
             this.actionsSequenceBuilder.endIf()
             return this
         }
 
+        /**
+         * call a function
+         * @param callback function to call 
+         */
         call(callback:()=>void): DialogTree{
             this.actionsSequenceBuilder.then(new CallbackAction(callback))
             return this
         }
 
+        /**
+         * run a custom action
+         * @param action action to run
+         */
         customAction(action: ActionsSequenceSystem.IAction): DialogTree{
             this.actionsSequenceBuilder.then(action)
             return this
         }
 
+        /**
+         * wait a number of seconds
+         * @param seconds seconds to wait
+         */
         wait(seconds: number): DialogTree{
             this.actionsSequenceBuilder.then(new WaitAction(seconds))
             return this
@@ -225,10 +348,25 @@ export namespace SimpleDialog{
     }
 
     export class DialogConfig{
+        /**
+         * reference to scene canvas
+         */
         canvas: UICanvas
+        /**
+         * left portait configuration
+         */
         leftPortrait: PortraitConfig
+        /**
+         * right portrait configuration
+         */
         rightPortrait: PortraitConfig
+        /**
+         * configuration for text in dialog box
+         */
         dialogText: DialogTextConfig
+        /**
+         * configuration for options container
+         */
         optionsContainer: OptionsContainerConfig
     }
 
@@ -630,9 +768,9 @@ class SayWithCallbackAction implements ActionsSequenceSystem.IAction{
     private callback: ()=>string
     private getDialogInstance: ()=>SimpleDialog
     private textConfig: SimpleDialog.TextConfig
-    private charIndex: number
+    private wordIndex: number
     private time: number
-    private text: string
+    private text: string[]
     private writting: boolean
     private textSpeed: number
     private idleTime: number
@@ -648,9 +786,9 @@ class SayWithCallbackAction implements ActionsSequenceSystem.IAction{
     onStart(): void {
         if (this.textConfig) this.getDialogInstance().setTextConfig(this.textConfig)
         this.hasFinished = false
-        this.charIndex = -1
+        this.wordIndex = 0
         this.time = 0
-        this.text = this.callback()
+        this.text = this.callback().split(" ")
         this.writting = true
         this.getDialogInstance().setText("")
         if(!this.textSpeed) this.textSpeed = this.getDialogInstance().getConfigDialogTextSpeed()
@@ -661,13 +799,13 @@ class SayWithCallbackAction implements ActionsSequenceSystem.IAction{
         if (this.writting){
             this.time += dt * this.textSpeed
             let floorTime = Math.ceil(this.time)
-            if (floorTime > this.charIndex){
-                this.charIndex = Scalar.Clamp(floorTime,0,this.text.length)
-                if (this.charIndex >= this.text.length){
+            if (floorTime > this.wordIndex){
+                this.wordIndex = Scalar.Clamp(floorTime,0,this.text.length)
+                if (this.wordIndex >= this.text.length){
                     this.writting = false
                     this.time = 0
                 }
-                this.getDialogInstance().setText(this.text.substr(0,this.charIndex))
+                this.getDialogInstance().setText(this.getText(this.wordIndex))
             }
         }
         else{
@@ -684,12 +822,20 @@ class SayWithCallbackAction implements ActionsSequenceSystem.IAction{
         if (this.writting){
             this.writting = false
             this.time = 0
-            this.getDialogInstance().setText(this.text)
+            this.getDialogInstance().setText(this.getText(this.text.length))
             this.lastSkipTime = Date.now()
         }
         else if (Date.now() - this.lastSkipTime >= 1500){
             this.hasFinished = true
         }
+    }
+    getText(lastIndex: number):string{
+        let ret: string = ""
+        for (let i=0; i<lastIndex; i++){
+            if (i != 0) ret += " "
+            ret += this.text[i]
+        }
+        return ret
     }
     hasFinished: boolean = false;
 }
