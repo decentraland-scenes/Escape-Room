@@ -105,7 +105,7 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
     const randomWrongAnswers = ["You are just guessing...","No it is not...","What? Not even close!"]
 
     //some variables used for dialog
-    let firstTimeDialog: boolean = false
+    let firstTimeDialog: boolean = true
     let firstOptionCorrect:boolean = false
     let secondOptionCorrect:boolean = false
     let thirdOptionCorrect:boolean = false
