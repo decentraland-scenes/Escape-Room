@@ -32,7 +32,7 @@ export class StateMachine implements ISystem{
 
     update(dt: number){
         if (this.currentState != null){
-            if (!this.currentState.onUpdate(dt)){
+            if (!this.currentState.onUpdateState(dt)){
                 let temp = this.currentState
                 this.currentState = null
                 temp.onEnd()
@@ -60,7 +60,7 @@ export namespace StateMachine{
          * return true if state is still active or false if state should finish
          * @param dt delta time
          */    
-        onUpdate(dt: number): boolean {
+        onUpdateState(dt: number): boolean {
             return false
         }
         /**

@@ -36,7 +36,7 @@ export class TransformSystem implements ISystem {
 
     private updateComponent(component: ITransformComponent, entity: IEntity, transform: Transform, dt: number){
         component.update(dt)
-        component.setValue(transform)
+        component.assignValueToTransform(transform)
         if (component.hasFinished()){
             entity.removeComponent(component)
             if (component.onFinishCallback != null) component.onFinishCallback()
@@ -85,7 +85,7 @@ interface ITransformComponent{
     onFinishCallback : ()=>void
     update(dt: number)
     hasFinished(): boolean
-    setValue(transform: Transform)
+    assignValueToTransform(transform: Transform)
 }
 
 /**
@@ -133,16 +133,12 @@ export class MoveTransformComponent implements ITransformComponent{
         this.lerpTime = TransformSystem.Interpolate(this.interpolationType, this.normalizedTime)
     }
 
-    getPosition(): Vector3{
-        return Vector3.Lerp(this.start, this.end, this.lerpTime)
-    }
-
     hasFinished(): boolean{
         return this.normalizedTime >= 1
     }
 
-    setValue(transform: Transform){
-        transform.position = this.getPosition()
+    assignValueToTransform(transform: Transform){
+        transform.position = Vector3.Lerp(this.start, this.end, this.lerpTime)
     }
 }
 
@@ -150,7 +146,7 @@ export class MoveTransformComponent implements ITransformComponent{
  * Component to rotate entity from one rotation (start) to another (end) in an amount of time
  */
 @Component("rotateTransformComponent")
-export class RotateTransformComponent{
+export class RotateTransformComponent implements ITransformComponent{
     private start: ReadOnlyQuaternion
     private end: ReadOnlyQuaternion
     private speed: number
@@ -191,16 +187,12 @@ export class RotateTransformComponent{
         this.lerpTime = TransformSystem.Interpolate(this.interpolationType, this.normalizedTime)
     }
 
-    getRotation(): Quaternion{
-        return Quaternion.Slerp(this.start, this.end, this.lerpTime)
-    }
-
     hasFinished(): boolean{
         return this.normalizedTime >= 1
     }
 
-    setValue(transform: Transform){
-        transform.rotation = this.getRotation()
+    assignValueToTransform(transform: Transform){
+        transform.rotation = Quaternion.Slerp(this.start, this.end, this.lerpTime)
     }
 }
 
@@ -248,16 +240,12 @@ export class ScaleTransformComponent implements ITransformComponent{
         this.lerpTime = TransformSystem.Interpolate(this.interpolationType, this.normalizedTime)
     }
 
-    getScale(): Vector3{
-        return Vector3.Lerp(this.start, this.end, this.lerpTime)
-    }
-
     hasFinished(): boolean{
         return this.normalizedTime >= 1
     }
 
-    setValue(transform: Transform){
-        transform.scale = this.getScale()
+    assignValueToTransform(transform: Transform){
+        transform.scale = Vector3.Lerp(this.start, this.end, this.lerpTime)
     }
 }
 
@@ -318,13 +306,12 @@ export class FollowPathComponent implements ITransformComponent{
             if (this.onPointReachedCallback && this.currentIndex < this.points.length-1) this.onPointReachedCallback(this.points[this.currentIndex],this.points[this.currentIndex+1])
         }
     }
+
     hasFinished(): boolean {
         return this.currentIndex >= this.points.length-2 && this.normalizedTime >= 1
     }
-    setValue(transform: Transform) {
-        transform.position = this.getPosition()
-    }
-    getPosition() : Vector3{
-        return Vector3.Lerp(this.points[this.currentIndex], this.points[this.currentIndex+1], this.normalizedTime)
+
+    assignValueToTransform(transform: Transform) {
+        transform.position = Vector3.Lerp(this.points[this.currentIndex], this.points[this.currentIndex+1], this.normalizedTime)
     }
 }

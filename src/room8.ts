@@ -209,8 +209,8 @@ export function CreateRoom8(): void{
         let trigger = new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(triggerSize,triggerPosition),fanEntity, FanLayer)
         trigger.enable = false
         //add toggle component
-        fanEntity.addComponent(new ToggleComponent(ToggleComponent.ToggleState.Off, newValue=>{
-            if (newValue == ToggleComponent.ToggleState.On){
+        fanEntity.addComponent(new ToggleComponent(ToggleComponent.State.Off, newValue=>{
+            if (newValue == ToggleComponent.State.On){
                 fanAnimation.play()
                 trigger.enable = true
             }
@@ -230,9 +230,9 @@ export function CreateRoom8(): void{
     });
 
     //set some fans to ON state
-    fans[0].getComponent(ToggleComponent).set(ToggleComponent.ToggleState.On)
-    fans[3].getComponent(ToggleComponent).set(ToggleComponent.ToggleState.On)
-    fans[4].getComponent(ToggleComponent).set(ToggleComponent.ToggleState.On)
+    fans[0].getComponent(ToggleComponent).set(ToggleComponent.State.On)
+    fans[3].getComponent(ToggleComponent).set(ToggleComponent.State.On)
+    fans[4].getComponent(ToggleComponent).set(ToggleComponent.State.On)
 
     //create pikes' triggers
     TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(0.5,0.25,0.5)), roomEntity, PikesLayer))
@@ -323,7 +323,7 @@ class MouseStateWalking extends StateMachine.State{
      * @param dt delta
      * return TRUE to keep state running, FALSE to finish state
      */
-    onUpdate(dt: number){
+    onUpdateState(dt: number){
         //move mouse
         this.mouseComponent.transform.position = this.mouseComponent.transform.position.add(this.mouseComponent.direction.scale(dt))
         //check room boundries to make the mouse bounce and go the other direction
@@ -425,7 +425,7 @@ class MouseBubbleStartState extends StateMachine.State{
      * @param dt delta
      * return TRUE to keep state running, FALSE to finish state
      */
-    onUpdate(dt: number){
+    onUpdateState(dt: number){
         return true
     }
     /**
@@ -484,7 +484,7 @@ class MouseBubbleState extends StateMachine.State{
      * @param dt delta
      * return TRUE to keep state running, FALSE to finish state
      */    
-    onUpdate(dt: number){
+    onUpdateState(dt: number){
         //increment time
         this.time += dt
         //calc new position according to mouse direction, speed and time
@@ -571,7 +571,7 @@ class MouseBurstBubbleState extends StateMachine.State{
      * @param dt delta
      * return TRUE to keep state running, FALSE to finish state
      */    
-    onUpdate(){
+    onUpdateState(){
         //is state still running?
         return this.isStateRunning
     }
@@ -618,7 +618,7 @@ class MouseFallingState extends StateMachine.State{
      * @param dt delta
      * return TRUE to keep state running, FALSE to finish state
      */    
-    onUpdate(){
+    onUpdateState(){
         //is state still running?
         return this.isStateRunning
     }
@@ -675,7 +675,7 @@ class MouseDeadState extends StateMachine.State{
      * @param dt delta
      * return TRUE to keep state running, FALSE to finish state
      */    
-    onUpdate(){
+    onUpdateState(){
         //is state running?
         return this.isStateRunning
     }
@@ -716,7 +716,7 @@ class MouseEnterCageState extends StateMachine.State{
      * @param dt delta
      * return TRUE to keep state running, FALSE to finish state
      */    
-    onUpdate(){
+    onUpdateState(){
         return this.isStateRunning
     }
     onEnd(){

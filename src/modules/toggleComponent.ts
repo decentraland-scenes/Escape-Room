@@ -1,5 +1,5 @@
 export namespace ToggleComponent{
-    export const enum ToggleState { Off = 0 , On }
+    export const enum State { Off = 0 , On }
 }
 
 /**
@@ -9,15 +9,15 @@ export namespace ToggleComponent{
 export class ToggleComponent{
     public enabled: boolean = true
 
-    private onValueChangedCallback : (value: ToggleComponent.ToggleState) => void
-    private state : ToggleComponent.ToggleState
+    private onValueChangedCallback : (value: ToggleComponent.State) => void
+    private state : ToggleComponent.State
 
     /**
      * Create an instance of a ToggleComponent
      * @param startingState starting state of the toggle (ON or OFF)
      * @param onValueChangedCallback called when toggle state changed
      */
-    constructor(startingState: ToggleComponent.ToggleState = ToggleComponent.ToggleState.On, onValueChangedCallback : (value: ToggleComponent.ToggleState) => void = null){
+    constructor(startingState: ToggleComponent.State = ToggleComponent.State.On, onValueChangedCallback : (value: ToggleComponent.State) => void = null){
         this.set(startingState)
         this.setCallback(onValueChangedCallback)
     }
@@ -26,7 +26,7 @@ export class ToggleComponent{
      * Set trigger to a state
      * @param state new state
      */
-    public set(state : ToggleComponent.ToggleState): void{
+    public set(state : ToggleComponent.State): void{
         this.state = state
         if (this.onValueChangedCallback)this.onValueChangedCallback(state)
     }
@@ -44,14 +44,14 @@ export class ToggleComponent{
      * Get if current toggle state is ON
      */
     public isOn(): boolean{
-        return this.state == ToggleComponent.ToggleState.On
+        return this.state == ToggleComponent.State.On
     }
 
     /**
      * Set callback for when ToggleComponent state changed
      * @param onValueChangedCallback callback
      */
-    public setCallback(onValueChangedCallback : (value: ToggleComponent.ToggleState) => void): void{
+    public setCallback(onValueChangedCallback : (value: ToggleComponent.State) => void): void{
         this.onValueChangedCallback = onValueChangedCallback
     }
 }

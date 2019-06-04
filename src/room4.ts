@@ -184,8 +184,8 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
     const carpet = new Entity()
     carpet.addComponent(new GLTFShape("models/room4/carpet.glb"))
     carpet.addComponent(new Transform({position: new Vector3(19,0,11)}))
-    carpet.addComponent(new ToggleComponent(ToggleComponent.ToggleState.Off, value=>{
-        if (value == ToggleComponent.ToggleState.On){
+    carpet.addComponent(new ToggleComponent(ToggleComponent.State.Off, value=>{
+        if (value == ToggleComponent.State.On){
             carpet.addComponent(new RotateTransformComponent(carpet.getComponent(Transform).rotation, Quaternion.Euler(0,45,0), 0.7))
         }
         else{

@@ -18,7 +18,9 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
     munaStatue.addComponent(new GLTFShape("models/room5/muna.glb"))
     munaStatue.addComponent(new Transform({position: new Vector3(32, 0, 10)}))
     munaStatue.addComponent(new OnClick(event=>{
-        dialog.startDialog(dialogTree)
+        if (!dialog.isDialogTreeRunning()){
+            dialog.runDialogTree(dialogTree)
+        }
     }))
     engine.addEntity(munaStatue)
 
@@ -26,8 +28,8 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
     const carpet = new Entity()
     carpet.addComponent(new GLTFShape("models/room5/carpet.glb"))
     carpet.addComponent(new Transform({position: new Vector3(29.1, 0, 10)}))
-    carpet.addComponent(new ToggleComponent(ToggleComponent.ToggleState.Off, value=>{
-        if (value == ToggleComponent.ToggleState.On){
+    carpet.addComponent(new ToggleComponent(ToggleComponent.State.Off, value=>{
+        if (value == ToggleComponent.State.On){
             carpet.addComponent(new RotateTransformComponent(carpet.getComponent(Transform).rotation, Quaternion.Euler(0,45,0), 0.7))
         }
         else{
@@ -163,7 +165,7 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
                                     .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
                                     .say(()=>"Yes it is...",{color: Color4.Yellow()})
                                     .say(()=>"\"In the midst of darkness, light persists.\"",{color: Color4.Yellow()})
-                                    .call(()=>spotLight1.getComponent(ToggleComponent).set(ToggleComponent.ToggleState.On))
+                                    .call(()=>spotLight1.getComponent(ToggleComponent).set(ToggleComponent.State.On))
                                 .endOption()
                                 .option(()=>"Green")
                                     .say(()=>"Green",{color: Color4.White()})
@@ -194,7 +196,7 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
                                         .say(()=>"The books are better than the movies...",{color: Color4.Yellow()})
                                         .say(()=>"...",{color: Color4.White()})
                                         .say(()=>"\"Give light, and the darkness will disappear of itself.\"",{color: Color4.Yellow()})
-                                        .call(()=>spotLight2.getComponent(ToggleComponent).set(ToggleComponent.ToggleState.On))
+                                        .call(()=>spotLight2.getComponent(ToggleComponent).set(ToggleComponent.State.On))
                                     .endOption()
                                 .endOptionsGroup()
                             .else()
@@ -220,7 +222,7 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
                                             .say(()=>"Marengo...",{color: Color4.Yellow()})
                                             .say(()=>"That answer is correct!",{color: Color4.Yellow()})
                                             .say(()=>"\"Give light and people will find the way.\"")
-                                            .call(()=>spotLight3.getComponent(ToggleComponent).set(ToggleComponent.ToggleState.On))
+                                            .call(()=>spotLight3.getComponent(ToggleComponent).set(ToggleComponent.State.On))
                                         .endOption()
                                     .endOptionsGroup()
                                 .endif()
@@ -432,8 +434,8 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
 function CreateSpotlight(position: Vector3, rotation: Quaternion, spotlightShape: GLTFShape, spotlightLightShape: GLTFShape, hiddenNumberValue: string): Entity{
     const rootEntity = new Entity()
     rootEntity.addComponent(new Transform({position: position, rotation:rotation}))
-    rootEntity.addComponent(new ToggleComponent(ToggleComponent.ToggleState.Off, value =>{
-        if (value == ToggleComponent.ToggleState.On){
+    rootEntity.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
+        if (value == ToggleComponent.State.On){
             if (!spotLightLight.isAddedToEngine()){
                 engine.addEntity(spotLightLight)
             }

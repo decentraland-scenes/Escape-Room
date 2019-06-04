@@ -36,8 +36,8 @@ export function CreateRoom6(): void{
         lightBulb.addComponent(new Transform({position: new Vector3(18 -1.5 + 1 * i, 1, 2)}))
 
         //create toggle component
-        lightBulb.addComponent(new ToggleComponent(ToggleComponent.ToggleState.Off, value =>{
-            if (value == ToggleComponent.ToggleState.On){
+        lightBulb.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
+            if (value == ToggleComponent.State.On){
                 lightBulb.addComponentOrReplace(bulbOnShape)
             }
             else{

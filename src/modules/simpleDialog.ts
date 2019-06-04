@@ -39,7 +39,7 @@ export class SimpleDialog{
      * play dialog tree
      * @param dialogTree dialog tree instance
      */
-    startDialog(dialogTree: SimpleDialog.DialogTree){
+    runDialogTree(dialogTree: SimpleDialog.DialogTree){
         this.portraitContainers.forEach(portrait => {
             portrait.hide()
         });
@@ -69,7 +69,7 @@ export class SimpleDialog{
     /**
      * get if dialog is running
      */
-    isRunning(): boolean{
+    isDialogTreeRunning(): boolean{
         if (this.actionsSequenceSystem == null) return false
         else return this.actionsSequenceSystem.isRunning()
     }
