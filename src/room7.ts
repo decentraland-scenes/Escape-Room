@@ -46,6 +46,8 @@ export function CreateRoom7(): void{
             engine.removeSystem(maiceBehaviorSystem)
             //open chest
             chestTop.addComponent(new RotateTransformComponent(Quaternion.Euler(0,180,0),Quaternion.Euler(90,180,0),0.5))
+            chestTop.addComponent(new AudioSource(new AudioClip("sounds/chest.mp3")))
+            chestTop.getComponent(AudioSource).playOnce()
             //we tell mouse that it can't change it's idle state
             return false
         }

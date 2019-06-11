@@ -79,6 +79,7 @@ export function CreateRoom6(): void{
 
     //create audioclip
     let buttonAudioClip = new AudioClip("sounds/button.mp3")
+    let chestAudioClip = new AudioClip("sounds/chest.mp3")
 
     //create 4 buttons
     for (let i=0; i<4; i++){
@@ -102,6 +103,8 @@ export function CreateRoom6(): void{
                 if (areAllLightBulbsOn()){
                     areButtonsEnable = false
                     chestTop.addComponent(new RotateTransformComponent(Quaternion.Euler(0,180,0),Quaternion.Euler(90,180,0),0.5))
+                    chestTop.addComponent(new AudioSource(chestAudioClip))
+                    chestTop.getComponent(AudioSource).playOnce()
                 }
             }
         }))

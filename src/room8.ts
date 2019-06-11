@@ -165,6 +165,9 @@ export function CreateRoom8(): void{
     //set initial state
     mouseStateMachine.setState(mouseStateAppear)
 
+    //load fan audio clio
+    let audioClipFan = new AudioClip("sounds/fan.mp3")
+
     //create fan shape
     const fanShape = new GLTFShape("models/room8/fan.glb")
 
@@ -196,6 +199,8 @@ export function CreateRoom8(): void{
         fanEntity.addComponent(fanAnimator)
         //add transform
         fanEntity.addComponent(transform)
+        //add audio source
+        fanEntity.addComponent(new AudioSource(audioClipFan))
         //set room as parent
         fanEntity.setParent(roomEntity)
 
@@ -212,9 +217,13 @@ export function CreateRoom8(): void{
         fanEntity.addComponent(new ToggleComponent(ToggleComponent.State.Off, newValue=>{
             if (newValue == ToggleComponent.State.On){
                 fanAnimation.play()
+                fanEntity.getComponent(AudioSource).playing = true
+                fanEntity.getComponent(AudioSource).loop = true
+                fanEntity.getComponent(AudioSource).volume = 0.3
                 trigger.enable = true
             }
             else{
+                fanEntity.getComponent(AudioSource).playing = false
                 fanAnimation.stop()
                 trigger.enable = false
             }
@@ -390,6 +399,7 @@ class MouseBubbleStartState extends StateMachine.State{
     mouseComponent: MouseComponent
     bubbleState: StateMachine.State
     isUp: boolean
+    audioClipInflate: AudioClip 
 
     /**
      * create instance of the state
@@ -400,6 +410,7 @@ class MouseBubbleStartState extends StateMachine.State{
         super()
         this.mouseComponent = mouseComponent
         this.bubbleState = bubbleState
+        this.audioClipInflate = new AudioClip("sounds/inflator.mp3")
     }
     /**
      * called when state starts
@@ -419,6 +430,10 @@ class MouseBubbleStartState extends StateMachine.State{
                 this.isUp = true
             }))
         }))
+        //play sound
+        let audioSource = new AudioSource(this.audioClipInflate)
+        this.mouseComponent.mouseEntity.addComponentOrReplace(audioSource)
+        audioSource.playOnce()
     }
     /**
      * called when state is updated
@@ -539,6 +554,7 @@ class MouseBurstBubbleState extends StateMachine.State{
     mouseComponent: MouseComponent
     isStateRunning: boolean
     burstParticleSystem: ParticleSystem
+    audioClipPop: AudioClip 
 
     /**
      * create an instance of the state
@@ -549,6 +565,7 @@ class MouseBurstBubbleState extends StateMachine.State{
         super()
         this.mouseComponent = mouseComponent
         this.burstParticleSystem = burstParticleSystem
+        this.audioClipPop = new AudioClip("sounds/pop.mp3")
     }
     /**
      * called when state starts
@@ -564,6 +581,10 @@ class MouseBurstBubbleState extends StateMachine.State{
             this.mouseComponent.bubble.getComponent(SphereShape).visible = false
             //play particle system
             this.burstParticleSystem.start()
+            //play audioclip
+            let audioSource = new AudioSource(this.audioClipPop)
+            this.mouseComponent.mouseEntity.addComponentOrReplace(audioSource)
+            audioSource.playOnce()
         }))
     }
     /**

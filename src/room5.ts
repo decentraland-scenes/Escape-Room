@@ -3,15 +3,20 @@ import { ToggleComponent } from "./modules/toggleComponent";
 import { RotateTransformComponent } from "./modules/transfromSystem";
 
 export function CreateRoom5(gameCanvas: UICanvas) : void{
+    //audio clips
+    let audioAccessGranted = new AudioClip("sounds/access_granted.mp3")
+    let audioAccessDenied = new AudioClip("sounds/access_denied.mp3")
+    let audioSpotlight = new AudioClip("sounds/spotlight_on.mp3")
+
     //load spotlight shape
     const spotLightShape = new GLTFShape("models/room5/spotlight.glb")
     //load spotlight's light shape
     const spotLightLightShape = new GLTFShape("models/room5/spotlightlight.glb")
 
     //create spotlights
-    const spotLight1 = CreateSpotlight(new Vector3(32,0,12), Quaternion.Identity, spotLightShape, spotLightLightShape, "1")
-    const spotLight2 = CreateSpotlight(new Vector3(32,0,8), Quaternion.Euler(0,180,0), spotLightShape, spotLightLightShape, "0")
-    const spotLight3 = CreateSpotlight(new Vector3(34.1,0,10), Quaternion.Euler(0,90,0), spotLightShape, spotLightLightShape, "4")
+    const spotLight1 = CreateSpotlight(new Vector3(32,0,12), Quaternion.Identity, spotLightShape, spotLightLightShape, "1", audioSpotlight)
+    const spotLight2 = CreateSpotlight(new Vector3(32,0,8), Quaternion.Euler(0,180,0), spotLightShape, spotLightLightShape, "0", audioSpotlight)
+    const spotLight3 = CreateSpotlight(new Vector3(34.1,0,10), Quaternion.Euler(0,90,0), spotLightShape, spotLightLightShape, "4", audioSpotlight)
 
     //create muna's statue
     const munaStatue = new Entity()
@@ -353,6 +358,8 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
                         panelInputs[1].text.color = Color4.Green()
                         panelInputs[2].text.value = "!"
                         panelInputs[2].text.color = Color4.Green()
+                        numPadLock.addComponentOrReplace(new AudioSource(audioAccessGranted))
+                        numPadLock.getComponent(AudioSource).playOnce() 
                         //TODO: make something happen
                     }
                     //if password is incorrect
@@ -364,6 +371,8 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
                         panelInputs[2].text.value = "r"
                         panelInputs[2].text.color = Color4.Red()
                         currentInputIdx = 0
+                        numPadLock.addComponentOrReplace(new AudioSource(audioAccessDenied))
+                        numPadLock.getComponent(AudioSource).playOnce()
                     }
                 })
             }
@@ -431,7 +440,7 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
     }
 }
 
-function CreateSpotlight(position: Vector3, rotation: Quaternion, spotlightShape: GLTFShape, spotlightLightShape: GLTFShape, hiddenNumberValue: string): Entity{
+function CreateSpotlight(position: Vector3, rotation: Quaternion, spotlightShape: GLTFShape, spotlightLightShape: GLTFShape, hiddenNumberValue: string, audioClip: AudioClip): Entity{
     const rootEntity = new Entity()
     rootEntity.addComponent(new Transform({position: position, rotation:rotation}))
     rootEntity.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
@@ -442,6 +451,8 @@ function CreateSpotlight(position: Vector3, rotation: Quaternion, spotlightShape
             if (!hiddenNumber.isAddedToEngine()){
                 engine.addEntity(hiddenNumber)
             }
+            spotLight.addComponentOrReplace(new AudioSource(audioClip))
+            spotLight.getComponent(AudioSource).playOnce()
         }
         else{
             if (spotLightLight.isAddedToEngine()){

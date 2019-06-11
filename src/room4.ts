@@ -2,6 +2,10 @@ import { ToggleComponent } from "./modules/toggleComponent";
 import { RotateTransformComponent } from "./modules/transfromSystem";
 
 export function CreateRoom4(gameCanvas: UICanvas) : void{
+    //audio clips
+    let audioAccessGranted = new AudioClip("sounds/access_granted.mp3")
+    let audioAccessDenied = new AudioClip("sounds/access_denied.mp3")
+
     //create rect to contain numerical pad
     const panelRect = new UIContainerRect(gameCanvas)
     panelRect.positionX = -50
@@ -103,6 +107,8 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
                         panelInputs[1].text.color = Color4.Green()
                         panelInputs[2].text.value = "!"
                         panelInputs[2].text.color = Color4.Green()
+                        numPadLock.addComponentOrReplace(new AudioSource(audioAccessGranted))
+                        numPadLock.getComponent(AudioSource).playOnce() 
                         //TODO: make something happen
                     }
                     //if password is incorrect
@@ -114,6 +120,8 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
                         panelInputs[2].text.value = "r"
                         panelInputs[2].text.color = Color4.Red()
                         currentInputIdx = 0
+                        numPadLock.addComponentOrReplace(new AudioSource(audioAccessDenied))
+                        numPadLock.getComponent(AudioSource).playOnce()
                     }
                 })
             }

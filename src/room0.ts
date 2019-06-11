@@ -1,4 +1,7 @@
 export function CreateRoom0() : void{
+    //variable to store if door is open
+    let isDoorOpen = false
+
     //create door entity
     let door = new Entity()
 
@@ -18,8 +21,11 @@ export function CreateRoom0() : void{
 
     //liste ton onclick event to toggle door state
     door.addComponent(new OnClick(event =>{
-        doorAnimator.getClip("Open").play()
-        door.getComponent(AudioSource).playOnce()
+        if (!isDoorOpen){
+            isDoorOpen = true
+            doorAnimator.getClip("Open").play()
+            door.getComponent(AudioSource).playOnce()
+        }
     }))
 
     //add door entity to engine
