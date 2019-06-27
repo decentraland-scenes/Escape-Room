@@ -40,10 +40,10 @@ export function CreateRoom7(): void{
     let onMouseIdleChanged = (): boolean=>{
         //check if player has painted all tiles
         if (tilesPaintedByPlayer == (columnCount * rowCount)){
-            //remove maice's behavior component and system cause we just finished the puzzle
+            //remove mouse's behavior component and system cause we just finished the puzzle
             mouse1.removeComponent(MouseFollowPathComponent)
             mouse2.removeComponent(MouseFollowPathComponent)
-            engine.removeSystem(maiceBehaviorSystem)
+            engine.removeSystem(mouseBehaviorSystem)
             //open chest
             chestTop.addComponent(new RotateTransformComponent(Quaternion.Euler(0,180,0),Quaternion.Euler(90,180,0),0.5))
             chestTop.addComponent(new AudioSource(new AudioClip("sounds/chest.mp3")))
@@ -60,8 +60,8 @@ export function CreateRoom7(): void{
     mouse2.addComponent(new MouseFollowPathComponent(0, 6, [new Vector3(26.54, 0.85, 3.9),new Vector3(26.54, 1.46, 4.25),new Vector3(26.9, 1.46, 4.25)], 5, onMouseIdleChanged))
 
     //add maice behavior system to engine
-    let maiceBehaviorSystem = new MouseFollowPathSystem()
-    engine.addSystem(maiceBehaviorSystem)
+    let mouseBehaviorSystem = new MouseFollowPathSystem()
+    engine.addSystem(mouseBehaviorSystem)
 
     //create trigger for maince
     TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(0.05,0.05,0.05), Vector3.Zero()), mouse1, 2, 2))
