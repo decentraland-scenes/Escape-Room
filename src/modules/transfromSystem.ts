@@ -96,7 +96,7 @@ export class MoveTransformComponent implements ITransformComponent{
     private start: ReadOnlyVector3
     private end: ReadOnlyVector3
     private speed: number
-    private normalizedTime: number
+    private currentFraction: number
     private interpolationType: TransformSystem.Interpolation
     private lerpTime : number
 
@@ -113,7 +113,7 @@ export class MoveTransformComponent implements ITransformComponent{
     constructor(start: ReadOnlyVector3, end: ReadOnlyVector3, duration: number, onFinishCallback?: ()=>void, interpolationType: TransformSystem.Interpolation = TransformSystem.Interpolation.LINEAR){
         this.start = start
         this.end = end
-        this.normalizedTime = 0;
+        this.currentFraction = 0;
         this.lerpTime = 0;
         this.onFinishCallback = onFinishCallback
         this.interpolationType = interpolationType
@@ -123,18 +123,18 @@ export class MoveTransformComponent implements ITransformComponent{
         }
         else{
             this.speed = 0
-            this.normalizedTime = 1;
+            this.currentFraction = 1;
             this.lerpTime = 1;
         }
     }
 
     update(dt: number){
-        this.normalizedTime = Scalar.Clamp(this.normalizedTime + dt * this.speed, 0, 1)
-        this.lerpTime = TransformSystem.Interpolate(this.interpolationType, this.normalizedTime)
+        this.currentFraction = Scalar.Clamp(this.currentFraction + dt * this.speed, 0, 1)
+        this.lerpTime = TransformSystem.Interpolate(this.interpolationType, this.currentFraction)
     }
 
     hasFinished(): boolean{
-        return this.normalizedTime >= 1
+        return this.currentFraction >= 1
     }
 
     assignValueToTransform(transform: Transform){
@@ -150,7 +150,7 @@ export class RotateTransformComponent implements ITransformComponent{
     private start: ReadOnlyQuaternion
     private end: ReadOnlyQuaternion
     private speed: number
-    private normalizedTime: number
+    private currentFraction: number
     private interpolationType: TransformSystem.Interpolation
     private lerpTime : number
 
@@ -167,7 +167,7 @@ export class RotateTransformComponent implements ITransformComponent{
     constructor(start: ReadOnlyQuaternion, end: ReadOnlyQuaternion, duration: number, onFinishCallback?: ()=>void, interpolationType: TransformSystem.Interpolation = TransformSystem.Interpolation.LINEAR){
         this.start = start
         this.end = end
-        this.normalizedTime = 0;
+        this.currentFraction = 0;
         this.lerpTime = 0;
         this.onFinishCallback = onFinishCallback
         this.interpolationType = interpolationType
@@ -177,18 +177,18 @@ export class RotateTransformComponent implements ITransformComponent{
         }
         else{
             this.speed = 0
-            this.normalizedTime = 1;
+            this.currentFraction = 1;
             this.lerpTime = 1;
         }
     }
 
     update(dt: number){
-        this.normalizedTime = Scalar.Clamp(this.normalizedTime + dt * this.speed, 0, 1)
-        this.lerpTime = TransformSystem.Interpolate(this.interpolationType, this.normalizedTime)
+        this.currentFraction = Scalar.Clamp(this.currentFraction + dt * this.speed, 0, 1)
+        this.lerpTime = TransformSystem.Interpolate(this.interpolationType, this.currentFraction)
     }
 
     hasFinished(): boolean{
-        return this.normalizedTime >= 1
+        return this.currentFraction >= 1
     }
 
     assignValueToTransform(transform: Transform){
@@ -204,7 +204,7 @@ export class ScaleTransformComponent implements ITransformComponent{
     private start: ReadOnlyVector3
     private end: ReadOnlyVector3
     private speed: number
-    private normalizedTime: number
+    private currentFraction: number
     private interpolationType: TransformSystem.Interpolation
     private lerpTime : number
 
@@ -220,7 +220,7 @@ export class ScaleTransformComponent implements ITransformComponent{
     constructor(start: ReadOnlyVector3, end: ReadOnlyVector3, duration: number, onFinishCallback?: ()=>void, interpolationType: TransformSystem.Interpolation = TransformSystem.Interpolation.LINEAR){
         this.start = start
         this.end = end
-        this.normalizedTime = 0;
+        this.currentFraction = 0;
         this.lerpTime = 0;
         this.onFinishCallback = onFinishCallback
         this.interpolationType = interpolationType
@@ -230,18 +230,18 @@ export class ScaleTransformComponent implements ITransformComponent{
         }
         else{
             this.speed = 0
-            this.normalizedTime = 1;
+            this.currentFraction = 1;
             this.lerpTime = 1;
         }
     }
 
     update(dt: number){
-        this.normalizedTime = Scalar.Clamp(this.normalizedTime + dt * this.speed, 0, 1)
-        this.lerpTime = TransformSystem.Interpolate(this.interpolationType, this.normalizedTime)
+        this.currentFraction = Scalar.Clamp(this.currentFraction + dt * this.speed, 0, 1)
+        this.lerpTime = TransformSystem.Interpolate(this.interpolationType, this.currentFraction)
     }
 
     hasFinished(): boolean{
-        return this.normalizedTime >= 1
+        return this.currentFraction >= 1
     }
 
     assignValueToTransform(transform: Transform){
@@ -256,7 +256,7 @@ export class ScaleTransformComponent implements ITransformComponent{
 export class FollowPathComponent implements ITransformComponent{
     private points : Vector3[]
     private speed: number[] = []
-    private normalizedTime: number
+    private currentFraction: number
     private currentIndex: number
 
     onFinishCallback : ()=>void
@@ -270,7 +270,7 @@ export class FollowPathComponent implements ITransformComponent{
      * @param onPointReachedCallback called everytime an entity reaches a point of the path
      */
     constructor(points : Vector3[], duration: number, onFinishCallback?: ()=>void, onPointReachedCallback?: (currentPoint:Vector3, nextPoint:Vector3)=>void){
-        this.normalizedTime = 0
+        this.currentFraction = 0
         this.currentIndex = 0
         this.points = points
         this.onFinishCallback = onFinishCallback
@@ -293,25 +293,25 @@ export class FollowPathComponent implements ITransformComponent{
             }
         }
         else{
-            this.normalizedTime = 1
+            this.currentFraction = 1
             this.currentIndex = points.length-2
         }
     }
 
     update(dt: number) {
-        this.normalizedTime = Scalar.Clamp(this.normalizedTime + dt * this.speed[this.currentIndex], 0, 1)
-        if (this.normalizedTime >= 1 && this.currentIndex < this.points.length-2){
+        this.currentFraction = Scalar.Clamp(this.currentFraction + dt * this.speed[this.currentIndex], 0, 1)
+        if (this.currentFraction >= 1 && this.currentIndex < this.points.length-2){
             this.currentIndex ++
-            this.normalizedTime = 0
+            this.currentFraction = 0
             if (this.onPointReachedCallback && this.currentIndex < this.points.length-1) this.onPointReachedCallback(this.points[this.currentIndex],this.points[this.currentIndex+1])
         }
     }
 
     hasFinished(): boolean {
-        return this.currentIndex >= this.points.length-2 && this.normalizedTime >= 1
+        return this.currentIndex >= this.points.length-2 && this.currentFraction >= 1
     }
 
     assignValueToTransform(transform: Transform) {
-        transform.position = Vector3.Lerp(this.points[this.currentIndex], this.points[this.currentIndex+1], this.normalizedTime)
+        transform.position = Vector3.Lerp(this.points[this.currentIndex], this.points[this.currentIndex+1], this.currentFraction)
     }
 }

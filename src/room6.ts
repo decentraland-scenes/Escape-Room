@@ -75,7 +75,7 @@ export function CreateRoom6(): void{
     ]
 
     //can we press the buttons or should we disable them cause the puzzle was solved?
-    let areButtonsEnable = true
+    let areButtonsEnabled = true
 
     //create audioclip
     let buttonAudioClip = new AudioClip("sounds/button.mp3")
@@ -97,11 +97,11 @@ export function CreateRoom6(): void{
 
         //add on click component
         button.addComponent(new OnClick(event =>{
-            if (areButtonsEnable){
+            if (areButtonsEnabled){
                 buttonInteractions[i]()
                 button.getComponent(AudioSource).playOnce()
                 if (areAllLightBulbsOn()){
-                    areButtonsEnable = false
+                    areButtonsEnabled = false
                     chestTop.addComponent(new RotateTransformComponent(Quaternion.Euler(0,180,0),Quaternion.Euler(90,180,0),0.5))
                     chestTop.addComponent(new AudioSource(chestAudioClip))
                     chestTop.getComponent(AudioSource).playOnce()
