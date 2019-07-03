@@ -55,17 +55,17 @@ export function CreateRoom7(): void{
         return true
     }
 
-    //set/add component for maice behavior
+    //set/add component for mouse behavior
     mouse1.addComponent(new MouseFollowPathComponent(7.5, 7, [new Vector3(25.82, 1.46, 4.25),new Vector3(26.54, 1.46, 4.25),new Vector3(26.54, 1.77, 4.43)], 2, onMouseIdleChanged)) 
     mouse2.addComponent(new MouseFollowPathComponent(0, 6, [new Vector3(26.54, 0.85, 3.9),new Vector3(26.54, 1.46, 4.25),new Vector3(26.9, 1.46, 4.25)], 5, onMouseIdleChanged))
 
-    //add maice behavior system to engine
+    //add mouse behavior system to engine
     let mouseBehaviorSystem = new MouseFollowPathSystem()
     engine.addSystem(mouseBehaviorSystem)
 
-    //create trigger for maince
-    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(0.05,0.05,0.05), Vector3.Zero()), mouse1, 2, 2))
-    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(0.05,0.05,0.05), Vector3.Zero()), mouse2, 2, 2))
+    //add trigger for mouse
+    mouse1.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.05,0.05,0.05), Vector3.Zero()), 2, 2))
+    mouse2.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.05,0.05,0.05), Vector3.Zero()), 2, 2))
 
     //set tiles grid
     const tileSize = new Vector3(0.15,0.15,1)
@@ -103,21 +103,19 @@ export function CreateRoom7(): void{
             }))
             //add tile to engine
             engine.addEntity(tileEntity)
-            //create tile trigger
-            let tileTrigger = new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(0.15,0.15,0.15), new Vector3(0,0,0)), tileEntity, 2, 2)
-            //set trigger callbacks
-            tileTrigger.onTriggerEnter = (trigger)=>{
-                if (trigger.parent != null && trigger.parent.hasComponent(MouseFollowPathComponent)){
-                    //check if the tile was painted by player
-                    if (tileEntity.getComponent(Material) == playerMaterial){
-                        //decrease tiles painted variable
-                        tilesPaintedByPlayer --
+            //add tile trigger
+            tileEntity.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.15,0.15,0.15), Vector3.Zero()), 2, 2, 
+                (entityEnter)=>{
+                    if (entityEnter.hasComponent(MouseFollowPathComponent)){
+                        //check if the tile was painted by player
+                        if (tileEntity.getComponent(Material) == playerMaterial){
+                            //decrease tiles painted variable
+                            tilesPaintedByPlayer --
+                        }
+                        tileEntity.addComponentOrReplace(miceMaterial)
                     }
-                    tileEntity.addComponentOrReplace(miceMaterial)
-                }
-            }
-            //add trigger to system
-            TriggerSystem.instance.addTrigger(tileTrigger)
+                })
+            )
         }
     }
 

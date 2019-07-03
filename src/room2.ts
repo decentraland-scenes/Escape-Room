@@ -43,16 +43,16 @@ export function CreateRoom2() : void{
     }))
 
     //create proximity trigger for spikes
-    let spikeTrigger = new TriggerSystem.Trigger(new TriggerSystem.TriggerSphereShape(2.5,new Vector3(9,1,9)), null, 1, 1)
-    spikeTrigger.onCameraEnter = ()=> {
+    let spikeTriggerEntity = new Entity()
+    spikeTriggerEntity.addComponent(new BoxShape())
+    spikeTriggerEntity.addComponent(new Transform({position: new Vector3(9,1,9)}))
+    spikeTriggerEntity.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerSphereShape(2.8,Vector3.Zero()), 0, 0, null, null, 
+    ()=>{
         spikes.getComponent(ToggleComponent).set(ToggleComponent.State.On)
-    }
-    spikeTrigger.onCameraExit = ()=> {
+    },
+    ()=>{
         spikes.getComponent(ToggleComponent).set(ToggleComponent.State.Off)
-    }
-
-    //add trigger to trigger system
-    TriggerSystem.instance.addTrigger(spikeTrigger)
+    }))
 
     //create the button that we'll use to open the door
     let button = new Entity()
@@ -68,8 +68,8 @@ export function CreateRoom2() : void{
 
     //listen for click event to toggle spikes state
     button.addComponent(new OnClick(event =>{
-        if (spikeTrigger.enable){
-            spikeTrigger.enable = false
+        if (spikeTriggerEntity.getComponent(TriggerSystem.TriggerComponent).enabled){
+            spikeTriggerEntity.getComponent(TriggerSystem.TriggerComponent).enabled = false
             spikes.getComponent(ToggleComponent).set(ToggleComponent.State.Off)
         }
         button.getComponent(AudioSource).playOnce()
@@ -129,4 +129,5 @@ export function CreateRoom2() : void{
     engine.addEntity(button)
     engine.addEntity(fern)
     engine.addEntity(fernPicture)
+    engine.addEntity(spikeTriggerEntity)
 }

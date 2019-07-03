@@ -50,7 +50,7 @@ export function CreateRoom8(): void{
     buttonEntity.setParent(cageEntity)
 
     //create mouse
-    const mouseEntity = new Entity()
+    const mouseEntity = new Entity("mouse")
     //set mouse as child of room
     mouseEntity.setParent(roomEntity)
     //add gltf
@@ -61,21 +61,24 @@ export function CreateRoom8(): void{
     //create and add mouse component
     const mouseComponent = new MouseComponent(mouseEntity)
     mouseEntity.addComponent(mouseComponent)
-    //create trigger for mouse
-    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(0.2,0.4,0.2), new Vector3(0,0.15,0)), mouseEntity, MouseLayer, PikesLayer | BoxLayer | FanLayer | CageLayer, 
-    (trigger: TriggerSystem.Trigger)=>{
-        let triggerType = StateMachineCollisionEvent.BOXES
-        if (trigger.layer == PikesLayer){
-            triggerType = StateMachineCollisionEvent.PIKES
+    //add trigger for mouse
+    mouseEntity.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.2,0.4,0.2), new Vector3(0,0.15,0)),
+        MouseLayer, PikesLayer | BoxLayer | FanLayer | CageLayer,
+        (entityEnter) =>{
+            let triggerType = StateMachineCollisionEvent.BOXES
+            let triggerLayer = entityEnter.getComponent(TriggerSystem.TriggerComponent).layer
+            if (triggerLayer == PikesLayer){
+                triggerType = StateMachineCollisionEvent.PIKES
+            }
+            else if (triggerLayer == FanLayer){
+                triggerType = StateMachineCollisionEvent.FANS
+            }
+            else if (triggerLayer == CageLayer){
+                triggerType = StateMachineCollisionEvent.CAGE
+            }
+            mouseStateMachine.handleEvent(new StateMachineCollisionEvent(mouseStateMachine, entityEnter, triggerType))
         }
-        else if (trigger.layer == FanLayer){
-            triggerType = StateMachineCollisionEvent.FANS
-        }
-        else if (trigger.layer == CageLayer){
-            triggerType = StateMachineCollisionEvent.CAGE
-        }
-        mouseStateMachine.handleEvent(new StateMachineCollisionEvent(mouseStateMachine, trigger, triggerType))
-    }))
+    ))
 
     //listen for click on mouse
     mouseEntity.addComponent(new OnClick(event=>{
@@ -210,9 +213,12 @@ export function CreateRoom8(): void{
         triggerSize.y = Math.abs(triggerSize.y)
         triggerSize.z = Math.abs(triggerSize.z)
         let triggerPosition = new Vector3(0.2,1.5,1.25).rotate(transform.rotation)
-        //create trigger
-        let trigger = new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(triggerSize,triggerPosition),fanEntity, FanLayer)
-        trigger.enable = false
+        
+        //create trigger component
+        let triggerComponent = new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(triggerSize,triggerPosition), FanLayer)
+        triggerComponent.enabled = false
+        fanEntity.addComponent(triggerComponent)
+
         //add toggle component
         fanEntity.addComponent(new ToggleComponent(ToggleComponent.State.Off, newValue=>{
             if (newValue == ToggleComponent.State.On){
@@ -220,20 +226,19 @@ export function CreateRoom8(): void{
                 fanEntity.getComponent(AudioSource).playing = true
                 fanEntity.getComponent(AudioSource).loop = true
                 fanEntity.getComponent(AudioSource).volume = 0.3
-                trigger.enable = true
+                triggerComponent.enabled = true
             }
             else{
                 fanEntity.getComponent(AudioSource).playing = false
                 fanAnimation.stop()
-                trigger.enable = false
+                triggerComponent.enabled = false
             }
         }))
         //listen for click
         fanEntity.addComponent(new OnClick(event=>{
             fanEntity.getComponent(ToggleComponent).toggle()
         }))
-        //add trigger to system
-        TriggerSystem.instance.addTrigger(trigger)
+
         //add entity to array
         fans.push(fanEntity)
     });
@@ -243,19 +248,27 @@ export function CreateRoom8(): void{
     fans[3].getComponent(ToggleComponent).set(ToggleComponent.State.On)
     fans[4].getComponent(ToggleComponent).set(ToggleComponent.State.On)
 
+    //room triggers
+    let roomTriggerEntities: Entity[] = [new Entity(),new Entity(),new Entity(),new Entity(),new Entity(),new Entity(),new Entity(),new Entity()]
+
     //create pikes' triggers
-    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(0.5,0.25,0.5)), roomEntity, PikesLayer))
-    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.7,1),new Vector3(0.5,0.95,0.5)), roomEntity, PikesLayer))
-    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(3.5,0.25,4.5)), roomEntity, PikesLayer))
-    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.7,1),new Vector3(3.5,0.95,4.5)), roomEntity, PikesLayer))
+    roomTriggerEntities[0].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(0.5,0.25,0.5)), PikesLayer))
+    roomTriggerEntities[1].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.7,1),new Vector3(0.5,0.95,0.5)), PikesLayer))
+    roomTriggerEntities[2].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(3.5,0.25,4.5)), PikesLayer))
+    roomTriggerEntities[3].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.7,1),new Vector3(3.5,0.95,4.5)), PikesLayer))
 
     //create boxes's triggers
-    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(1.5,0.25,1.5)), roomEntity, BoxLayer))
-    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(2.5,0.25,2.5)), roomEntity, BoxLayer))
-    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(1.5,0.25,4.5)), roomEntity, BoxLayer))
+    roomTriggerEntities[4].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(1.5,0.25,1.5)), BoxLayer))
+    roomTriggerEntities[5].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(2.5,0.25,2.5)), BoxLayer))
+    roomTriggerEntities[6].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(1.5,0.25,4.5)), BoxLayer))
 
     //create cage's trigger
-    TriggerSystem.instance.addTrigger(new TriggerSystem.Trigger(new TriggerSystem.TriggerBoxShape(new Vector3(0.5,1,1),new Vector3(-0.5,0.5,0)), cageEntity, CageLayer))
+    roomTriggerEntities[7].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.5,1,1),new Vector3(-0.5,0.5,0)), CageLayer))
+
+    //set triggers as child of room entity
+    roomTriggerEntities.forEach(triggerEntity => {
+        triggerEntity.setParent(roomEntity)
+    });
 }
 
 @Component("mouseComponent")
@@ -461,7 +474,7 @@ class MouseBubbleStartState extends StateMachine.State{
             //and the collision is with a trigger of a fan
             if (event.triggerType == StateMachineCollisionEvent.FANS){
                 //get the forward vector of the fan and set it as mouse's direction
-                let parentForward = Vector3.Forward().rotate(event.trigger.parent.getComponent(Transform).rotation)
+                let parentForward = Vector3.Forward().rotate(event.entity.getComponent(Transform).rotation)
                 this.mouseComponent.direction = parentForward
                 //and change the state to the bubble floating around state
                 event.stateMachine.setState(this.bubbleState)
@@ -536,7 +549,7 @@ class MouseBubbleState extends StateMachine.State{
         else if (event instanceof StateMachineCollisionEvent){
             //if it's a FAN, then we move in it's forward direction
             if (event.triggerType == StateMachineCollisionEvent.FANS){
-                let parentForward = Vector3.Forward().rotate(event.trigger.parent.getComponent(Transform).rotation)
+                let parentForward = Vector3.Forward().rotate(event.entity.getComponent(Transform).rotation)
                 this.mouseComponent.direction = parentForward
             }
             //if it's a PIKE then the bubble should burst
@@ -756,18 +769,18 @@ class StateMachineCollisionEvent implements StateMachine.IStateEvent{
     static readonly CAGE = 3
 
     stateMachine: StateMachine
-    trigger: TriggerSystem.Trigger
+    entity: Entity
     triggerType: number
 
     /**
      * 
      * @param stateMachine state machine reference
-     * @param trigger reference of the trigger we collide with
+     * @param entity reference of the entity we collide with
      * @param triggerType type of the trigger we collide with
      */
-    constructor(stateMachine: StateMachine, trigger: TriggerSystem.Trigger, triggerType: number){
+    constructor(stateMachine: StateMachine, entity: Entity, triggerType: number){
         this.stateMachine = stateMachine
-        this.trigger = trigger
+        this.entity = entity
         this.triggerType = triggerType
     }
 }

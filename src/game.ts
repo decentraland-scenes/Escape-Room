@@ -8,12 +8,16 @@ import { CreateRoom5 } from "./room5";
 import { CreateRoom6 } from "./room6";
 import { CreateRoom7 } from "./room7";
 import { CreateRoom8 } from "./room8";
+import { TriggerSystem } from "./modules/triggerSystem";
 
 const gameCanvas = new UICanvas()
 gameCanvas.visible = false
 
 const transformSystem = new TransformSystem()
 engine.addSystem(transformSystem)
+
+const tiggerSytem = new TriggerSystem()
+engine.addSystem(tiggerSytem)
 
 const scene = new Entity()
 scene.addComponent(new GLTFShape("models/scene.glb"))
