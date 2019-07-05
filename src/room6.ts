@@ -30,7 +30,7 @@ export function CreateRoom6(): void{
         let lightBulb = new Entity()
 
         //add shape
-        lightBulb.addComponent(bulbOffShape)
+        lightBulb.addComponent(new LightBulbComponent(lightBulb,"models/room6/bulb_on.glb","models/room6/bulb_off.glb"))
 
         //create and set transform
         lightBulb.addComponent(new Transform({position: new Vector3(18 -1.5 + 1 * i, 1, 2)}))
@@ -38,14 +38,14 @@ export function CreateRoom6(): void{
         //create toggle component
         lightBulb.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
             if (value == ToggleComponent.State.On){
-                lightBulb.addComponentOrReplace(bulbOnShape)
+                lightBulb.getComponent(LightBulbComponent).setON()
             }
             else{
-                lightBulb.addComponentOrReplace(bulbOffShape)
+                lightBulb.getComponent(LightBulbComponent).setOFF()
             }
         }))
 
-        //add button to engine
+        //add lightbulb to engine
         engine.addEntity(lightBulb)
 
         //add it to array
@@ -145,4 +145,36 @@ export function CreateRoom6(): void{
     hint.addComponent(hintMaterial)
     hint.addComponent(new Transform({position: new Vector3(0,0.4,0), rotation: Quaternion.Euler(90,0,90), scale: new Vector3(0.6,0.6,0.6)}))
     hint.setParent(chest)
+}
+
+@Component("lightBulbComponent")
+class LightBulbComponent{
+    private _lightBublGltfOn: GLTFShape
+    private _lightBublGltfOff: GLTFShape
+
+    constructor(lightbulbEntity: IEntity, lightOnGltfPath: string, lightOffGltfPath: string){
+        let lightBublEntityOn = new Entity()
+        this._lightBublGltfOn = new GLTFShape(lightOnGltfPath)
+
+        lightBublEntityOn.addComponent(this._lightBublGltfOn)
+        lightBublEntityOn.setParent(lightbulbEntity)
+
+        let lightBublEntityOff = new Entity()
+        this._lightBublGltfOff = new GLTFShape(lightOffGltfPath)
+
+        lightBublEntityOff.addComponent(this._lightBublGltfOff)
+        lightBublEntityOff.setParent(lightbulbEntity)
+
+        this.setOFF()
+    }
+
+    setON(){
+        this._lightBublGltfOff.visible = false
+        this._lightBublGltfOn.visible = true
+    }
+
+    setOFF(){
+        this._lightBublGltfOff.visible = true
+        this._lightBublGltfOn.visible = false
+    }
 }
