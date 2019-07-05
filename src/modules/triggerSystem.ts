@@ -6,19 +6,26 @@ export class TriggerSystem implements ISystem{
         this._cameraTriggerWrapper = new CameraTrigger(new TriggerSystem.TriggerBoxShape(new Vector3(0.5,1.8,0.5), new Vector3(0,0.91,0)))
     }
 
+    /**
+     * set a custom trigger's shape for the camera
+     * @param shape custom trigger's shape
+     */
     setCameraTriggerShape(shape: TriggerSystem.TriggerBoxShape | TriggerSystem.TriggerSphereShape){
         this._cameraTriggerWrapper.setShape(shape)
     }
 
     update(){
+        //get entities with trigger component
         let entitiesWithTriggers = engine.getComponentGroup(TriggerSystem.TriggerComponent).entities
 
+        //iterate through all entities with triggers and wrap entities that weren't wrapped yet
         entitiesWithTriggers.forEach(entity => {
             if (this.shouldWrapTriggerEntity(entity)){
                 this.wrapTriggerEntity(entity)
             }
         });
         
+        //iterate through wrapped entities
         for (const key in this._triggers){
             if (this._triggers.hasOwnProperty(key)){
                 let wrapper = this._triggers[key]
@@ -344,6 +351,9 @@ class CameraTrigger extends TriggerWrapper{
     }
 
     engageCollision(other: TriggerWrapper){
+    }
+    isDebugging(): boolean{
+        return false
     }
 }
 

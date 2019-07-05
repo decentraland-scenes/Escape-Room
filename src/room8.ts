@@ -249,7 +249,7 @@ export function CreateRoom8(): void{
     fans[4].getComponent(ToggleComponent).set(ToggleComponent.State.On)
 
     //room triggers
-    let roomTriggerEntities: Entity[] = [new Entity(),new Entity(),new Entity(),new Entity(),new Entity(),new Entity(),new Entity(),new Entity()]
+    let roomTriggerEntities: Entity[] = [new Entity(),new Entity(),new Entity(),new Entity(),new Entity(),new Entity(),new Entity()]
 
     //create pikes' triggers
     roomTriggerEntities[0].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(0.5,0.25,0.5)), PikesLayer))
@@ -263,7 +263,7 @@ export function CreateRoom8(): void{
     roomTriggerEntities[6].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(1.5,0.25,4.5)), BoxLayer))
 
     //create cage's trigger
-    roomTriggerEntities[7].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.5,1,1),new Vector3(-0.5,0.5,0)), CageLayer))
+    cageEntity.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.5,1,1),new Vector3(-0.5,0.5,0)), CageLayer))
 
     //set triggers as child of room entity
     roomTriggerEntities.forEach(triggerEntity => {
