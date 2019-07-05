@@ -44,7 +44,6 @@ export function CreateRoom2() : void{
 
     //create proximity trigger for spikes
     let spikeTriggerEntity = new Entity()
-    spikeTriggerEntity.addComponent(new BoxShape())
     spikeTriggerEntity.addComponent(new Transform({position: new Vector3(9,1,9)}))
     spikeTriggerEntity.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerSphereShape(2.8,Vector3.Zero()), 0, 0, null, null, 
     ()=>{
