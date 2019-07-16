@@ -194,7 +194,7 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
                                         .say(()=>randomWrongAnswers[Math.floor(Math.random()*(randomWrongAnswers.length-1))],{color: Color4.Yellow()})
                                     .endOption()
                                     .option(()=>"Girl falling in love with vampire")
-                                        .say(()=>"The book about a gril falling in love with a vampire...",{color: Color4.White()})
+                                        .say(()=>"The book about a girl falling in love with a vampire...",{color: Color4.White()})
                                         .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
                                         .call(()=>secondOptionCorrect = true)
                                         .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
