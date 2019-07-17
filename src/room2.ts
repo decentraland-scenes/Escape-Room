@@ -7,16 +7,16 @@ export function CreateRoom2() : void{
     let spikes = new Entity()
 
     //create gltf shape component and add it to entity
-    let spikesShape = new GLTFShape("models/room2/spikes.glb")
+    let spikesShape = new GLTFShape("models/room2/Puzzle03_Door.glb")
     spikes.addComponent(spikesShape)
 
     //add transform and set position
-    spikes.addComponent(new Transform({position: new Vector3(10.1,1.4,8.07), rotation: Quaternion.Euler(0,90,0)}))
+    spikes.addComponent(new Transform({position: new Vector3(24.1166,7.17,15.78)}))
 
     //create animator and add animation clips
     let spikesAnimator = new Animator()
-    spikesAnimator.addClip(new AnimationState("Appear", {looping:false}))
-    spikesAnimator.addClip(new AnimationState("Disappear", {looping:false}))
+    spikesAnimator.addClip(new AnimationState("Door_Close", {looping:false}))
+    spikesAnimator.addClip(new AnimationState("Door_Open", {looping:false}))
 
     //add AudioSource and clip
     spikes.addComponent(new AudioSource(new AudioClip("sounds/room2/whip.mp3")))
@@ -28,24 +28,24 @@ export function CreateRoom2() : void{
     spikes.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
         if (value == ToggleComponent.State.On){
             //stop previous animation as a workaround to a bug with animations
-            spikes.getComponent(Animator).getClip("Disappear").stop()
+            spikes.getComponent(Animator).getClip("Door_Open").stop()
             //on On play appear animation
-            spikes.getComponent(Animator).getClip("Appear").play()
+            spikes.getComponent(Animator).getClip("Door_Close").play()
             //play sound
             spikes.getComponent(AudioSource).playOnce()
         }
         else{
             //stop previous animation as a workaround to a bug with animations
-            spikes.getComponent(Animator).getClip("Appear").stop()
+            spikes.getComponent(Animator).getClip("Door_Close").stop()
             //on Off play disappear animation
-            spikes.getComponent(Animator).getClip("Disappear").play()
+            spikes.getComponent(Animator).getClip("Door_Open").play()
         }
     }))
 
     //create proximity trigger for spikes
     let spikeTriggerEntity = new Entity()
-    spikeTriggerEntity.addComponent(new Transform({position: new Vector3(9,1,9)}))
-    spikeTriggerEntity.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerSphereShape(2.8,Vector3.Zero()), 0, 0, null, null, 
+    spikeTriggerEntity.addComponent(new Transform({position: new Vector3(25.5,7.17,19.5)}))
+    spikeTriggerEntity.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(4.2,3,8),Vector3.Zero()), 0, 0, null, null, 
     ()=>{
         spikes.getComponent(ToggleComponent).set(ToggleComponent.State.On)
     },
@@ -57,13 +57,18 @@ export function CreateRoom2() : void{
     let button = new Entity()
 
     //add shape component to button
-    button.addComponent(new GLTFShape("models/generic/redbutton.gltf"))
+    button.addComponent(new GLTFShape("models/room2/Puzzle03_Buttom.glb"))
 
     //add transform and set position
-    button.addComponent(new Transform({position: new Vector3(7.9,0.2,14.65), rotation: Quaternion.Euler(0,0,-90), scale: new Vector3(0.3,0.3,0.3)}))
+    button.addComponent(new Transform({position: new Vector3(22.5856,5.92706,24.18)}))
 
     //add audio source to button
     button.addComponent(new AudioSource(new AudioClip("sounds/button.mp3")))
+
+    //add animation to button
+    let buttonAnimator = new Animator()
+    buttonAnimator.addClip(new AnimationState("Armature_Puzzle02_ButtomAction"))
+    button.addComponent(buttonAnimator)
 
     //listen for click event to toggle spikes state
     button.addComponent(new OnClick(event =>{
@@ -72,33 +77,91 @@ export function CreateRoom2() : void{
             spikes.getComponent(ToggleComponent).set(ToggleComponent.State.Off)
         }
         button.getComponent(AudioSource).playOnce()
+        buttonAnimator.getClip("Armature_Puzzle02_ButtomAction").play()
     }))
 
-    //create decorative object to hide button behind it
+    //ferns move sound
+    let fernMoveAudioClip = new AudioClip("sounds/move_object1.mp3") 
+
+    //create decorative objects to hide button behind it
     let fern = new Entity()
+    let fern2 = new Entity()
+    let fern3 = new Entity()
+    let fern4 = new Entity()
 
     //add gltf shape component
-    fern.addComponent(new GLTFShape("models/room2/fern.glb"))
+    fern.addComponent(new GLTFShape("models/room2/Puzzle03_Plant1.glb"))
+    fern2.addComponent(new GLTFShape("models/room2/Puzzle03_Plant2.glb"))
+    fern3.addComponent(new GLTFShape("models/room2/Puzzle03_Plant3.glb"))
+    fern4.addComponent(new GLTFShape("models/room2/Puzzle03_Plant4.glb"))
 
     //add and set transform
-    fern.addComponent(new Transform({position: new Vector3(8.3,0,14.6)}))
+    fern.addComponent(new Transform({position: new Vector3(23.4489,5.5071,23.413)}))
+    fern2.addComponent(new Transform({position: new Vector3(26.9356,5.52006,23.4817)}))
+    fern3.addComponent(new Transform({position: new Vector3(23.4513,5.50571,16.8218)}))
+    fern4.addComponent(new Transform({position: new Vector3(26.9878,5.51511,16.8279)}))
 
     //add audio source to fern
-    fern.addComponent(new AudioSource(new AudioClip("sounds/move_object1.mp3")))
+    fern.addComponent(new AudioSource(fernMoveAudioClip))
+    fern2.addComponent(new AudioSource(fernMoveAudioClip))
+    fern3.addComponent(new AudioSource(fernMoveAudioClip))
+    fern4.addComponent(new AudioSource(fernMoveAudioClip))
 
     //add toggle component to set two states to the entity: normal or moved
     fern.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
         if (value == ToggleComponent.State.On){
             fern.addComponentOrReplace(new MoveTransformComponent(fern.getComponent(Transform).position, 
-                fern.getComponent(Transform).position.add(new Vector3(0,0,0.5)), 0.5))
+                fern.getComponent(Transform).position.add(new Vector3(0,0,-0.5)), 0.5))
 
             fern.getComponent(AudioSource).playOnce()
         }
         else{
             fern.addComponentOrReplace(new MoveTransformComponent(fern.getComponent(Transform).position, 
-                new Vector3(8.5,0,14.6), 0.5))
+                new Vector3(23.4489,5.5071,23.413), 0.5))
 
             fern.getComponent(AudioSource).playOnce()
+        }
+    }))
+    fern2.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
+        if (value == ToggleComponent.State.On){
+            fern2.addComponentOrReplace(new MoveTransformComponent(fern2.getComponent(Transform).position, 
+                fern2.getComponent(Transform).position.add(new Vector3(0,0,-0.5)), 0.5))
+
+            fern2.getComponent(AudioSource).playOnce()
+        }
+        else{
+            fern2.addComponentOrReplace(new MoveTransformComponent(fern2.getComponent(Transform).position, 
+                new Vector3(26.9356,5.52006,23.4817), 0.5))
+
+            fern2.getComponent(AudioSource).playOnce()
+        }
+    }))
+    fern3.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
+        if (value == ToggleComponent.State.On){
+            fern3.addComponentOrReplace(new MoveTransformComponent(fern3.getComponent(Transform).position, 
+                fern3.getComponent(Transform).position.add(new Vector3(0,0,0.5)), 0.5))
+
+            fern3.getComponent(AudioSource).playOnce()
+        }
+        else{
+            fern3.addComponentOrReplace(new MoveTransformComponent(fern3.getComponent(Transform).position, 
+                new Vector3(23.4513,5.50571,16.8218), 0.5))
+
+            fern3.getComponent(AudioSource).playOnce()
+        }
+    }))
+    fern4.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
+        if (value == ToggleComponent.State.On){
+            fern4.addComponentOrReplace(new MoveTransformComponent(fern4.getComponent(Transform).position, 
+                fern4.getComponent(Transform).position.add(new Vector3(0,0,0.5)), 0.5))
+
+            fern4.getComponent(AudioSource).playOnce()
+        }
+        else{
+            fern4.addComponentOrReplace(new MoveTransformComponent(fern4.getComponent(Transform).position, 
+                new Vector3(26.9878,5.51511,16.8279), 0.5))
+
+            fern4.getComponent(AudioSource).playOnce()
         }
     }))
 
@@ -106,27 +169,22 @@ export function CreateRoom2() : void{
     fern.addComponent(new OnClick(event=>{
         fern.getComponent(ToggleComponent).toggle()
     }))
-
-    //create fern picture as a hint for the player
-    let fernPicture = new Entity()
-
-    //add shape
-    fernPicture.addComponent(new PlaneShape())
-
-    //add transform
-    fernPicture.addComponent(new Transform({position: new Vector3(11, 1.5, 8.3), scale: new Vector3(0.7,1,1), rotation: Quaternion.Euler(0,180,0)}))
-
-    //create material, set it up and add it to fern picture
-    let fernPictureMat = new Material()
-    fernPictureMat.albedoTexture = new Texture("images/room2/fernpicture.png")
-    fernPictureMat.hasAlpha = true
-    fernPictureMat.transparencyMode = 3
-    fernPicture.addComponent(fernPictureMat)
+    fern2.addComponent(new OnClick(event=>{
+        fern2.getComponent(ToggleComponent).toggle()
+    }))
+    fern3.addComponent(new OnClick(event=>{
+        fern3.getComponent(ToggleComponent).toggle()
+    }))
+    fern4.addComponent(new OnClick(event=>{
+        fern4.getComponent(ToggleComponent).toggle()
+    }))
 
     //add entities to engine
     engine.addEntity(spikes)
     engine.addEntity(button)
     engine.addEntity(fern)
-    engine.addEntity(fernPicture)
+    engine.addEntity(fern2)
+    engine.addEntity(fern3)
+    engine.addEntity(fern4)
     engine.addEntity(spikeTriggerEntity)
 }

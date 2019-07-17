@@ -15,15 +15,15 @@ export function CreateRoom1() : void{
     let door = new Entity()
 
     //add gltf shape
-    door.addComponent(new GLTFShape("models/generic/door.glb"))
+    door.addComponent(new GLTFShape("models/room1/Puzzle02_Door.glb"))
 
     //add transform and set positoin
-    door.addComponent(new Transform({position:new Vector3(8,0,11.74), rotation: Quaternion.Euler(0,90,0)}))
+    door.addComponent(new Transform({position:new Vector3(24.1,5.51634,24.9)}))
 
     //creat animator and add animation clips
     let doorAnimator = new Animator()
-    doorAnimator.addClip(new AnimationState("Open", {looping:false}))
-    doorAnimator.addClip(new AnimationState("Close", {looping:false}))
+    doorAnimator.addClip(new AnimationState("Door_Open", {looping:false}))
+    doorAnimator.addClip(new AnimationState("Door_Close", {looping:false}))
     door.addComponent(doorAnimator)
 
     //create audio source component, set audio clip and add it to door entity
@@ -34,23 +34,45 @@ export function CreateRoom1() : void{
     let button = new Entity()
 
     //add shape component to button
-    button.addComponent(new GLTFShape("models/generic/redbutton.gltf"))
+    button.addComponent(new GLTFShape("models/room1/Puzzle02_Buttom.glb"))
 
     //add transform and set position
-    button.addComponent(new Transform({position: new Vector3(1.91,1.1,12.12), scale: new Vector3(0.3,0.3,0.3)}))
+    button.addComponent(new Transform({position: new Vector3(26.3714,6.90984,26.8936)}))
 
     //add audio source to button
     button.addComponent(new AudioSource(new AudioClip("sounds/button.mp3")))
 
+    //create animator for button
+    let buttonAnimator = new Animator()
+    
+    //add clip to animator
+    buttonAnimator.addClip(new AnimationState("Armature_Puzzle02_ButtomAction"))
+
+    //add animator to button
+    button.addComponent(buttonAnimator)
+
+    //create entity that will contain the countdown
+    let countDownDisplayer = new Entity()
+
+    //add mesh to the displayer
+    countDownDisplayer.addComponent(new GLTFShape("models/room1/Puzzle02_ButtomScreen.glb"))
+
+    //set position to the displayer
+    countDownDisplayer.addComponent(new Transform({position: new Vector3(25.1272,9.51119,25.1116)}))
+
     //create countdown displayer
     let countdown = new Entity()
 
+    //set countdown text as child of displayer
+    countdown.setParent(countDownDisplayer)
+
     //add transform and set position
-    countdown.addComponent(new Transform({position: new Vector3(7.7,3.5,12.5), rotation: Quaternion.Euler(0,90,0) }))
+    countdown.addComponent(new Transform({position: new Vector3(0,0,0.1), rotation: Quaternion.Euler(20,180,0) }))
 
     //create text shape for countdown
     let countdownTextShape = new TextShape(formatTimeString(countdownTimer.getTimeLeft()))
     countdownTextShape.color = Color3.Red()
+    countdownTextShape.fontSize = 5
     countdown.addComponent(countdownTextShape)
 
     //set to listen for countdown timer's update
@@ -63,9 +85,9 @@ export function CreateRoom1() : void{
         //reset countdown
         countdownTimer.reset()
         //stop previous animation as a workaround to a bug with animations
-        doorAnimator.getClip("Open").stop()
+        doorAnimator.getClip("Door_Open").stop()
         //play Close animation
-        doorAnimator.getClip("Close").play()
+        doorAnimator.getClip("Door_Close").play()
         //play door sound
         doorAudioSource.playOnce()   
         //reset countdown text value
@@ -77,13 +99,15 @@ export function CreateRoom1() : void{
         //check if timer is running
         if (!countdownTimer.isRunning()){
             //stop previous animation as a workaround to a bug with animations
-            doorAnimator.getClip("Close").stop()
+            doorAnimator.getClip("Door_Close").stop()
             //play Open animation
-            doorAnimator.getClip("Open").play()
+            doorAnimator.getClip("Door_Open").play()
             //play door sound
             doorAudioSource.playOnce()
             //play button sound
             button.getComponent(AudioSource).playOnce()
+            //play button animation
+            buttonAnimator.getClip("Armature_Puzzle02_ButtomAction").play()
             //reset countdown from previous state
             countdownTimer.reset()
             //make the timer run
@@ -94,5 +118,5 @@ export function CreateRoom1() : void{
     //add entities to the engine
     engine.addEntity(door)
     engine.addEntity(button)
-    engine.addEntity(countdown)
+    engine.addEntity(countDownDisplayer)
 }

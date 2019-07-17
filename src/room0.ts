@@ -6,14 +6,14 @@ export function CreateRoom0() : void{
     let door = new Entity()
 
     //add gltf shape
-    door.addComponent(new GLTFShape("models/generic/door.glb"))
+    door.addComponent(new GLTFShape("models/room0/door.glb"))
 
     //add transform and set it in position
-    door.addComponent(new Transform({position: new Vector3(6.58,0,7.85)}))
+    door.addComponent(new Transform({position: new Vector3(23.01,10.8,24.6), rotation: Quaternion.Euler(0,180,0)}))
 
     //create animator and add animation clips
     let doorAnimator = new Animator()
-    doorAnimator.addClip(new AnimationState("Open", {looping:false}))
+    doorAnimator.addClip(new AnimationState("Door_Open", {looping:false}))
     door.addComponent(doorAnimator)
 
     //create audio source component, set audio clip and add it to door entity
@@ -23,7 +23,7 @@ export function CreateRoom0() : void{
     door.addComponent(new OnClick(event =>{
         if (!isDoorOpen){
             isDoorOpen = true
-            doorAnimator.getClip("Open").play()
+            doorAnimator.getClip("Door_Open").play()
             door.getComponent(AudioSource).playOnce()
         }
     }))
