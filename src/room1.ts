@@ -34,7 +34,7 @@ export function CreateRoom1() : void{
     let button = new Entity()
 
     //add shape component to button
-    button.addComponent(new GLTFShape("models/room1/Puzzle02_Buttom.glb"))
+    button.addComponent(new GLTFShape("models/room1/Puzzle02_Button.glb"))
 
     //add transform and set position
     button.addComponent(new Transform({position: new Vector3(26.3714,6.90984,26.8936)}))
@@ -46,7 +46,7 @@ export function CreateRoom1() : void{
     let buttonAnimator = new Animator()
     
     //add clip to animator
-    buttonAnimator.addClip(new AnimationState("Armature_Puzzle02_ButtomAction"))
+    buttonAnimator.addClip(new AnimationState("Button_Action", {looping:false}))
 
     //add animator to button
     button.addComponent(buttonAnimator)
@@ -107,7 +107,8 @@ export function CreateRoom1() : void{
             //play button sound
             button.getComponent(AudioSource).playOnce()
             //play button animation
-            buttonAnimator.getClip("Armature_Puzzle02_ButtomAction").play()
+            buttonAnimator.getClip("Button_Action").stop()
+            buttonAnimator.getClip("Button_Action").play()
             //reset countdown from previous state
             countdownTimer.reset()
             //make the timer run

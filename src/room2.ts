@@ -57,7 +57,7 @@ export function CreateRoom2() : void{
     let button = new Entity()
 
     //add shape component to button
-    button.addComponent(new GLTFShape("models/room2/Puzzle03_Buttom.glb"))
+    button.addComponent(new GLTFShape("models/room2/Puzzle03_Button.glb"))
 
     //add transform and set position
     button.addComponent(new Transform({position: new Vector3(22.5856,5.92706,24.18)}))
@@ -67,7 +67,7 @@ export function CreateRoom2() : void{
 
     //add animation to button
     let buttonAnimator = new Animator()
-    buttonAnimator.addClip(new AnimationState("Armature_Puzzle02_ButtomAction"))
+    buttonAnimator.addClip(new AnimationState("Button_Action", {looping:false}))
     button.addComponent(buttonAnimator)
 
     //listen for click event to toggle spikes state
@@ -77,7 +77,7 @@ export function CreateRoom2() : void{
             spikes.getComponent(ToggleComponent).set(ToggleComponent.State.Off)
         }
         button.getComponent(AudioSource).playOnce()
-        buttonAnimator.getClip("Armature_Puzzle02_ButtomAction").play()
+        buttonAnimator.getClip("Button_Action").play()
     }))
 
     //ferns move sound
