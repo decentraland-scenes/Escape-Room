@@ -60,7 +60,7 @@ export function CreateRoom2() : void{
     button.addComponent(new GLTFShape("models/room2/Puzzle03_Button.glb"))
 
     //add transform and set position
-    button.addComponent(new Transform({position: new Vector3(22.5856,5.92706,24.18)}))
+    button.addComponent(new Transform({position: new Vector3(22.4456,5.92706,24.18)}))
 
     //add audio source to button
     button.addComponent(new AudioSource(new AudioClip("sounds/button.mp3")))
@@ -96,7 +96,7 @@ export function CreateRoom2() : void{
     fern4.addComponent(new GLTFShape("models/room2/Puzzle03_Plant4.glb"))
 
     //add and set transform
-    fern.addComponent(new Transform({position: new Vector3(23.4489,5.5071,23.413)}))
+    fern.addComponent(new Transform({position: new Vector3(23.2489,5.5071,23.813)}))
     fern2.addComponent(new Transform({position: new Vector3(26.9356,5.52006,23.4817)}))
     fern3.addComponent(new Transform({position: new Vector3(23.4513,5.50571,16.8218)}))
     fern4.addComponent(new Transform({position: new Vector3(26.9878,5.51511,16.8279)}))
@@ -117,7 +117,7 @@ export function CreateRoom2() : void{
         }
         else{
             fern.addComponentOrReplace(new MoveTransformComponent(fern.getComponent(Transform).position, 
-                new Vector3(23.4489,5.5071,23.413), 0.5))
+                new Vector3(23.2489,5.5071,23.813), 0.5))
 
             fern.getComponent(AudioSource).playOnce()
         }

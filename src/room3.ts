@@ -10,7 +10,7 @@ export function CreateRoom3() : void{
     const telescopeDefaultRot = Quaternion.Identity
     const book2DefaultPos = new Vector3(20.41,6.4118,10.4922)
     const wineGlassDefaultPos = new Vector3(25.7505,6.95786,10.5917)
-    const globeDefaultRot = Quaternion.Identity
+    const globeDefaultRot = Quaternion.Euler(0.146,34.9,-33.8)
 
     //create AudioClips that we are going to use in several entities
     let audioClipMoveObject1 = new AudioClip("sounds/move_object1.mp3")
@@ -95,7 +95,7 @@ export function CreateRoom3() : void{
     globe.addComponent(new GLTFShape("models/room3/Puzzle04_Globe.glb"))
 
     //add transform component
-    globe.addComponent(new Transform({position: new Vector3(21.2191,7.11234,10.6817)}))
+    globe.addComponent(new Transform({position: new Vector3(21.2191,7.11234,10.6817), rotation: globeDefaultRot}))
 
     //add audio source and set audio clip
     globe.addComponent(new AudioSource(audioClipMoveObject1))
@@ -195,7 +195,7 @@ export function CreateRoom3() : void{
     //toggle for globe
     globe.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
         if (value == ToggleComponent.State.On){
-            globe.addComponentOrReplace(new RotateTransformComponent(globe.getComponent(Transform).rotation,Quaternion.Euler(0,127,0), 0.5))
+            globe.addComponentOrReplace(new RotateTransformComponent(globe.getComponent(Transform).rotation,Quaternion.Euler(174, -26.43, -149.37), 0.5))
             globe.getComponent(AudioSource).playOnce()
         }
         else{

@@ -1,5 +1,6 @@
 import { ToggleComponent } from "./modules/toggleComponent";
 import { RotateTransformComponent } from "./modules/transfromSystem";
+import { Timer, TimerSystem } from "./modules/timerSystem";
 
 export function CreateRoom4(gameCanvas: UICanvas) : void{
     //audio clips
@@ -21,8 +22,8 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
 
     //background for numerical pad
     const panelBg = new UIImage(panelRect, new Texture("images/codepad/pwdpanel_bg.png"))
-    panelBg.sourceWidth = 222
-    panelBg.sourceHeight = 297
+    panelBg.sourceWidth = 918
+    panelBg.sourceHeight = 1300
     panelBg.width = 310
     panelBg.height = 420
     panelBg.positionX = 70
@@ -30,31 +31,20 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
 
     //close button for numerical pad
     let panelCloseButton = new UIImage(panelRect, closeTexture)
-    panelCloseButton.sourceWidth = 32
-    panelCloseButton.sourceHeight = 32
-    panelCloseButton.positionX = 204
-    panelCloseButton.positionY = 133
+    panelCloseButton.sourceWidth = 92
+    panelCloseButton.sourceHeight = 92
+    panelCloseButton.positionX = 194
+    panelCloseButton.positionY = 108
     panelCloseButton.width = 32
     panelCloseButton.height = 32
     panelCloseButton.onClick = new OnClick(event=>{
         panelRect.visible = false
-        gameCanvas.visible = false
     })
 
-    //text dor numerical pad
-    let panelText = new UIText(panelRect)
-    panelText.positionY = 133
-    panelText.positionX = 16
-    panelText.hTextAlign = "left"
-    panelText.vTextAlign = "center"
-    panelText.fontSize = 30
-    panelText.value = "Enter Code"
-    panelText.isPointerBlocker = false
-
     //set position offset for buttons
-    const panelPosition = new Vector2(0, -12)
+    const panelPosition = new Vector2(12, -24)
     //set buttons size
-    const buttonSize = new Vector2(64, 64)
+    const buttonSize = new Vector2(55, 55)
     //set space between buttons
     const buttonSpace = new Vector2(5, 5)
 
@@ -84,7 +74,7 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
                 buttonImage.onClick = new OnClick(event =>{
                     panelInputs.forEach(inputSlot => {
                         inputSlot.text.value = ""
-                        inputSlot.text.color = Color4.Black()
+                        inputSlot.text.color = Color4.White()
                     });
                     currentInputIdx = 0
                 })
@@ -107,9 +97,14 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
                         panelInputs[1].text.color = Color4.Green()
                         panelInputs[2].text.value = "!"
                         panelInputs[2].text.color = Color4.Green()
+                        numPadLock.removeComponent(OnClick)
                         numPadLock.addComponentOrReplace(new AudioSource(audioAccessGranted))
                         numPadLock.getComponent(AudioSource).playOnce() 
-                        //TODO: make something happen
+                        TimerSystem.instance.createTimer(2,()=>{
+                            panelRect.visible = false
+                            door.getComponent(Animator).getClip("Door_Open").play()
+                        })
+
                     }
                     //if password is incorrect
                     else{
@@ -149,8 +144,8 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
                 })
             }
             //set image
-            buttonImage.sourceWidth = 64
-            buttonImage.sourceHeight = 64
+            buttonImage.sourceWidth = 171
+            buttonImage.sourceHeight = 171
             buttonImage.width = buttonSize.x
             buttonImage.height = buttonSize.y
             buttonImage.positionX = panelPosition.x + col * (buttonSpace.x + buttonSize.x)
@@ -174,27 +169,27 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
     let panelInputs: {image: UIImage, text: UIText}[] = []
     for (let i=0; i<3; i++){
         let inputSlot = {image: new UIImage(panelRect, inputTexture), text: new UIText(panelRect)}
-        inputSlot.image.sourceWidth = 64
-        inputSlot.image.sourceHeight = 64
+        inputSlot.image.sourceWidth = 173
+        inputSlot.image.sourceHeight = 173
         inputSlot.image.width = inputSlot.text.width = buttonSize.x
         inputSlot.image.height = inputSlot.text.height = buttonSize.y
-        inputSlot.image.positionX = inputSlot.text.positionX = i * (buttonSpace.x + buttonSize.x)
-        inputSlot.image.positionY = inputSlot.text.positionY = 65
+        inputSlot.image.positionX = inputSlot.text.positionX = (i * (buttonSpace.x + buttonSize.x)) + 5
+        inputSlot.image.positionY = inputSlot.text.positionY = 45
         inputSlot.image.isPointerBlocker = inputSlot.text.isPointerBlocker = false
         inputSlot.text.fontAutoSize = true
         inputSlot.text.hTextAlign = "center"
         inputSlot.text.value = ""
-        inputSlot.text.color = Color4.Black()
+        inputSlot.text.color = Color4.White()
         panelInputs.push(inputSlot)
     }
 
     //create a carpet on the ground
     const carpet = new Entity()
-    carpet.addComponent(new GLTFShape("models/room4/carpet.glb"))
-    carpet.addComponent(new Transform({position: new Vector3(19,0,11)}))
+    carpet.addComponent(new GLTFShape("models/room4/Puzzle05_Carpet.glb"))
+    carpet.addComponent(new Transform({position: new Vector3(20.7079,5.50579,24.6273)}))
     carpet.addComponent(new ToggleComponent(ToggleComponent.State.Off, value=>{
         if (value == ToggleComponent.State.On){
-            carpet.addComponent(new RotateTransformComponent(carpet.getComponent(Transform).rotation, Quaternion.Euler(0,45,0), 0.7))
+            carpet.addComponent(new RotateTransformComponent(carpet.getComponent(Transform).rotation, Quaternion.Euler(0,-10,0), 0.7))
         }
         else{
             carpet.addComponent(new RotateTransformComponent(carpet.getComponent(Transform).rotation, Quaternion.Euler(0,0,0), 0.7))
@@ -206,14 +201,14 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
     engine.addEntity(carpet)
 
     //create a coin under the carpet
-    const coin = new Entity()
-    coin.addComponent(new GLTFShape("models/room4/coin.glb"))
-    coin.addComponent(new Transform({position: new Vector3(18,0,10.5)}))
-    coin.addComponent(new OnClick(event =>{
+    const postit = new Entity()
+    postit.addComponent(new GLTFShape("models/room4/Puzzle05_Postit.glb"))
+    postit.addComponent(new Transform({position: new Vector3(21.571,5.50857,25.9534)}))
+    postit.addComponent(new OnClick(event =>{
         coinHintRect.visible = true
         gameCanvas.visible = true
     }))
-    engine.addEntity(coin)
+    engine.addEntity(postit)
 
     //create hint ui image to show when coin is clicked
     const coinHintRect = new UIContainerRect(gameCanvas)
@@ -236,20 +231,14 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
     coinHintClose.positionY = 256 - 32
     coinHintClose.onClick = new OnClick(event =>{
         coinHintRect.visible = false
-        gameCanvas.visible = false
     })
 
     //create a painting on the wall
     const painting = new Entity()
-    painting.addComponent(new PlaneShape())
-    painting.addComponent(new Transform({position: new Vector3(18, 1.5, 13), scale: new Vector3(0.7,1,1), rotation: Quaternion.Euler(0,0,180)}))
-    let paintingMat = new Material()
-    paintingMat.albedoTexture = new Texture("images/room4/fernpicture.png", {hasAlpha: true})
-    paintingMat.hasAlpha = true
-    painting.addComponent(paintingMat)
+    painting.addComponent(new GLTFShape("models/room4/Puzzle05_PictureMain.glb"))
+    painting.addComponent(new Transform({position: new Vector3(22.2283, 7.60325, 20.9326)}))
     painting.addComponent(new OnClick(event =>{
         paintingHintRect.visible = true
-        gameCanvas.visible = true
     }))
     engine.addEntity(painting)
 
@@ -274,23 +263,25 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
     paintingHintClose.positionY = 256 - 32
     paintingHintClose.onClick = new OnClick(event =>{
         paintingHintRect.visible = false
-        gameCanvas.visible = false
     })
 
     //create the numpad lock
     const numPadLock = new Entity()
-    numPadLock.addComponent(new GLTFShape("models/generic/codePad.glb"))
-    numPadLock.addComponent(new Transform({position: new Vector3(19.5,1.5,13)}))
+    const lockShape = new BoxShape()
+    numPadLock.addComponent(lockShape)
+    lockShape.visible = false
+    numPadLock.addComponent(new Transform({position: new Vector3(19.6486,7,23.142), scale: new Vector3(0.2,0.6,0.4)}))
     numPadLock.addComponent(new OnClick(event =>{
         panelRect.visible = true
-        gameCanvas.visible = true
     }))
     engine.addEntity(numPadLock)
 
-    //create a temporal wall
-    const tempWall = new Entity()
-    tempWall.addComponent(new PlaneShape())
-    tempWall.addComponent(new Transform({position: new Vector3(19, 1.4, 13.1), scale: new Vector3(4,3,1)}))
-    engine.addEntity(tempWall)
-
+    //create door
+    const door = new Entity()
+    door.addComponent(new GLTFShape("models/room1/Puzzle02_Door.glb"))
+    const doorAnimator = new Animator()
+    doorAnimator.addClip(new AnimationState("Door_Open",{looping:false}))
+    door.addComponent(doorAnimator)
+    door.addComponent(new Transform({position: new Vector3(19.5141,5.54709,25.676), rotation: Quaternion.Euler(0,90,0)}))
+    engine.addEntity(door)
 }

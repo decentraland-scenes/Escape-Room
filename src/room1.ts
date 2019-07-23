@@ -37,7 +37,7 @@ export function CreateRoom1() : void{
     button.addComponent(new GLTFShape("models/room1/Puzzle02_Button.glb"))
 
     //add transform and set position
-    button.addComponent(new Transform({position: new Vector3(26.3714,6.90984,26.8936)}))
+    button.addComponent(new Transform({position: new Vector3(26.3714,6.89,26.8936)}))
 
     //add audio source to button
     button.addComponent(new AudioSource(new AudioClip("sounds/button.mp3")))

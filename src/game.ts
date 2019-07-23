@@ -11,7 +11,6 @@ import { CreateRoom8 } from "./room8";
 import { TriggerSystem } from "./modules/triggerSystem";
 
 const gameCanvas = new UICanvas()
-gameCanvas.visible = false
 
 const transformSystem = new TransformSystem()
 engine.addSystem(transformSystem)
@@ -23,10 +22,11 @@ const scene = new Entity()
 scene.addComponent(new GLTFShape("models/scene.glb"))
 engine.addEntity(scene)
 
-CreateRoom0()
-CreateRoom1()
-CreateRoom2()
-CreateRoom3()
+//CreateRoom0()
+//CreateRoom1()
+//CreateRoom2()
+//CreateRoom3()
+CreateRoom4(gameCanvas)
 /*CreateRoom4(gameCanvas)
 CreateRoom5(gameCanvas)
 CreateRoom6()
