@@ -20,7 +20,7 @@ export function CreateRoom7(): void{
     defaultMaterial.albedoColor = Color3.Blue()
 
     //create mouse shape
-    let mouseShape = new GLTFShape("models/room7/mouse.glb")
+    let mouseShape = new GLTFShape("models/generic/Mouse.glb")
 
     //create maice entities
     let mouse1 = new Entity()
@@ -72,8 +72,16 @@ export function CreateRoom7(): void{
     const columnCount = 5
     const rowCount = 5
     const tileSpacing = 0.03
-    const initialPosition = new Vector3(26,1,4)
+    const initialPosition = new Vector3(17.788,0.86829,10.694)
     const tileDirection = new Vector3(1,0.86,0.49)
+    //const tileDirection = new Vector3(-0.43309323302322006, 0, 0.9013491285342737)
+    //Quaternion.Euler(0,25,-50.6)
+
+    log("dir: "+new Vector3(17.0756,0.797652,12.0604).subtract(new Vector3(17.7481,0.797652,10.6608)).normalize())
+    const plane = new Entity()
+    plane.addComponent(new PlaneShape())
+    plane.addComponent(new Transform({position:new Vector3(17.0746,1.37454,11.248), rotation: Quaternion.Euler(39.1,64.2,0)}))
+    engine.addEntity(plane)
     
     //create grid
     for (let column = 0; column < columnCount; column++){
@@ -86,7 +94,7 @@ export function CreateRoom7(): void{
             //create tile entity
             let tileEntity = new Entity()
             //add and set transform
-            tileEntity.addComponent(new Transform({position: tilePos, scale: tileSize, rotation: Quaternion.Euler(30,0,0)}))
+            tileEntity.addComponent(new Transform({position: tilePos, scale: tileSize, rotation: Quaternion.Euler(-10,60,-10)}))
             //add shape
             tileEntity.addComponent(tileShape)
             //add material
@@ -140,6 +148,34 @@ export function CreateRoom7(): void{
     hint.addComponent(hintMaterial)
     hint.addComponent(new Transform({position: new Vector3(0,0.4,0), rotation: Quaternion.Euler(90,0,90), scale: new Vector3(0.6,0.6,0.6)}))
     hint.setParent(chest)
+
+    //create door entity
+    let door = new Entity()
+
+    //add gltf shape
+    door.addComponent(new GLTFShape("models/room7/Puzzle08_Door.glb"))
+
+    //add transform and set position
+    door.addComponent(new Transform({position:new Vector3(22.612,0,14.9205), rotation: Quaternion.Euler(0,135,0)}))
+
+    //creat animator and add animation clips
+    let doorAnimator = new Animator()
+    doorAnimator.addClip(new AnimationState("Door_Open", {looping:false}))
+    doorAnimator.addClip(new AnimationState("Door_Close", {looping:false}))
+    door.addComponent(doorAnimator)
+
+    //create audio source component, set audio clip and add it to door entity
+    let doorAudioSource = new AudioSource(new AudioClip("sounds/door_squeak.mp3"))
+    door.addComponent(doorAudioSource)
+
+    //listen to onclick event to toggle door state
+    door.addComponent(new OnClick(event =>{
+        doorAnimator.getClip("Door_Open").play()
+        door.getComponent(AudioSource).playOnce()
+    }))
+
+    //add door to engine
+    engine.addEntity(door)
 }
 
 @Component("mouseFollowPathComponent")

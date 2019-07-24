@@ -19,6 +19,7 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
     const buttonTexture = new Texture("images/codepad/pwdpanel_buttons.png")
     const inputTexture = new Texture("images/codepad/pwdpanel_input.png")
     const closeTexture = new Texture("images/codepad/button_close.png")
+    const closeHintTexture = new Texture("images/room4/button_close.png")
 
     //background for numerical pad
     const panelBg = new UIImage(panelRect, new Texture("images/codepad/pwdpanel_bg.png"))
@@ -222,13 +223,13 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
     coinHintImage.height = 341
 
     //create "close" button for the coin's hint ui
-    const coinHintClose = new UIImage(coinHintRect, closeTexture)
-    coinHintClose.sourceWidth = 32
-    coinHintClose.sourceHeight = 32
-    coinHintClose.width = 32
-    coinHintClose.height = 32
-    coinHintClose.positionX = 196 - 32
-    coinHintClose.positionY = 256 - 32
+    const coinHintClose = new UIImage(coinHintRect, closeHintTexture)
+    coinHintClose.sourceWidth = 92
+    coinHintClose.sourceHeight = 92
+    coinHintClose.width = 46
+    coinHintClose.height = 46
+    coinHintClose.positionX = 512 * 0.5
+    coinHintClose.positionY = 512 * 0.5
     coinHintClose.onClick = new OnClick(event =>{
         coinHintRect.visible = false
     })
@@ -248,19 +249,19 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
     paintingHintRect.height = "100%"
     paintingHintRect.visible = false
     const paintingHintImage = new UIImage(paintingHintRect, new Texture("images/room4/fernpictureHint.png"))
-    paintingHintImage.sourceWidth = 392
+    paintingHintImage.sourceWidth = 512
     paintingHintImage.sourceHeight = 512
-    paintingHintImage.width = 261
-    paintingHintImage.height = 341
+    paintingHintImage.width = 512
+    paintingHintImage.height = 512
 
     //create "close" button for the painting's hint ui
-    const paintingHintClose = new UIImage(paintingHintRect, closeTexture)
-    paintingHintClose.sourceWidth = 32
-    paintingHintClose.sourceHeight = 32
-    paintingHintClose.width = 32
-    paintingHintClose.height = 32
-    paintingHintClose.positionX = 196 - 32
-    paintingHintClose.positionY = 256 - 32
+    const paintingHintClose = new UIImage(paintingHintRect, closeHintTexture)
+    paintingHintClose.sourceWidth = 92
+    paintingHintClose.sourceHeight = 92
+    paintingHintClose.width = 46
+    paintingHintClose.height = 46
+    paintingHintClose.positionX = 512 * 0.5
+    paintingHintClose.positionY = 512 * 0.5
     paintingHintClose.onClick = new OnClick(event =>{
         paintingHintRect.visible = false
     })
@@ -278,10 +279,10 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
 
     //create door
     const door = new Entity()
-    door.addComponent(new GLTFShape("models/room1/Puzzle02_Door.glb"))
+    door.addComponent(new GLTFShape("models/room4/Puzzle05_Door.glb"))
     const doorAnimator = new Animator()
     doorAnimator.addClip(new AnimationState("Door_Open",{looping:false}))
     door.addComponent(doorAnimator)
-    door.addComponent(new Transform({position: new Vector3(19.5141,5.54709,25.676), rotation: Quaternion.Euler(0,90,0)}))
+    door.addComponent(new Transform({position: new Vector3(19.5141,5.54709,25.676)}))
     engine.addEntity(door)
 }

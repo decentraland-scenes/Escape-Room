@@ -20,8 +20,8 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
 
     //create muna's statue
     const munaStatue = new Entity()
-    munaStatue.addComponent(new GLTFShape("models/room5/muna.glb"))
-    munaStatue.addComponent(new Transform({position: new Vector3(32, 0, 10)}))
+    munaStatue.addComponent(new GLTFShape("models/room5/Puzzle06_Muna.glb"))
+    munaStatue.addComponent(new Transform({position: new Vector3(26.748, 0.1054, 20.765)}))
     munaStatue.addComponent(new OnClick(event=>{
         if (!dialog.isDialogTreeRunning()){
             dialog.runDialogTree(dialogTree)
@@ -438,6 +438,34 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
         inputSlot.text.color = Color4.Black()
         panelInputs.push(inputSlot)
     }
+
+    //create door entity
+    let door = new Entity()
+
+    //add gltf shape
+    door.addComponent(new GLTFShape("models/room5/Puzzle06_Door.glb"))
+
+    //add transform and set position
+    door.addComponent(new Transform({position:new Vector3(28.3,0.25,19.75), rotation: Quaternion.Euler(0,180,0)}))
+
+    //creat animator and add animation clips
+    let doorAnimator = new Animator()
+    doorAnimator.addClip(new AnimationState("Door_Open", {looping:false}))
+    doorAnimator.addClip(new AnimationState("Door_Close", {looping:false}))
+    door.addComponent(doorAnimator)
+
+    //create audio source component, set audio clip and add it to door entity
+    let doorAudioSource = new AudioSource(new AudioClip("sounds/door_squeak.mp3"))
+    door.addComponent(doorAudioSource)
+
+    //listen to onclick event to toggle door state
+    door.addComponent(new OnClick(event =>{ //TODO: remove later
+        doorAnimator.getClip("Door_Open").play()
+        door.getComponent(AudioSource).playOnce()
+    }))
+
+    //add door to engine
+    engine.addEntity(door)
 }
 
 function CreateSpotlight(position: Vector3, rotation: Quaternion, spotlightShape: GLTFShape, spotlightLightShape: GLTFShape, hiddenNumberValue: string, audioClip: AudioClip): Entity{

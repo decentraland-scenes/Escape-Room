@@ -17,7 +17,7 @@ export function CreateRoom1() : void{
     //add gltf shape
     door.addComponent(new GLTFShape("models/room1/Puzzle02_Door.glb"))
 
-    //add transform and set positoin
+    //add transform and set position
     door.addComponent(new Transform({position:new Vector3(24.1,5.51634,24.9)}))
 
     //creat animator and add animation clips
@@ -34,7 +34,7 @@ export function CreateRoom1() : void{
     let button = new Entity()
 
     //add shape component to button
-    button.addComponent(new GLTFShape("models/room1/Puzzle02_Button.glb"))
+    button.addComponent(new GLTFShape("models/room1/Square_Button.glb"))
 
     //add transform and set position
     button.addComponent(new Transform({position: new Vector3(26.3714,6.89,26.8936)}))

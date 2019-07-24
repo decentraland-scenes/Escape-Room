@@ -57,7 +57,7 @@ export function CreateRoom2() : void{
     let button = new Entity()
 
     //add shape component to button
-    button.addComponent(new GLTFShape("models/room2/Puzzle03_Button.glb"))
+    button.addComponent(new GLTFShape("models/generic/Round_Button.glb"))
 
     //add transform and set position
     button.addComponent(new Transform({position: new Vector3(22.4456,5.92706,24.18)}))

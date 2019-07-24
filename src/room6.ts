@@ -2,38 +2,25 @@ import { ToggleComponent } from "./modules/toggleComponent";
 import { RotateTransformComponent } from "./modules/transfromSystem";
 
 export function CreateRoom6(): void{
-    //create base for light bulbs
-    let bulbsBase = new Entity()
-    
-    //add shape to bulbsBase
-    bulbsBase.addComponent(new BoxShape())
-
-    //add and set transform
-    bulbsBase.addComponent(new Transform({position: new Vector3(18,0,2), scale: new Vector3(4,1,1)}))
-
-    //add bulbsBase to engine
-    engine.addEntity(bulbsBase)
-
     //instance shape for buttons
-    let buttonShape = new GLTFShape("models/generic/redbutton.gltf")
-
-    //instance shapes for light bulbs
-    const bulbOnShape = new GLTFShape("models/room6/bulb_on.glb")
-    const bulbOffShape = new GLTFShape("models/room6/bulb_off.glb")
+    let buttonShape = new GLTFShape("models/generic/Round_Button.glb")
 
     //array to store bulbs
     let lightBulbs: Entity[] = []
 
+    //define lightbulb position
+    let lightbulbPositions = [new Vector3(23.408,2.26006,10.3273),new Vector3(23.408,2.22122,11.1682),new Vector3(23.408,2.10693,12.1568),new Vector3(23.408,2.24542,13.1888)]
+
     //create 4 light bulbs
-    for (let i=0; i<4; i++){
+    for (let i=0; i<lightbulbPositions.length; i++){
         //create button
         let lightBulb = new Entity()
 
         //add shape
-        lightBulb.addComponent(new LightBulbComponent(lightBulb,"models/room6/bulb_on.glb","models/room6/bulb_off.glb"))
+        lightBulb.addComponent(new LightBulbComponent(lightBulb,"models/room6/Puzzle07_LightOn.glb","models/room6/Puzzle07_LightOff.glb"))
 
         //create and set transform
-        lightBulb.addComponent(new Transform({position: new Vector3(18 -1.5 + 1 * i, 1, 2)}))
+        lightBulb.addComponent(new Transform({position: lightbulbPositions[i]}))
 
         //create toggle component
         lightBulb.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
@@ -81,8 +68,11 @@ export function CreateRoom6(): void{
     let buttonAudioClip = new AudioClip("sounds/button.mp3")
     let chestAudioClip = new AudioClip("sounds/chest.mp3")
 
+    //define buttons' position
+    let buttonsPosition = [new Vector3(23.0891,1.58507,10.2526),new Vector3(23.0891,1.48205,11.2557),new Vector3(23.0891,1.38123,12.2855),new Vector3(23.0891,1.52253,13.2941)]
+
     //create 4 buttons
-    for (let i=0; i<4; i++){
+    for (let i=0; i<buttonsPosition.length; i++){
         //create button
         let button = new Entity()
 
@@ -90,16 +80,23 @@ export function CreateRoom6(): void{
         button.addComponent(buttonShape)
 
         //create and set transform
-        button.addComponent(new Transform({position: new Vector3(18 -1.5 + 1 * i, 0.2, 1.5), rotation: Quaternion.Euler(-90,90,0), scale: new Vector3(0.3,0.3,0.3)}))
+        button.addComponent(new Transform({position: buttonsPosition[i]}))
 
         //create AudioSource and add clip
         button.addComponent(new AudioSource(buttonAudioClip))
+
+        //add animation to button
+        let buttonAnimator = new Animator()
+        buttonAnimator.addClip(new AnimationState("Button_Action", {looping:false}))
+        button.addComponent(buttonAnimator)
 
         //add on click component
         button.addComponent(new OnClick(event =>{
             if (areButtonsEnabled){
                 buttonInteractions[i]()
                 button.getComponent(AudioSource).playOnce()
+                buttonAnimator.getClip("Button_Action").stop()
+                buttonAnimator.getClip("Button_Action").play()
                 if (areAllLightBulbsOn()){
                     areButtonsEnabled = false
                     chestTop.addComponent(new RotateTransformComponent(Quaternion.Euler(0,180,0),Quaternion.Euler(90,180,0),0.5))
@@ -127,7 +124,7 @@ export function CreateRoom6(): void{
     //create chest that contain muna's statue question hint
     const chest = new Entity()
     chest.addComponent(new GLTFShape("models/generic/chestBase.glb"))
-    chest.addComponent(new Transform({position: new Vector3(21,0,2)}))
+    chest.addComponent(new Transform({position: new Vector3(24.221,0,9.92463), rotation: Quaternion.Euler(0,180,0)}))
     engine.addEntity(chest)
 
     //create chest top
@@ -145,6 +142,34 @@ export function CreateRoom6(): void{
     hint.addComponent(hintMaterial)
     hint.addComponent(new Transform({position: new Vector3(0,0.4,0), rotation: Quaternion.Euler(90,0,90), scale: new Vector3(0.6,0.6,0.6)}))
     hint.setParent(chest)
+
+    //create door entity
+    let door = new Entity()
+
+    //add gltf shape
+    door.addComponent(new GLTFShape("models/room6/Puzzle07_Door.glb"))
+
+    //add transform and set position
+    door.addComponent(new Transform({position:new Vector3(26.3087,0,14.9449), rotation: Quaternion.Euler(0,-10.2,0)}))
+
+    //creat animator and add animation clips
+    let doorAnimator = new Animator()
+    doorAnimator.addClip(new AnimationState("Door_Open", {looping:false}))
+    doorAnimator.addClip(new AnimationState("Door_Close", {looping:false}))
+    door.addComponent(doorAnimator)
+
+    //create audio source component, set audio clip and add it to door entity
+    let doorAudioSource = new AudioSource(new AudioClip("sounds/door_squeak.mp3"))
+    door.addComponent(doorAudioSource)
+
+    //listen to onclick event to toggle door state
+    door.addComponent(new OnClick(event =>{
+        doorAnimator.getClip("Door_Open").play()
+        door.getComponent(AudioSource).playOnce()
+    }))
+
+    //add door to engine
+    engine.addEntity(door)
 }
 
 @Component("lightBulbComponent")

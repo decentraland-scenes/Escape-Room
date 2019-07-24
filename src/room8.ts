@@ -269,6 +269,34 @@ export function CreateRoom8(): void{
     roomTriggerEntities.forEach(triggerEntity => {
         triggerEntity.setParent(roomEntity)
     });
+
+    //create door entity
+    let door = new Entity()
+
+    //add gltf shape
+    door.addComponent(new GLTFShape("models/room8/Puzzle09_Door.glb"))
+
+    //add transform and set position
+    door.addComponent(new Transform({position:new Vector3(23.2215,0,25.0522)}))
+
+    //creat animator and add animation clips
+    let doorAnimator = new Animator()
+    doorAnimator.addClip(new AnimationState("Door_Open", {looping:false}))
+    doorAnimator.addClip(new AnimationState("Door_Close", {looping:false}))
+    door.addComponent(doorAnimator)
+
+    //create audio source component, set audio clip and add it to door entity
+    let doorAudioSource = new AudioSource(new AudioClip("sounds/door_squeak.mp3"))
+    door.addComponent(doorAudioSource)
+
+    //listen to onclick event to toggle door state
+    door.addComponent(new OnClick(event =>{
+        doorAnimator.getClip("Door_Open").play()
+        door.getComponent(AudioSource).playOnce()
+    }))
+
+    //add door to engine
+    engine.addEntity(door)
 }
 
 @Component("mouseComponent")
