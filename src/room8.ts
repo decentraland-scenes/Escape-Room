@@ -39,7 +39,7 @@ export function CreateRoom8(): void{
     cageEntity.addComponent(new Transform({position:new Vector3(4.5,0,2.5), rotation: Quaternion.Euler(0,-90,0)}))
     //set as child of room entity
     cageEntity.setParent(roomEntity)
-
+/*
     //button entity
     const buttonEntity = new Entity()
     //button gltf shape
@@ -48,13 +48,14 @@ export function CreateRoom8(): void{
     buttonEntity.addComponent(new Transform({position:new Vector3(0,-0.1,-0.2), scale: new Vector3(0.3,0.3,0.3)}))
     //set as child of cage entity
     buttonEntity.setParent(cageEntity)
+*/
 
     //create mouse
     const mouseEntity = new Entity("mouse")
     //set mouse as child of room
     mouseEntity.setParent(roomEntity)
     //add gltf
-    mouseEntity.addComponent(new GLTFShape("models/room7/mouse.glb"))
+    mouseEntity.addComponent(new GLTFShape("models/generic/Mouse.glb"))
     //create and add transform
     const mouseTransform = new Transform()
     mouseEntity.addComponent(mouseTransform)
@@ -172,7 +173,7 @@ export function CreateRoom8(): void{
     let audioClipFan = new AudioClip("sounds/fan.mp3")
 
     //create fan shape
-    const fanShape = new GLTFShape("models/room8/fan.glb")
+    const fanShape = new GLTFShape("models/room8/Fan.glb")
 
     //create fan entities array
     const fans: Entity[] = []

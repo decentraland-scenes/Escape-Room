@@ -11,13 +11,13 @@ export function CreateRoom7(): void{
 
     //create tile's materials
     const miceMaterial = new Material()
-    miceMaterial.albedoColor = Color3.Red()
+    miceMaterial.albedoColor = Color3.Magenta()
 
     const playerMaterial = new Material()
-    playerMaterial.albedoColor = Color3.Teal()
+    playerMaterial.albedoColor = Color3.Green()
 
     const defaultMaterial = new Material()
-    defaultMaterial.albedoColor = Color3.Blue()
+    defaultMaterial.albedoColor = Color3.Teal()
 
     //create mouse shape
     let mouseShape = new GLTFShape("models/generic/Mouse.glb")
@@ -27,9 +27,9 @@ export function CreateRoom7(): void{
     let mouse2 = new Entity()
 
     //add transfrom add shape to maice
-    mouse1.addComponent(new Transform({position: new Vector3(25.82, 1.46, 4.25), scale: new Vector3(0.3,0.3,0.3)}))
+    mouse1.addComponent(new Transform({position: new Vector3(25.82, 1.46, 4.25)}))
     mouse1.addComponent(mouseShape)
-    mouse2.addComponent(new Transform({position: new Vector3(26.54, 0.85, 3.9), scale: new Vector3(0.3,0.3,0.3)}))
+    mouse2.addComponent(new Transform({position: new Vector3(26.54, 0.85, 3.9)}))
     mouse2.addComponent(mouseShape)
 
     //add maice entities to engine
@@ -44,10 +44,8 @@ export function CreateRoom7(): void{
             mouse1.removeComponent(MouseFollowPathComponent)
             mouse2.removeComponent(MouseFollowPathComponent)
             engine.removeSystem(mouseBehaviorSystem)
-            //open chest
-            chestTop.addComponent(new RotateTransformComponent(Quaternion.Euler(0,180,0),Quaternion.Euler(90,180,0),0.5))
-            chestTop.addComponent(new AudioSource(new AudioClip("sounds/chest.mp3")))
-            chestTop.getComponent(AudioSource).playOnce()
+            //show ticket
+            ticketAnimator.getClip("Ticket_Action").play()
             //we tell mouse that it can't change it's idle state
             return false
         }
@@ -56,8 +54,8 @@ export function CreateRoom7(): void{
     }
 
     //set/add component for mouse behavior
-    mouse1.addComponent(new MouseFollowPathComponent(7.5, 7, [new Vector3(25.82, 1.46, 4.25),new Vector3(26.54, 1.46, 4.25),new Vector3(26.54, 1.77, 4.43)], 2, onMouseIdleChanged)) 
-    mouse2.addComponent(new MouseFollowPathComponent(0, 6, [new Vector3(26.54, 0.85, 3.9),new Vector3(26.54, 1.46, 4.25),new Vector3(26.9, 1.46, 4.25)], 5, onMouseIdleChanged))
+    mouse1.addComponent(new MouseFollowPathComponent(7.5, 7, [new Vector3(17.37, 1.69, 10.06),new Vector3(16.7, 1.7, 11.47),new Vector3(16.3, 2.24, 11.28)], 2, onMouseIdleChanged)) 
+    mouse2.addComponent(new MouseFollowPathComponent(0, 6, [new Vector3(17.49, 0.6, 11.85),new Vector3(16.7, 1.7, 11.47),new Vector3(16.36, 1.7, 12.17)], 5, onMouseIdleChanged))
 
     //add mouse behavior system to engine
     let mouseBehaviorSystem = new MouseFollowPathSystem()
@@ -68,33 +66,28 @@ export function CreateRoom7(): void{
     mouse2.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.05,0.05,0.05), Vector3.Zero()), 2, 2))
 
     //set tiles grid
-    const tileSize = new Vector3(0.15,0.15,1)
+    const tileSize = new Vector3(0.30,0.30,1)
     const columnCount = 5
     const rowCount = 5
-    const tileSpacing = 0.03
-    const initialPosition = new Vector3(17.788,0.86829,10.694)
-    const tileDirection = new Vector3(1,0.86,0.49)
-    //const tileDirection = new Vector3(-0.43309323302322006, 0, 0.9013491285342737)
-    //Quaternion.Euler(0,25,-50.6)
-
-    log("dir: "+new Vector3(17.0756,0.797652,12.0604).subtract(new Vector3(17.7481,0.797652,10.6608)).normalize())
-    const plane = new Entity()
-    plane.addComponent(new PlaneShape())
-    plane.addComponent(new Transform({position:new Vector3(17.0746,1.37454,11.248), rotation: Quaternion.Euler(39.1,64.2,0)}))
-    engine.addEntity(plane)
+    const tileSpacing = new Vector3(0.09,0.05,0)
+    const initialPosition = new Vector3(17.7913,0.871266,10.6956)
+    const screenRotation = Quaternion.Euler(118,-45,127.3)
     
     //create grid
     for (let column = 0; column < columnCount; column++){
         for (let row = 0; row < rowCount; row++){
             //calc tile position
             let tilePos = new Vector3()
-            tilePos.x = initialPosition.x + column * tileDirection.x * (tileSize.x + tileSpacing)
-            tilePos.y = initialPosition.y + row * tileDirection.y * (tileSize.y + tileSpacing)
-            tilePos.z = initialPosition.z + row * tileDirection.z * (tileSize.y + tileSpacing)
+            tilePos.x = column * (tileSize.x + tileSpacing.x)
+            tilePos.y = row * (tileSize.y + tileSpacing.y)
+            tilePos.z = 0
+    
+            tilePos = initialPosition.add(tilePos.rotate(screenRotation))
+
             //create tile entity
             let tileEntity = new Entity()
             //add and set transform
-            tileEntity.addComponent(new Transform({position: tilePos, scale: tileSize, rotation: Quaternion.Euler(-10,60,-10)}))
+            tileEntity.addComponent(new Transform({position: tilePos, scale: tileSize, rotation: screenRotation}))
             //add shape
             tileEntity.addComponent(tileShape)
             //add material
@@ -127,27 +120,18 @@ export function CreateRoom7(): void{
         }
     }
 
-    //create chest that contain muna's statue question hint
-    const chest = new Entity()
-    chest.addComponent(new GLTFShape("models/generic/chestBase.glb"))
-    chest.addComponent(new Transform({position: new Vector3(28,0,4)}))
-    engine.addEntity(chest)
+    //create hint for muna's question (ticket)
+    const ticket = new Entity()
+    ticket.addComponent(new GLTFShape("models/room7/Ticket.glb"))
+    ticket.addComponent(new Transform({position: new Vector3(18.28,0.24,11.48)}))
 
-    //create chest top
-    const chestTop = new Entity()
-    chestTop.addComponent(new GLTFShape("models/generic/chestTop.glb"))
-    chestTop.addComponent(new Transform({position: new Vector3(0,0.36,0.32), rotation: Quaternion.Euler(0,180,0)}))
-    chestTop.setParent(chest)
+    //animator for ticket
+    const ticketAnimator = new Animator()
+    ticketAnimator.addClip(new AnimationState("Ticket_Action",{looping:false}))
+    ticket.addComponent(ticketAnimator)
 
-    //create hint for muna's question
-    const hint = new Entity()
-    const hintMaterial = new Material()
-    hintMaterial.albedoTexture = new Texture("images/room7/marengo_cover.png",{hasAlpha: true})
-    hintMaterial.hasAlpha = true
-    hint.addComponent(new PlaneShape())
-    hint.addComponent(hintMaterial)
-    hint.addComponent(new Transform({position: new Vector3(0,0.4,0), rotation: Quaternion.Euler(90,0,90), scale: new Vector3(0.6,0.6,0.6)}))
-    hint.setParent(chest)
+    //add ticket to engine
+    engine.addEntity(ticket)
 
     //create door entity
     let door = new Entity()
