@@ -206,24 +206,24 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
     postit.addComponent(new GLTFShape("models/room4/Puzzle05_Postit.glb"))
     postit.addComponent(new Transform({position: new Vector3(21.571,5.50857,25.9534)}))
     postit.addComponent(new OnClick(event =>{
-        coinHintRect.visible = true
+        postitHintRect.visible = true
         gameCanvas.visible = true
     }))
     engine.addEntity(postit)
 
     //create hint ui image to show when coin is clicked
-    const coinHintRect = new UIContainerRect(gameCanvas)
-    coinHintRect.width = "100%"
-    coinHintRect.height = "100%"
-    coinHintRect.visible = false
-    const coinHintImage = new UIImage(coinHintRect, new Texture("images/room4/coinHint.png"))
-    coinHintImage.sourceWidth = 392
-    coinHintImage.sourceHeight = 512
-    coinHintImage.width = 261
-    coinHintImage.height = 341
+    const postitHintRect = new UIContainerRect(gameCanvas)
+    postitHintRect.width = "100%"
+    postitHintRect.height = "100%"
+    postitHintRect.visible = false
+    const coinHintImage = new UIImage(postitHintRect, new Texture("images/room4/Postit_001.png"))
+    coinHintImage.sourceWidth = 512
+    coinHintImage.sourceHeight = 520
+    coinHintImage.width = 512
+    coinHintImage.height = 520
 
     //create "close" button for the coin's hint ui
-    const coinHintClose = new UIImage(coinHintRect, closeHintTexture)
+    const coinHintClose = new UIImage(postitHintRect, closeHintTexture)
     coinHintClose.sourceWidth = 92
     coinHintClose.sourceHeight = 92
     coinHintClose.width = 46
@@ -231,7 +231,7 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
     coinHintClose.positionX = 512 * 0.5
     coinHintClose.positionY = 512 * 0.5
     coinHintClose.onClick = new OnClick(event =>{
-        coinHintRect.visible = false
+        postitHintRect.visible = false
     })
 
     //create a painting on the wall
