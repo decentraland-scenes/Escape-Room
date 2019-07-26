@@ -20,17 +20,25 @@ export function CreateRoom7(): void{
     defaultMaterial.albedoColor = Color3.Teal()
 
     //create mouse shape
-    let mouseShape = new GLTFShape("models/generic/Mouse.glb")
+    let mouseShape = new GLTFShape("models/room7/Mouse.glb")
 
     //create maice entities
     let mouse1 = new Entity()
     let mouse2 = new Entity()
 
     //add transfrom add shape to maice
-    mouse1.addComponent(new Transform({position: new Vector3(25.82, 1.46, 4.25)}))
+    mouse1.addComponent(new Transform({position: new Vector3(25.82, 1.46, 4.25), scale: new Vector3(0.8,0.8,0.8)}))
     mouse1.addComponent(mouseShape)
-    mouse2.addComponent(new Transform({position: new Vector3(26.54, 0.85, 3.9)}))
+    mouse2.addComponent(new Transform({position: new Vector3(26.54, 0.85, 3.9), scale: new Vector3(0.8,0.8,0.8)}))
     mouse2.addComponent(mouseShape)
+
+    //add animator
+    const mouseAnimator = new Animator()
+    const mouseAnimationClip = new AnimationState("Mouse_Action")
+    mouseAnimator.addClip(mouseAnimationClip)
+    mouse1.addComponent(mouseAnimator)
+    mouse2.addComponent(mouseAnimator)
+    mouseAnimationClip.play()
 
     //add maice entities to engine
     engine.addEntity(mouse1)
@@ -123,7 +131,7 @@ export function CreateRoom7(): void{
     //create hint for muna's question (ticket)
     const ticket = new Entity()
     ticket.addComponent(new GLTFShape("models/room7/Ticket.glb"))
-    ticket.addComponent(new Transform({position: new Vector3(18.28,0.24,11.48)}))
+    ticket.addComponent(new Transform({position: new Vector3(18.28,0.2,11.48)}))
 
     //animator for ticket
     const ticketAnimator = new Animator()

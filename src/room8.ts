@@ -15,13 +15,13 @@ export function CreateRoom8(): void{
     //create room entity
     const roomEntity = new Entity()
     //add gltf shape
-    roomEntity.addComponent(new GLTFShape("models/room8/room8.glb"))
+    roomEntity.addComponent(new GLTFShape("models/room8/Puzzle09_Game.glb"))
     //add and set transform
-    roomEntity.addComponent(new Transform({position: new Vector3(32,0,1)}))
+    roomEntity.addComponent(new Transform({position: new Vector3(19.0928,0,28.6582)}))
     //create animator
     const roomAnimator = new Animator()
     //create animation state for room
-    const roomAnimation = new AnimationState("idle", {looping: true}) 
+    const roomAnimation = new AnimationState("Spikes_Action", {looping: true}) 
     //add clip to animator
     roomAnimator.addClip(roomAnimation)
     //add animator to entity
@@ -31,14 +31,6 @@ export function CreateRoom8(): void{
     //add room to engine
     engine.addEntity(roomEntity)
 
-    //cage entity
-    const cageEntity = new Entity()
-    //cage gltf shape
-    cageEntity.addComponent(new GLTFShape("models/room8/cage.glb"))
-    //cage transform
-    cageEntity.addComponent(new Transform({position:new Vector3(4.5,0,2.5), rotation: Quaternion.Euler(0,-90,0)}))
-    //set as child of room entity
-    cageEntity.setParent(roomEntity)
 /*
     //button entity
     const buttonEntity = new Entity()
@@ -55,7 +47,7 @@ export function CreateRoom8(): void{
     //set mouse as child of room
     mouseEntity.setParent(roomEntity)
     //add gltf
-    mouseEntity.addComponent(new GLTFShape("models/generic/Mouse.glb"))
+    mouseEntity.addComponent(new GLTFShape("models/room8/Puzzle09_MouseWill.glb"))
     //create and add transform
     const mouseTransform = new Transform()
     mouseEntity.addComponent(mouseTransform)
@@ -63,7 +55,7 @@ export function CreateRoom8(): void{
     const mouseComponent = new MouseComponent(mouseEntity)
     mouseEntity.addComponent(mouseComponent)
     //add trigger for mouse
-    mouseEntity.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.2,0.4,0.2), new Vector3(0,0.15,0)),
+    mouseEntity.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.2,0.1,0.2), new Vector3(0,0,0)),
         MouseLayer, PikesLayer | BoxLayer | FanLayer | CageLayer,
         (entityEnter) =>{
             let triggerType = StateMachineCollisionEvent.BOXES
@@ -89,7 +81,7 @@ export function CreateRoom8(): void{
     //create bubble entity
     const bubbleEntity = new Entity()
     //add transform
-    bubbleEntity.addComponent(new Transform({position: new Vector3(0,0.2,0.05)}))
+    bubbleEntity.addComponent(new Transform({position: new Vector3(0,0.1,0.05)}))
     //create shape and add it as component
     const bubbleShape = new SphereShape()
     bubbleEntity.addComponent(bubbleShape)
@@ -121,14 +113,14 @@ export function CreateRoom8(): void{
 
     //config emitter for bubble particle system
     const bubbleParticleEmitter: ParticleSystem.IEmitterConfig = {
-        loop: false,
-        startDelay: 0,
-        maxParticles: 6,
         duration: 0,
-        particleLifeTime: 0.5,
+        loop: false,
+        maxParticles: 1,
+        particleLifeTime: 0.3,
         particleSpawnInterval: 0,
         sourceSize: Vector3.Zero(),
-        particlesBehavior: new BubbleParticlesBehavior(bubbleParticleMaterial)
+        startDelay: 0,
+        particlesBehavior: new ParticleSystem.BasicParticlesBehavior(bubbleParticleMaterial, null, null, Vector3.Zero(), null, null, new Vector3(0.4,0.4,0.4))
     }
 
     //create bubble particle system and add it to engine
@@ -180,17 +172,17 @@ export function CreateRoom8(): void{
 
     //create fans transfrom
     const fansTransform: Transform[] = [
-        new Transform({position: new Vector3(-0.5,0,1.5), rotation: Quaternion.Euler(0,90,0)}),
-        new Transform({position: new Vector3(-0.5,0,2.5), rotation: Quaternion.Euler(0,90,0)}), 
-        new Transform({position: new Vector3(2.5,0,-0.5)}), 
-        new Transform({position: new Vector3(3.5,0,-0.5)}), 
-        new Transform({position: new Vector3(0.5,0,5.5), rotation: Quaternion.Euler(0,180,0)}), 
-        new Transform({position: new Vector3(4.5,0,4.5), rotation: Quaternion.Euler(0,-90,0)}),
+        new Transform({position: new Vector3(-3.18875,1.01502,-0.57951), rotation: Quaternion.Euler(0,90,0)}),
+        new Transform({position: new Vector3(-3.18875,1.01502,0.02), rotation: Quaternion.Euler(0,90,0)}), 
+        new Transform({position: new Vector3(0.169518,1.01502,-2.94794)}), 
+        new Transform({position: new Vector3(0.75203,1.01502,-2.94794)}), 
+        new Transform({position: new Vector3(-0.873027,1.01502,3.0735), rotation: Quaternion.Euler(0,180,0)}), 
+        new Transform({position: new Vector3(1.9556,1.01502,1.08835), rotation: Quaternion.Euler(0,-90,0)}),
     ]
 
     fansTransform.forEach(transform => {
         //instantiate animation
-        let fanAnimation = new AnimationState("turnon",{looping:true})
+        let fanAnimation = new AnimationState("Fan_Action",{looping:true})
         //create animator
         let fanAnimator = new Animator()        
         //add clip to animator
@@ -213,7 +205,7 @@ export function CreateRoom8(): void{
         triggerSize.x = Math.abs(triggerSize.x)
         triggerSize.y = Math.abs(triggerSize.y)
         triggerSize.z = Math.abs(triggerSize.z)
-        let triggerPosition = new Vector3(0.2,1.5,1.25).rotate(transform.rotation)
+        let triggerPosition = new Vector3(0.2,0.65,1.35).rotate(transform.rotation)
         
         //create trigger component
         let triggerComponent = new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(triggerSize,triggerPosition), FanLayer)
@@ -250,21 +242,24 @@ export function CreateRoom8(): void{
     fans[4].getComponent(ToggleComponent).set(ToggleComponent.State.On)
 
     //room triggers
-    let roomTriggerEntities: Entity[] = [new Entity(),new Entity(),new Entity(),new Entity(),new Entity(),new Entity(),new Entity()]
+    let roomTriggerEntities: Entity[] = [new Entity(),new Entity(),new Entity(),new Entity(),new Entity(),new Entity(),new Entity(),new Entity()]
 
     //create pikes' triggers
-    roomTriggerEntities[0].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(0.5,0.25,0.5)), PikesLayer))
-    roomTriggerEntities[1].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.7,1),new Vector3(0.5,0.95,0.5)), PikesLayer))
-    roomTriggerEntities[2].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(3.5,0.25,4.5)), PikesLayer))
-    roomTriggerEntities[3].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.7,1),new Vector3(3.5,0.95,4.5)), PikesLayer))
+    roomTriggerEntities[0].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.52,0.06,0.52),new Vector3(0.212483,1.15162,-0.04)), PikesLayer))
+    roomTriggerEntities[1].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.52,0.4,0.52),new Vector3(-0.885757,1.17605,-1.14666)), PikesLayer))
+    roomTriggerEntities[2].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.52,0.06,0.52),new Vector3(-0.347696,1.15162,-0.575279)), PikesLayer))
+    roomTriggerEntities[3].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.52,0.4,0.52),new Vector3(0.729466,1.17605,1.08766)), PikesLayer))
+    roomTriggerEntities[4].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.52,0.06,0.52),new Vector3(-0.347696,1.15162,1.08902)), PikesLayer))
 
     //create boxes's triggers
-    roomTriggerEntities[4].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(1.5,0.25,1.5)), BoxLayer))
-    roomTriggerEntities[5].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(2.5,0.25,2.5)), BoxLayer))
-    roomTriggerEntities[6].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(1,0.5,1),new Vector3(1.5,0.25,4.5)), BoxLayer))
+    roomTriggerEntities[5].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.52,0.16,0.52),new Vector3(0.212483,1.04742,-0.04)), BoxLayer))
+    roomTriggerEntities[6].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.52,0.16,0.52),new Vector3(-0.347696,1.04742,-0.575279)), BoxLayer))
+    roomTriggerEntities[7].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.52,0.16,0.52),new Vector3(-0.347696,1.04742,1.08902)), BoxLayer))
 
     //create cage's trigger
-    cageEntity.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.5,1,1),new Vector3(-0.5,0.5,0)), CageLayer))
+    const cageTrigger = new Entity()
+    cageTrigger.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.52,0.16,0.52),new Vector3(1.0331,1.04742,-0.04)), CageLayer))
+    cageTrigger.setParent(roomEntity)
 
     //set triggers as child of room entity
     roomTriggerEntities.forEach(triggerEntity => {
@@ -329,7 +324,7 @@ class MouseStateAppear extends StateMachine.State{
      */
     onStart(){
         //set mouse to it initial position
-        this.mouseComponent.transform.position = new Vector3(0.5,0,1.5)
+        this.mouseComponent.transform.position = new Vector3(-0.872083,1,-0.579439)
         //set mouse to it initial scale
         this.mouseComponent.transform.scale = Vector3.Zero()
         //set direction to zero
@@ -376,22 +371,22 @@ class MouseStateWalking extends StateMachine.State{
      */
     onUpdateState(dt: number){
         //move mouse
-        this.mouseComponent.transform.position = this.mouseComponent.transform.position.add(this.mouseComponent.direction.scale(dt))
+        this.mouseComponent.transform.position = this.mouseComponent.transform.position.add(this.mouseComponent.direction.scale(0.5 * dt))
         //check room boundries to make the mouse bounce and go the other direction
-        if (this.mouseComponent.transform.position.x < 0.3){
-            this.mouseComponent.transform.position.x = 0.3
+        if (this.mouseComponent.transform.position.x < -1.12){
+            this.mouseComponent.transform.position.x = -1.12
             this.changeDirection()              
         }
-        else if (this.mouseComponent.transform.position.x > 3.7){
-            this.mouseComponent.transform.position.x = 3.7
+        else if (this.mouseComponent.transform.position.x > 0.98){
+            this.mouseComponent.transform.position.x = 0.98
             this.changeDirection()              
         }
-        if (this.mouseComponent.transform.position.z > 5){
-            this.mouseComponent.transform.position.z = 5
+        if (this.mouseComponent.transform.position.z > 1.33){
+            this.mouseComponent.transform.position.z = 1.33
             this.changeDirection()              
         }
-        else if (this.mouseComponent.transform.position.z < 0.3){
-            this.mouseComponent.transform.position.z = 0.3
+        else if (this.mouseComponent.transform.position.z < -1.37){
+            this.mouseComponent.transform.position.z = -1.37
             this.changeDirection()              
         }
         return true
@@ -463,10 +458,10 @@ class MouseBubbleStartState extends StateMachine.State{
         //let's make the bubble appear
         this.mouseComponent.bubble.getComponent(SphereShape).visible = true
         //scale the bubble to it's default scale
-        this.mouseComponent.bubble.addComponent(new ScaleTransformComponent(Vector3.Zero(), new Vector3(0.5,0.5,0.5), 1.5,()=>{
+        this.mouseComponent.bubble.addComponent(new ScaleTransformComponent(Vector3.Zero(), new Vector3(0.3,0.3,0.3), 1.5,()=>{
             //when bubble finish scaling up, whe move the mouse up in the air
             let currentPosition = this.mouseComponent.transform.position
-            let targetPosition = new Vector3(currentPosition.x, 1, currentPosition.z)
+            let targetPosition = new Vector3(currentPosition.x, 1.4, currentPosition.z)
             this.mouseComponent.mouseEntity.addComponent(new MoveTransformComponent(currentPosition, targetPosition, 1, ()=>{
                 //now mouse is fully up in the air
                 this.isUp = true
@@ -534,7 +529,7 @@ class MouseBubbleState extends StateMachine.State{
      * called when state starts
      */    
     onStart(){
-        this.time = 0
+        this.time = 0.5
     }
     /**
      * called when state is updated
@@ -545,23 +540,23 @@ class MouseBubbleState extends StateMachine.State{
         //increment time
         this.time += dt
         //calc new position according to mouse direction, speed and time
-        let newPosition = this.mouseComponent.transform.position.add(this.mouseComponent.direction.scale(0.5 * dt))
+        let newPosition = this.mouseComponent.transform.position.add(this.mouseComponent.direction.scale(0.2 * dt))
         //let's use the SIN function to move the mouse a little up and down
-        newPosition.y = 1 + Math.sin(this.time) * 0.1
+        newPosition.y = 1.5 + Math.sin(this.time) * 0.1
         //set new position to mouse
         this.mouseComponent.transform.position = newPosition
         //check room boundries
-        if (this.mouseComponent.transform.position.x < 0.3){
-            this.mouseComponent.transform.position.x = 0.3
+        if (this.mouseComponent.transform.position.x < -1.12){
+            this.mouseComponent.transform.position.x = -1.12
         }
-        else if (this.mouseComponent.transform.position.x > 3.7){
-            this.mouseComponent.transform.position.x = 3.7
+        else if (this.mouseComponent.transform.position.x > 0.98){
+            this.mouseComponent.transform.position.x = 0.98
         }
-        if (this.mouseComponent.transform.position.z > 5){
-            this.mouseComponent.transform.position.z = 5
+        if (this.mouseComponent.transform.position.z > 1.33){
+            this.mouseComponent.transform.position.z = 1.33
         }
-        else if (this.mouseComponent.transform.position.z < 0.3){
-            this.mouseComponent.transform.position.z = 0.3
+        else if (this.mouseComponent.transform.position.z < -1.37){
+            this.mouseComponent.transform.position.z = -1.37
         }
         return true
     }
@@ -668,7 +663,7 @@ class MouseFallingState extends StateMachine.State{
         this.mouseComponent.mouseEntity.addComponent(new MoveTransformComponent(this.mouseComponent.transform.position, this.mouseComponent.transform.position.add(new Vector3(0,0.1,0)),0.2,
         ()=>{
             //calc position to the floor
-            let targetPosition = new Vector3(this.mouseComponent.transform.position.x,0,this.mouseComponent.transform.position.z)
+            let targetPosition = new Vector3(this.mouseComponent.transform.position.x,1,this.mouseComponent.transform.position.z)
             //move the mouse to the floor
             this.mouseComponent.mouseEntity.addComponent(new MoveTransformComponent(this.mouseComponent.transform.position, targetPosition, 0.5, ()=>{
                 //state should end now
@@ -769,7 +764,7 @@ class MouseEnterCageState extends StateMachine.State{
         //the state is running
         this.isStateRunning = true
         //let's move the mouse inside the cage
-        this.mouseComponent.mouseEntity.addComponent(new MoveTransformComponent(this.mouseComponent.transform.position, new Vector3(4.5,0,2.7), 1.5, ()=>{
+        this.mouseComponent.mouseEntity.addComponent(new MoveTransformComponent(this.mouseComponent.transform.position, new Vector3(1.85275,1.06965,-0.04), 1.5, ()=>{
             //state should end now
             this.isStateRunning = false
         }, TransformSystem.Interpolation.EASEQUAD))
@@ -833,59 +828,4 @@ class StateMachineOnClickEvent implements StateMachine.IStateEvent{
         this.bubbleState = bubbleState
         this.burstState = burstState
     }
-}
-
-/**
- * behavior for bubble's particles
- */
-class BubbleParticlesBehavior implements ParticleSystem.IParticlesBehavior{
-    private particleIndex: number = 0
-    private particleMaterial: Material
-
-    /**
-     * 
-     * @param particleMaterial material that we are going to use for the particles
-     */
-    constructor(particleMaterial: Material){
-        this.particleMaterial = particleMaterial
-    }
-    /**
-     * called when a particle is created
-     * @param particleEntity particle's entity
-     * @param properties properties of the particle
-     */
-    onCreate(particleEntity: Readonly<Entity>, properties: Readonly<ParticleSystem.ParticleProperties>) { 
-        //calc an angle for this particle
-        let angle = 60 * this.particleIndex
-        //set it's direction according to the calculated angle
-        let direction = Vector3.Right().rotate(Quaternion.Euler(0,0,angle))
-        //offset from the source to appear
-        let startOffset = direction.scale(0.05)
-        //create a bundle for this particle
-        properties.setBundle({
-            particleStartOffset: startOffset
-        })
-        //increase particle index for calculating angle for next particle
-        this.particleIndex++
-        //add material to the particle
-        particleEntity.addComponent(this.particleMaterial)
-        //set particle scale
-        properties.setScale(new Vector3(0.1,0.1,0.1))
-        //set particle velocity
-        properties.setVelocity(direction.scale(1.5))
-        //set particle material
-        properties.setMaterial(this.particleMaterial)
-    }   
-    /**
-     * called when a particle is spawned
-     * @param properties properties of the particle
-     */ 
-    onSpawn(properties: Readonly<ParticleSystem.ParticleProperties>) {
-        //set particle initial position according to it's offset
-        let position = properties.getPosition().add(properties.getBundle().particleStartOffset)
-        properties.setPosition(position)
-    }
-    onUpdate(properties: Readonly<ParticleSystem.ParticleProperties>, lifeTimeRatio: number) {
-    }
-
 }
