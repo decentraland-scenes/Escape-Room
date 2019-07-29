@@ -8,15 +8,10 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
     let audioAccessDenied = new AudioClip("sounds/access_denied.mp3")
     let audioSpotlight = new AudioClip("sounds/spotlight_on.mp3")
 
-    //load spotlight shape
-    const spotLightShape = new GLTFShape("models/room5/spotlight.glb")
-    //load spotlight's light shape
-    const spotLightLightShape = new GLTFShape("models/room5/spotlightlight.glb")
-
     //create spotlights
-    const spotLight1 = CreateSpotlight(new Vector3(32,0,12), Quaternion.Identity, spotLightShape, spotLightLightShape, "1", audioSpotlight)
-    const spotLight2 = CreateSpotlight(new Vector3(32,0,8), Quaternion.Euler(0,180,0), spotLightShape, spotLightLightShape, "0", audioSpotlight)
-    const spotLight3 = CreateSpotlight(new Vector3(34.1,0,10), Quaternion.Euler(0,90,0), spotLightShape, spotLightLightShape, "4", audioSpotlight)
+    const spotLight1 = CreateSpotlight(new Vector3(26.7078,0.1,20.7646), Quaternion.Identity, new GLTFShape("models/room5/spotlightlight.glb"), "1", audioSpotlight)
+    const spotLight2 = CreateSpotlight(new Vector3(26.725,0.1,20.7646), Quaternion.Euler(0,90,0), new GLTFShape("models/room5/spotlightlight.glb"), "0", audioSpotlight)
+    const spotLight3 = CreateSpotlight(new Vector3(26.7188,0.1,20.7646), Quaternion.Euler(0,180,0), new GLTFShape("models/room5/spotlightlight.glb"), "4", audioSpotlight)
 
     //create muna's statue
     const munaStatue = new Entity()
@@ -28,33 +23,6 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
         }
     }))
     engine.addEntity(munaStatue)
-
-    //create carpet to hide hint for dialog with muna under it
-    const carpet = new Entity()
-    carpet.addComponent(new GLTFShape("models/room5/carpet.glb"))
-    carpet.addComponent(new Transform({position: new Vector3(29.1, 0, 10)}))
-    carpet.addComponent(new ToggleComponent(ToggleComponent.State.Off, value=>{
-        if (value == ToggleComponent.State.On){
-            carpet.addComponent(new RotateTransformComponent(carpet.getComponent(Transform).rotation, Quaternion.Euler(0,45,0), 0.7))
-        }
-        else{
-            carpet.addComponent(new RotateTransformComponent(carpet.getComponent(Transform).rotation, Quaternion.Euler(0,0,0), 0.7))
-        }
-    }))
-    carpet.addComponent(new OnClick(event=>{
-        carpet.getComponent(ToggleComponent).toggle()
-    }))
-    engine.addEntity(carpet)
-
-    //create material for first hint
-    const blueHintMaterial = new Material()
-    blueHintMaterial.albedoTexture = new Texture("images/room5/blue_cover.jpg")
-    //create first hint
-    const blueHint = new Entity()
-    blueHint.addComponent(new PlaneShape())
-    blueHint.addComponent(blueHintMaterial)
-    blueHint.addComponent(new Transform({position:new Vector3(27.9, 0, 9.3), rotation: Quaternion.Euler(90,0,0), scale: new Vector3(0.5,0.5,0.5)}))
-    engine.addEntity(blueHint)
 
     //load textures for dialog
     const playerPortraitDefault = new Texture("images/dialogs/player_default.png", {hasAlpha: true})
@@ -68,17 +36,17 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
     const dialogConfig: SimpleDialog.DialogConfig = {
         canvas: gameCanvas,
         leftPortrait: {
-            width: 128,
-            height: 192,
-            sourceWidth: 128,
-            sourceHeight: 192,
+            width: 256,
+            height: 256,
+            sourceWidth: 256,
+            sourceHeight: 256,
             positionX: "-17%"
         },
         rightPortrait: {
-            width: 128,
-            height: 192,
-            sourceWidth: 128,
-            sourceHeight: 192,
+            width: 256,
+            height: 256,
+            sourceWidth: 256,
+            sourceHeight: 256,
             positionX: "15%"
         },
         dialogText:{
@@ -244,7 +212,7 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
         .endif()
         
     //set callback for whend dialog finish
-    dialog.setFinishCallback(()=>gameCanvas.visible = false)
+    //dialog.setFinishCallback(()=>gameCanvas.visible = false)
 
     //create the numpad lock
     const numPadLock = new Entity()
@@ -468,52 +436,30 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
     engine.addEntity(door)
 }
 
-function CreateSpotlight(position: Vector3, rotation: Quaternion, spotlightShape: GLTFShape, spotlightLightShape: GLTFShape, hiddenNumberValue: string, audioClip: AudioClip): Entity{
+function CreateSpotlight(position: Vector3, rotation: Quaternion, spotlightLightShape: GLTFShape, hiddenNumberValue: string, audioClip: AudioClip): Entity{
     const rootEntity = new Entity()
     rootEntity.addComponent(new Transform({position: position, rotation:rotation}))
     rootEntity.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
         if (value == ToggleComponent.State.On){
-            if (!spotLightLight.isAddedToEngine()){
-                engine.addEntity(spotLightLight)
-            }
-            if (!hiddenNumber.isAddedToEngine()){
-                engine.addEntity(hiddenNumber)
-            }
-            spotLight.addComponentOrReplace(new AudioSource(audioClip))
-            spotLight.getComponent(AudioSource).playOnce()
-        }
-        else{
-            if (spotLightLight.isAddedToEngine()){
-                engine.removeEntity(spotLightLight)
-            }
-            if (hiddenNumber.isAddedToEngine()){
-                engine.removeEntity(hiddenNumber)
-            }
+            const spotLightLight = new Entity()
+            spotLightLight.addComponent(spotlightLightShape)
+            spotLightLight.setParent(rootEntity)
+
+            const hiddenNumber = new Entity()
+            const hiddenNumberShape = new TextShape()
+            hiddenNumber.addComponent(hiddenNumberShape)
+            hiddenNumber.addComponent(new Transform({position: new Vector3(0,0.9,-0.4)}))
+            hiddenNumber.setParent(rootEntity)
+        
+            hiddenNumberShape.value = hiddenNumberValue
+            hiddenNumberShape.fontSize = 5
+
+            spotLightLight.addComponentOrReplace(new AudioSource(audioClip))
+            spotLightLight.getComponent(AudioSource).playOnce()
         }
     }))
 
-    const spotLight = new Entity()
-    spotLight.addComponent(spotlightShape)
-    spotLight.addComponent(new Transform())
-    spotLight.setParent(rootEntity)
-
-    const spotLightLight = new Entity()
-    spotLightLight.addComponent(spotlightLightShape)
-    spotLightLight.addComponent(new Transform({position: new Vector3(0,0.3,0), rotation: Quaternion.Euler(30,0,0)}))
-    spotLightLight.setParent(rootEntity)
-
-    const hiddenNumber = new Entity()
-    const hiddenNumberShape = new TextShape()
-    hiddenNumber.addComponent(hiddenNumberShape)
-    hiddenNumber.addComponent(new Transform({position: new Vector3(0,1,-1.5), rotation: Quaternion.Euler(0,180,0)}))
-    hiddenNumber.setParent(rootEntity)
-
-    hiddenNumberShape.value = hiddenNumberValue
-    hiddenNumberShape.fontSize = 20
-
     engine.addEntity(rootEntity)
-    engine.removeEntity(spotLightLight)
-    engine.removeEntity(hiddenNumber)
 
     return rootEntity
 }
