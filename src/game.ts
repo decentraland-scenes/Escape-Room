@@ -1,4 +1,3 @@
-import { TransformSystem } from "./modules/transfromSystem";
 import { CreateRoom0 } from "./room0";
 import { CreateRoom1 } from "./room1";
 import { CreateRoom2 } from "./room2";
@@ -12,11 +11,8 @@ import { TriggerSystem } from "./modules/triggerSystem";
 
 const gameCanvas = new UICanvas()
 
-const transformSystem = new TransformSystem()
-engine.addSystem(transformSystem)
-
-const tiggerSytem = new TriggerSystem()
-engine.addSystem(tiggerSytem)
+const tiggerSystem = new TriggerSystem()
+engine.addSystem(tiggerSystem)
 
 const scene = new Entity()
 scene.addComponent(new GLTFShape("models/scene.glb"))
