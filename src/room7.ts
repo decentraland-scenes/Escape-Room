@@ -1,5 +1,5 @@
+import utils from "../node_modules/decentraland-ecs-utils/index"
 import { TriggerSystem } from "./modules/triggerSystem";
-import { FollowPathComponent, RotateTransformComponent } from "./modules/transfromSystem";
 
 export function CreateRoom7(): void{
     //variable to store how many tiles does the player paint
@@ -219,7 +219,7 @@ class MouseFollowPathComponent {
                 //rotate mouse to look at it's next point in path
                 mouseEntiy.getComponent(Transform).lookAt(path[1])
                 //add component to follow the path
-                mouseEntiy.addComponentOrReplace(new FollowPathComponent(path, this.movingTime, 
+                mouseEntiy.addComponentOrReplace(new utils.FollowPathComponent(path, this.movingTime, 
                     ()=>{
                         //when path is finished we reset mouse variables
                         this.isInIdleTime = true

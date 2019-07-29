@@ -12,5 +12,8 @@
   },
   "devDependencies": {
     "decentraland-ecs": "^6.2.3"
+  },
+  "dependencies": {
+    "decentraland-ecs-utils": "^1.0.1"
   }
 }

@@ -1,6 +1,5 @@
-import { ToggleComponent } from "./modules/toggleComponent";
+import utils from "../node_modules/decentraland-ecs-utils/index"
 import { TriggerSystem } from "./modules/triggerSystem";
-import { MoveTransformComponent } from "./modules/transfromSystem";
 
 export function CreateRoom2() : void{
     //create spikes
@@ -25,8 +24,8 @@ export function CreateRoom2() : void{
     spikes.addComponent(spikesAnimator)
 
     //add toggle for spikes up (on) or down (off)
-    spikes.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
-        if (value == ToggleComponent.State.On){
+    spikes.addComponent(new utils.ToggleComponent(utils.ToggleState.Off, value =>{
+        if (value == utils.ToggleState.On){
             //stop previous animation as a workaround to a bug with animations
             spikes.getComponent(Animator).getClip("Door_Open").stop()
             //on On play appear animation
@@ -47,10 +46,10 @@ export function CreateRoom2() : void{
     spikeTriggerEntity.addComponent(new Transform({position: new Vector3(25.5,7.17,19.5)}))
     spikeTriggerEntity.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(4.2,3,8),Vector3.Zero()), 0, 0, null, null, 
     ()=>{
-        spikes.getComponent(ToggleComponent).set(ToggleComponent.State.On)
+        spikes.getComponent(utils.ToggleComponent).set(utils.ToggleState.On)
     },
     ()=>{
-        spikes.getComponent(ToggleComponent).set(ToggleComponent.State.Off)
+        spikes.getComponent(utils.ToggleComponent).set(utils.ToggleState.Off)
     }))
 
     //create the button that we'll use to open the door
@@ -74,7 +73,7 @@ export function CreateRoom2() : void{
     button.addComponent(new OnClick(event =>{
         if (spikeTriggerEntity.getComponent(TriggerSystem.TriggerComponent).enabled){
             spikeTriggerEntity.getComponent(TriggerSystem.TriggerComponent).enabled = false
-            spikes.getComponent(ToggleComponent).set(ToggleComponent.State.Off)
+            spikes.getComponent(utils.ToggleComponent).set(utils.ToggleState.Off)
         }
         button.getComponent(AudioSource).playOnce()
         buttonAnimator.getClip("Button_Action").play()
@@ -108,57 +107,57 @@ export function CreateRoom2() : void{
     fern4.addComponent(new AudioSource(fernMoveAudioClip))
 
     //add toggle component to set two states to the entity: normal or moved
-    fern.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
-        if (value == ToggleComponent.State.On){
-            fern.addComponentOrReplace(new MoveTransformComponent(fern.getComponent(Transform).position, 
+    fern.addComponent(new utils.ToggleComponent(utils.ToggleState.Off, value =>{
+        if (value == utils.ToggleState.On){
+            fern.addComponentOrReplace(new utils.MoveTransformComponent(fern.getComponent(Transform).position, 
                 fern.getComponent(Transform).position.add(new Vector3(0,0,-0.5)), 0.5))
 
             fern.getComponent(AudioSource).playOnce()
         }
         else{
-            fern.addComponentOrReplace(new MoveTransformComponent(fern.getComponent(Transform).position, 
+            fern.addComponentOrReplace(new utils.MoveTransformComponent(fern.getComponent(Transform).position, 
                 new Vector3(23.2489,5.5071,23.813), 0.5))
 
             fern.getComponent(AudioSource).playOnce()
         }
     }))
-    fern2.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
-        if (value == ToggleComponent.State.On){
-            fern2.addComponentOrReplace(new MoveTransformComponent(fern2.getComponent(Transform).position, 
+    fern2.addComponent(new utils.ToggleComponent(utils.ToggleState.Off, value =>{
+        if (value == utils.ToggleState.On){
+            fern2.addComponentOrReplace(new utils.MoveTransformComponent(fern2.getComponent(Transform).position, 
                 fern2.getComponent(Transform).position.add(new Vector3(0,0,-0.5)), 0.5))
 
             fern2.getComponent(AudioSource).playOnce()
         }
         else{
-            fern2.addComponentOrReplace(new MoveTransformComponent(fern2.getComponent(Transform).position, 
+            fern2.addComponentOrReplace(new utils.MoveTransformComponent(fern2.getComponent(Transform).position, 
                 new Vector3(26.9356,5.52006,23.4817), 0.5))
 
             fern2.getComponent(AudioSource).playOnce()
         }
     }))
-    fern3.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
-        if (value == ToggleComponent.State.On){
-            fern3.addComponentOrReplace(new MoveTransformComponent(fern3.getComponent(Transform).position, 
+    fern3.addComponent(new utils.ToggleComponent(utils.ToggleState.Off, value =>{
+        if (value == utils.ToggleState.On){
+            fern3.addComponentOrReplace(new utils.MoveTransformComponent(fern3.getComponent(Transform).position, 
                 fern3.getComponent(Transform).position.add(new Vector3(0,0,0.5)), 0.5))
 
             fern3.getComponent(AudioSource).playOnce()
         }
         else{
-            fern3.addComponentOrReplace(new MoveTransformComponent(fern3.getComponent(Transform).position, 
+            fern3.addComponentOrReplace(new utils.MoveTransformComponent(fern3.getComponent(Transform).position, 
                 new Vector3(23.4513,5.50571,16.8218), 0.5))
 
             fern3.getComponent(AudioSource).playOnce()
         }
     }))
-    fern4.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
-        if (value == ToggleComponent.State.On){
-            fern4.addComponentOrReplace(new MoveTransformComponent(fern4.getComponent(Transform).position, 
+    fern4.addComponent(new utils.ToggleComponent(utils.ToggleState.Off, value =>{
+        if (value == utils.ToggleState.On){
+            fern4.addComponentOrReplace(new utils.MoveTransformComponent(fern4.getComponent(Transform).position, 
                 fern4.getComponent(Transform).position.add(new Vector3(0,0,0.5)), 0.5))
 
             fern4.getComponent(AudioSource).playOnce()
         }
         else{
-            fern4.addComponentOrReplace(new MoveTransformComponent(fern4.getComponent(Transform).position, 
+            fern4.addComponentOrReplace(new utils.MoveTransformComponent(fern4.getComponent(Transform).position, 
                 new Vector3(26.9878,5.51511,16.8279), 0.5))
 
             fern4.getComponent(AudioSource).playOnce()
@@ -167,16 +166,16 @@ export function CreateRoom2() : void{
 
     //add onclick component to listen for click and change geckobush toggle state
     fern.addComponent(new OnClick(event=>{
-        fern.getComponent(ToggleComponent).toggle()
+        fern.getComponent(utils.ToggleComponent).toggle()
     }))
     fern2.addComponent(new OnClick(event=>{
-        fern2.getComponent(ToggleComponent).toggle()
+        fern2.getComponent(utils.ToggleComponent).toggle()
     }))
     fern3.addComponent(new OnClick(event=>{
-        fern3.getComponent(ToggleComponent).toggle()
+        fern3.getComponent(utils.ToggleComponent).toggle()
     }))
     fern4.addComponent(new OnClick(event=>{
-        fern4.getComponent(ToggleComponent).toggle()
+        fern4.getComponent(utils.ToggleComponent).toggle()
     }))
 
     //add entities to engine

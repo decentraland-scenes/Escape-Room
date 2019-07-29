@@ -1,13 +1,13 @@
-import { Timer, TimerSystem } from "./modules/timerSystem";
+import utils from "../node_modules/decentraland-ecs-utils/index"
 
 export function CreateRoom1() : void{
     //create a timer that will keep the door open for X amount of seconds
-    let countdownTimer = new Timer(5)
+    const openDoorTime = 5 //millisecs
 
     //function to convert seconds left in timer to a formatted string
-    let formatTimeString = (seconds: number) =>{
-        let mins = Math.floor(countdownTimer.getTimeLeft() / 60)
-        let secs = Math.floor(countdownTimer.getTimeLeft() % 60)
+    let formatCountdownString = (seconds: number) =>{
+        let mins = Math.floor(seconds/ 60)
+        let secs = Math.floor(seconds % 60)
         return mins.toLocaleString(undefined, {minimumIntegerDigits: 2}) + ":" + secs.toLocaleString(undefined, {minimumIntegerDigits: 2})     
     }
 
@@ -70,34 +70,38 @@ export function CreateRoom1() : void{
     countdown.addComponent(new Transform({position: new Vector3(0,0,0.1), rotation: Quaternion.Euler(20,180,0) }))
 
     //create text shape for countdown
-    let countdownTextShape = new TextShape(formatTimeString(countdownTimer.getTimeLeft()))
+    let countdownTextShape = new TextShape(formatCountdownString(openDoorTime))
     countdownTextShape.color = Color3.Red()
     countdownTextShape.fontSize = 5
     countdown.addComponent(countdownTextShape)
 
-    //set to listen for countdown timer's update
-    countdownTimer.setOnTimerUpdate(dt=>{
-        countdownTextShape.value = formatTimeString(countdownTimer.getTimeLeft())
-    })
-
-    //listen for when we reach to the end of the countdown
-    countdownTimer.setOnTimerEnds(()=>{
-        //reset countdown
-        countdownTimer.reset()
-        //stop previous animation as a workaround to a bug with animations
-        doorAnimator.getClip("Door_Open").stop()
-        //play Close animation
-        doorAnimator.getClip("Door_Close").play()
-        //play door sound
-        doorAudioSource.playOnce()   
-        //reset countdown text value
-        countdownTextShape.value = formatTimeString(countdownTimer.getTimeLeft())
-    })
-
     //listen for click event to toggle door state
     button.addComponent(new OnClick(event =>{
         //check if timer is running
-        if (!countdownTimer.isRunning()){
+        if (!countDownDisplayer.hasComponent(utils.Interval)){
+            //set countdown
+            let countdown = openDoorTime
+
+            //create 1 second interval
+            countDownDisplayer.addComponent(new utils.Interval(1000,()=>{
+                countdown --
+                if (countdown > 0){
+                    countdownTextShape.value = formatCountdownString(countdown)
+                }
+                else{
+                    //reset countdown
+                    countDownDisplayer.removeComponent(utils.Interval)
+                    //stop previous animation as a workaround to a bug with animations
+                    doorAnimator.getClip("Door_Open").stop()
+                    //play Close animation
+                    doorAnimator.getClip("Door_Close").play()
+                    //play door sound
+                    doorAudioSource.playOnce()   
+                    //reset countdown text value
+                    countdownTextShape.value = formatCountdownString(openDoorTime)
+                }
+            }))
+
             //stop previous animation as a workaround to a bug with animations
             doorAnimator.getClip("Door_Close").stop()
             //play Open animation
@@ -109,10 +113,6 @@ export function CreateRoom1() : void{
             //play button animation
             buttonAnimator.getClip("Button_Action").stop()
             buttonAnimator.getClip("Button_Action").play()
-            //reset countdown from previous state
-            countdownTimer.reset()
-            //make the timer run
-            TimerSystem.instance.runTimer(countdownTimer)
         }
     }))
 

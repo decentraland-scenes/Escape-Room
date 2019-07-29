@@ -1,6 +1,5 @@
 import { SimpleDialog } from "./modules/simpleDialog";
-import { ToggleComponent } from "./modules/toggleComponent";
-import { RotateTransformComponent } from "./modules/transfromSystem";
+import utils from "../node_modules/decentraland-ecs-utils/index"
 
 export function CreateRoom5(gameCanvas: UICanvas) : void{
     //audio clips
@@ -138,7 +137,7 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
                                     .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
                                     .say(()=>"Yes it is...",{color: Color4.Yellow()})
                                     .say(()=>"\"In the midst of darkness, light persists.\"",{color: Color4.Yellow()})
-                                    .call(()=>spotLight1.getComponent(ToggleComponent).set(ToggleComponent.State.On))
+                                    .call(()=>spotLight1.getComponent(utils.ToggleComponent).set(utils.ToggleState.On))
                                 .endOption()
                                 .option(()=>"Green")
                                     .say(()=>"Green",{color: Color4.White()})
@@ -169,7 +168,7 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
                                         .say(()=>"The books are better than the movies...",{color: Color4.Yellow()})
                                         .say(()=>"...",{color: Color4.White()})
                                         .say(()=>"\"Give light, and the darkness will disappear of itself.\"",{color: Color4.Yellow()})
-                                        .call(()=>spotLight2.getComponent(ToggleComponent).set(ToggleComponent.State.On))
+                                        .call(()=>spotLight2.getComponent(utils.ToggleComponent).set(utils.ToggleState.On))
                                     .endOption()
                                 .endOptionsGroup()
                             .else()
@@ -195,7 +194,7 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
                                             .say(()=>"Marengo...",{color: Color4.Yellow()})
                                             .say(()=>"That answer is correct!",{color: Color4.Yellow()})
                                             .say(()=>"\"Give light and people will find the way.\"")
-                                            .call(()=>spotLight3.getComponent(ToggleComponent).set(ToggleComponent.State.On))
+                                            .call(()=>spotLight3.getComponent(utils.ToggleComponent).set(utils.ToggleState.On))
                                         .endOption()
                                     .endOptionsGroup()
                                 .endif()
@@ -439,8 +438,8 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
 function CreateSpotlight(position: Vector3, rotation: Quaternion, spotlightLightShape: GLTFShape, hiddenNumberValue: string, audioClip: AudioClip): Entity{
     const rootEntity = new Entity()
     rootEntity.addComponent(new Transform({position: position, rotation:rotation}))
-    rootEntity.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
-        if (value == ToggleComponent.State.On){
+    rootEntity.addComponent(new utils.ToggleComponent(utils.ToggleState.Off, value =>{
+        if (value == utils.ToggleState.On){
             const spotLightLight = new Entity()
             spotLightLight.addComponent(spotlightLightShape)
             spotLightLight.setParent(rootEntity)

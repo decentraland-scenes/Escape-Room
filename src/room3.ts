@@ -1,6 +1,4 @@
-import { ToggleComponent } from "./modules/toggleComponent";
-
-import { MoveTransformComponent, RotateTransformComponent } from "./modules/transfromSystem";
+import utils from "../node_modules/decentraland-ecs-utils/index"
 
 export function CreateRoom3() : void{
     //constants
@@ -101,35 +99,35 @@ export function CreateRoom3() : void{
     globe.addComponent(new AudioSource(audioClipMoveObject1))
 
     //toggle for bookshelf
-    bookshelf.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
-        if (value == ToggleComponent.State.On){
+    bookshelf.addComponent(new utils.ToggleComponent(utils.ToggleState.Off, value =>{
+        if (value == utils.ToggleState.On){
             //move bookshelf when it's toggled on
-            bookshelf.addComponentOrReplace(new MoveTransformComponent(bookshelf.getComponent(Transform).position,bookshelfDefaultPos.add(new Vector3(1.5,0,0)), 3))
+            bookshelf.addComponentOrReplace(new utils.MoveTransformComponent(bookshelf.getComponent(Transform).position,bookshelfDefaultPos.add(new Vector3(1.5,0,0)), 3))
             //play sound when moved
             bookshelf.getComponent(AudioSource).playOnce()
         }
         else{
             //move back to default position when bookshelf's toggled off
-            bookshelf.addComponentOrReplace(new MoveTransformComponent(bookshelf.getComponent(Transform).position,bookshelfDefaultPos, 3))
+            bookshelf.addComponentOrReplace(new utils.MoveTransformComponent(bookshelf.getComponent(Transform).position,bookshelfDefaultPos, 3))
             //play sound when moved
             bookshelf.getComponent(AudioSource).playOnce()
         }
     }))
 
     //toggle for chandelier
-    chandelier.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
-        if (value == ToggleComponent.State.On){
+    chandelier.addComponent(new utils.ToggleComponent(utils.ToggleState.Off, value =>{
+        if (value == utils.ToggleState.On){
             //rotate chandelier when toggled on and activate bookshelf
-            chandelier.addComponentOrReplace(new RotateTransformComponent(chandelier.getComponent(Transform).rotation,Quaternion.Euler(0,0,30), 0.5, ()=>{
-                bookshelf.getComponent(ToggleComponent).set(ToggleComponent.State.On)
+            chandelier.addComponentOrReplace(new utils.RotateTransformComponent(chandelier.getComponent(Transform).rotation,Quaternion.Euler(0,0,30), 0.5, ()=>{
+                bookshelf.getComponent(utils.ToggleComponent).set(utils.ToggleState.On)
             }))
             //play sound when rotated
             chandelier.getComponent(AudioSource).playOnce()
         }
         else{
             //rotate back to default position when off and deactivate bookshelf
-            chandelier.addComponentOrReplace(new RotateTransformComponent(chandelier.getComponent(Transform).rotation,chandelierDefaultRot, 0.5, ()=>{
-                bookshelf.getComponent(ToggleComponent).set(ToggleComponent.State.Off)
+            chandelier.addComponentOrReplace(new utils.RotateTransformComponent(chandelier.getComponent(Transform).rotation,chandelierDefaultRot, 0.5, ()=>{
+                bookshelf.getComponent(utils.ToggleComponent).set(utils.ToggleState.Off)
             }))
             //play sound when rotated
             chandelier.getComponent(AudioSource).playOnce()
@@ -138,92 +136,92 @@ export function CreateRoom3() : void{
 
     //listen for click on chandelier and toggle it's state
     chandelier.addComponent(new OnClick(event=>{
-        chandelier.getComponent(ToggleComponent).toggle()
+        chandelier.getComponent(utils.ToggleComponent).toggle()
     }))
 
     //toggle for book
-    book.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
-        if (value == ToggleComponent.State.On){
-            book.addComponentOrReplace(new RotateTransformComponent(book.getComponent(Transform).rotation,Quaternion.Euler(0,0,-25), 0.5))
+    book.addComponent(new utils.ToggleComponent(utils.ToggleState.Off, value =>{
+        if (value == utils.ToggleState.On){
+            book.addComponentOrReplace(new utils.RotateTransformComponent(book.getComponent(Transform).rotation,Quaternion.Euler(0,0,-25), 0.5))
             book.getComponent(AudioSource).playOnce()
         }
         else{
-            book.addComponentOrReplace(new RotateTransformComponent(book.getComponent(Transform).rotation,bookDefaultRot, 0.5))
+            book.addComponentOrReplace(new utils.RotateTransformComponent(book.getComponent(Transform).rotation,bookDefaultRot, 0.5))
             book.getComponent(AudioSource).playOnce()
         }
     }))
 
     //listen for click on book
     book.addComponent(new OnClick(event=>{
-        book.getComponent(ToggleComponent).toggle()
+        book.getComponent(utils.ToggleComponent).toggle()
     }))
 
     //toggle for book
-    book2.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
-        if (value == ToggleComponent.State.On){
-            book2.addComponentOrReplace(new MoveTransformComponent(book2.getComponent(Transform).position,book2DefaultPos.add(new Vector3(0,0,-0.2)), 0.5))
+    book2.addComponent(new utils.ToggleComponent(utils.ToggleState.Off, value =>{
+        if (value == utils.ToggleState.On){
+            book2.addComponentOrReplace(new utils.MoveTransformComponent(book2.getComponent(Transform).position,book2DefaultPos.add(new Vector3(0,0,-0.2)), 0.5))
             book2.getComponent(AudioSource).playOnce()
         }
         else{
-            book2.addComponentOrReplace(new MoveTransformComponent(book2.getComponent(Transform).position,book2DefaultPos, 0.5))
+            book2.addComponentOrReplace(new utils.MoveTransformComponent(book2.getComponent(Transform).position,book2DefaultPos, 0.5))
             book2.getComponent(AudioSource).playOnce()
         }
     }))
 
     //listen for click on wine book
     book2.addComponent(new OnClick(event=>{
-        book2.getComponent(ToggleComponent).toggle()
+        book2.getComponent(utils.ToggleComponent).toggle()
     }))
 
     //toggle for wine glass
-    wineGlass.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
-        if (value == ToggleComponent.State.On){
-            wineGlass.addComponentOrReplace(new MoveTransformComponent(wineGlass.getComponent(Transform).position,wineGlassDefaultPos.add(new Vector3(0.2,0,0)), 0.5))
+    wineGlass.addComponent(new utils.ToggleComponent(utils.ToggleState.Off, value =>{
+        if (value == utils.ToggleState.On){
+            wineGlass.addComponentOrReplace(new utils.MoveTransformComponent(wineGlass.getComponent(Transform).position,wineGlassDefaultPos.add(new Vector3(0.2,0,0)), 0.5))
             wineGlass.getComponent(AudioSource).playOnce()
         }
         else{
-            wineGlass.addComponentOrReplace(new MoveTransformComponent(wineGlass.getComponent(Transform).position,wineGlassDefaultPos, 0.5))
+            wineGlass.addComponentOrReplace(new utils.MoveTransformComponent(wineGlass.getComponent(Transform).position,wineGlassDefaultPos, 0.5))
             wineGlass.getComponent(AudioSource).playOnce()
         }
     }))
 
     //listen for click on wine glass
     wineGlass.addComponent(new OnClick(event=>{
-        wineGlass.getComponent(ToggleComponent).toggle()
+        wineGlass.getComponent(utils.ToggleComponent).toggle()
     }))
 
     //toggle for globe
-    globe.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
-        if (value == ToggleComponent.State.On){
-            globe.addComponentOrReplace(new RotateTransformComponent(globe.getComponent(Transform).rotation,Quaternion.Euler(174, -26.43, -149.37), 0.5))
+    globe.addComponent(new utils.ToggleComponent(utils.ToggleState.Off, value =>{
+        if (value == utils.ToggleState.On){
+            globe.addComponentOrReplace(new utils.RotateTransformComponent(globe.getComponent(Transform).rotation,Quaternion.Euler(174, -26.43, -149.37), 0.5))
             globe.getComponent(AudioSource).playOnce()
         }
         else{
-            globe.addComponentOrReplace(new RotateTransformComponent(globe.getComponent(Transform).rotation,globeDefaultRot, 0.5))
+            globe.addComponentOrReplace(new utils.RotateTransformComponent(globe.getComponent(Transform).rotation,globeDefaultRot, 0.5))
             globe.getComponent(AudioSource).playOnce()
         }
     }))
 
     //listen for click on globe
     globe.addComponent(new OnClick(event=>{
-        globe.getComponent(ToggleComponent).toggle()
+        globe.getComponent(utils.ToggleComponent).toggle()
     }))
 
     //toggle for telescope
-    telescope.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
-        if (value == ToggleComponent.State.On){
-            telescope.addComponentOrReplace(new RotateTransformComponent(telescope.getComponent(Transform).rotation,Quaternion.Euler(0,127,0), 0.5))
+    telescope.addComponent(new utils.ToggleComponent(utils.ToggleState.Off, value =>{
+        if (value == utils.ToggleState.On){
+            telescope.addComponentOrReplace(new utils.RotateTransformComponent(telescope.getComponent(Transform).rotation,Quaternion.Euler(0,127,0), 0.5))
             telescope.getComponent(AudioSource).playOnce()
         }
         else{
-            telescope.addComponentOrReplace(new RotateTransformComponent(telescope.getComponent(Transform).rotation,telescopeDefaultRot, 0.5))
+            telescope.addComponentOrReplace(new utils.RotateTransformComponent(telescope.getComponent(Transform).rotation,telescopeDefaultRot, 0.5))
             telescope.getComponent(AudioSource).playOnce()
         }
     }))
 
     //listen for click on telescope
     telescope.addComponent(new OnClick(event=>{
-        telescope.getComponent(ToggleComponent).toggle()
+        telescope.getComponent(utils.ToggleComponent).toggle()
     }))
 
     //add entities to engine

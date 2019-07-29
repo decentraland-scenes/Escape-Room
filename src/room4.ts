@@ -1,6 +1,4 @@
-import { ToggleComponent } from "./modules/toggleComponent";
-import { RotateTransformComponent } from "./modules/transfromSystem";
-import { Timer, TimerSystem } from "./modules/timerSystem";
+import utils from "../node_modules/decentraland-ecs-utils/index"
 
 export function CreateRoom4(gameCanvas: UICanvas) : void{
     //audio clips
@@ -100,11 +98,13 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
                         panelInputs[2].text.color = Color4.Green()
                         numPadLock.removeComponent(OnClick)
                         numPadLock.addComponentOrReplace(new AudioSource(audioAccessGranted))
-                        numPadLock.getComponent(AudioSource).playOnce() 
-                        TimerSystem.instance.createTimer(2,()=>{
+                        numPadLock.getComponent(AudioSource).playOnce()
+                        const openDoorTimer = new Entity()
+                        openDoorTimer.addComponent(new utils.ExpireIn(2000,()=>{
                             panelRect.visible = false
                             door.getComponent(Animator).getClip("Door_Open").play()
-                        })
+                        }))
+                        engine.addEntity(openDoorTimer)
 
                     }
                     //if password is incorrect
@@ -188,16 +188,16 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
     const carpet = new Entity()
     carpet.addComponent(new GLTFShape("models/room4/Puzzle05_Carpet.glb"))
     carpet.addComponent(new Transform({position: new Vector3(20.7079,5.50579,24.6273)}))
-    carpet.addComponent(new ToggleComponent(ToggleComponent.State.Off, value=>{
-        if (value == ToggleComponent.State.On){
-            carpet.addComponent(new RotateTransformComponent(carpet.getComponent(Transform).rotation, Quaternion.Euler(0,-10,0), 0.7))
+    carpet.addComponent(new utils.ToggleComponent(utils.ToggleState.Off, value=>{
+        if (value == utils.ToggleState.On){
+            carpet.addComponent(new utils.RotateTransformComponent(carpet.getComponent(Transform).rotation, Quaternion.Euler(0,-10,0), 0.7))
         }
         else{
-            carpet.addComponent(new RotateTransformComponent(carpet.getComponent(Transform).rotation, Quaternion.Euler(0,0,0), 0.7))
+            carpet.addComponent(new utils.RotateTransformComponent(carpet.getComponent(Transform).rotation, Quaternion.Euler(0,0,0), 0.7))
         }
     }))
     carpet.addComponent(new OnClick(event=>{
-        carpet.getComponent(ToggleComponent).toggle()
+        carpet.getComponent(utils.ToggleComponent).toggle()
     }))
     engine.addEntity(carpet)
 

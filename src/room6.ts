@@ -1,5 +1,4 @@
-import { ToggleComponent } from "./modules/toggleComponent";
-import { RotateTransformComponent } from "./modules/transfromSystem";
+import utils from "../node_modules/decentraland-ecs-utils/index"
 
 export function CreateRoom6(): void{
     //instance shape for buttons
@@ -23,8 +22,8 @@ export function CreateRoom6(): void{
         lightBulb.addComponent(new Transform({position: lightbulbPositions[i]}))
 
         //create toggle component
-        lightBulb.addComponent(new ToggleComponent(ToggleComponent.State.Off, value =>{
-            if (value == ToggleComponent.State.On){
+        lightBulb.addComponent(new utils.ToggleComponent(utils.ToggleState.Off, value =>{
+            if (value == utils.ToggleState.On){
                 lightBulb.getComponent(LightBulbComponent).setON()
             }
             else{
@@ -42,22 +41,22 @@ export function CreateRoom6(): void{
     //create array of button intereaction
     let buttonInteractions = [
         ()=>{
-            lightBulbs[1].getComponent(ToggleComponent).toggle()
-            lightBulbs[2].getComponent(ToggleComponent).toggle()
-            lightBulbs[3].getComponent(ToggleComponent).toggle()
+            lightBulbs[1].getComponent(utils.ToggleComponent).toggle()
+            lightBulbs[2].getComponent(utils.ToggleComponent).toggle()
+            lightBulbs[3].getComponent(utils.ToggleComponent).toggle()
         },
         ()=>{
-            lightBulbs[2].getComponent(ToggleComponent).toggle()
-            lightBulbs[3].getComponent(ToggleComponent).toggle()
+            lightBulbs[2].getComponent(utils.ToggleComponent).toggle()
+            lightBulbs[3].getComponent(utils.ToggleComponent).toggle()
         },
         ()=>{
-            lightBulbs[0].getComponent(ToggleComponent).toggle()
-            lightBulbs[3].getComponent(ToggleComponent).toggle()
+            lightBulbs[0].getComponent(utils.ToggleComponent).toggle()
+            lightBulbs[3].getComponent(utils.ToggleComponent).toggle()
         },
         ()=>{
-            lightBulbs[0].getComponent(ToggleComponent).toggle()
-            lightBulbs[2].getComponent(ToggleComponent).toggle()
-            lightBulbs[3].getComponent(ToggleComponent).toggle()
+            lightBulbs[0].getComponent(utils.ToggleComponent).toggle()
+            lightBulbs[2].getComponent(utils.ToggleComponent).toggle()
+            lightBulbs[3].getComponent(utils.ToggleComponent).toggle()
         },
     ]
 
@@ -99,7 +98,7 @@ export function CreateRoom6(): void{
                 buttonAnimator.getClip("Button_Action").play()
                 if (areAllLightBulbsOn()){
                     areButtonsEnabled = false
-                    chestTop.addComponent(new RotateTransformComponent(Quaternion.Euler(0,180,0),Quaternion.Euler(90,180,0),0.5))
+                    chestTop.addComponent(new utils.RotateTransformComponent(Quaternion.Euler(0,180,0),Quaternion.Euler(90,180,0),0.5))
                     chestTop.addComponent(new AudioSource(chestAudioClip))
                     chestTop.getComponent(AudioSource).playOnce()
                 }
@@ -113,7 +112,7 @@ export function CreateRoom6(): void{
     //check if all lightbulbs are ON
     let areAllLightBulbsOn = ()=>{
         for (let bulb of lightBulbs){
-            if (!bulb.getComponent(ToggleComponent).isOn()){
+            if (!bulb.getComponent(utils.ToggleComponent).isOn()){
                 return false
             }
         }
@@ -135,11 +134,7 @@ export function CreateRoom6(): void{
 
     //create hint for muna's question
     const hint = new Entity()
-    const hintMaterial = new Material()
-    hintMaterial.albedoTexture = new Texture("images/room6/vampire_cover.png",{hasAlpha: true})
-    hintMaterial.hasAlpha = true
     hint.addComponent(new PlaneShape())
-    hint.addComponent(hintMaterial)
     hint.addComponent(new Transform({position: new Vector3(0,0.4,0), rotation: Quaternion.Euler(90,0,90), scale: new Vector3(0.6,0.6,0.6)}))
     hint.setParent(chest)
 

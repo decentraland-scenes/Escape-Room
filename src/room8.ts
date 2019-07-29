@@ -1,7 +1,6 @@
+import utils from "../node_modules/decentraland-ecs-utils/index"
 import { TriggerSystem } from "./modules/triggerSystem";
-import { ToggleComponent } from "./modules/toggleComponent";
 import { StateMachine } from "./modules/stateMachine";
-import { ScaleTransformComponent, MoveTransformComponent, TransformSystem, RotateTransformComponent } from "./modules/transfromSystem";
 import { ParticleSystem } from "./modules/particleSystem";
 
 export function CreateRoom8(): void{
@@ -30,17 +29,6 @@ export function CreateRoom8(): void{
     roomAnimation.play()
     //add room to engine
     engine.addEntity(roomEntity)
-
-/*
-    //button entity
-    const buttonEntity = new Entity()
-    //button gltf shape
-    buttonEntity.addComponent(new GLTFShape("models/generic/redbutton.gltf"))
-    //button transform
-    buttonEntity.addComponent(new Transform({position:new Vector3(0,-0.1,-0.2), scale: new Vector3(0.3,0.3,0.3)}))
-    //set as child of cage entity
-    buttonEntity.setParent(cageEntity)
-*/
 
     //create mouse
     const mouseEntity = new Entity("mouse")
@@ -213,8 +201,8 @@ export function CreateRoom8(): void{
         fanEntity.addComponent(triggerComponent)
 
         //add toggle component
-        fanEntity.addComponent(new ToggleComponent(ToggleComponent.State.Off, newValue=>{
-            if (newValue == ToggleComponent.State.On){
+        fanEntity.addComponent(new utils.ToggleComponent(utils.ToggleState.Off, newValue=>{
+            if (newValue == utils.ToggleState.On){
                 fanAnimation.play()
                 fanEntity.getComponent(AudioSource).playing = true
                 fanEntity.getComponent(AudioSource).loop = true
@@ -229,7 +217,7 @@ export function CreateRoom8(): void{
         }))
         //listen for click
         fanEntity.addComponent(new OnClick(event=>{
-            fanEntity.getComponent(ToggleComponent).toggle()
+            fanEntity.getComponent(utils.ToggleComponent).toggle()
         }))
 
         //add entity to array
@@ -237,9 +225,9 @@ export function CreateRoom8(): void{
     });
 
     //set some fans to ON state
-    fans[0].getComponent(ToggleComponent).set(ToggleComponent.State.On)
-    fans[3].getComponent(ToggleComponent).set(ToggleComponent.State.On)
-    fans[4].getComponent(ToggleComponent).set(ToggleComponent.State.On)
+    fans[0].getComponent(utils.ToggleComponent).set(utils.ToggleState.On)
+    fans[3].getComponent(utils.ToggleComponent).set(utils.ToggleState.On)
+    fans[4].getComponent(utils.ToggleComponent).set(utils.ToggleState.On)
 
     //room triggers
     let roomTriggerEntities: Entity[] = [new Entity(),new Entity(),new Entity(),new Entity(),new Entity(),new Entity(),new Entity(),new Entity()]
@@ -330,10 +318,10 @@ class MouseStateAppear extends StateMachine.State{
         //set direction to zero
         this.mouseComponent.direction = Vector3.Zero()
         //start scaling mouse and set it direction when finish scaling
-        this.mouseComponent.mouseEntity.addComponent(new ScaleTransformComponent(Vector3.Zero(), Vector3.One(), 1, ()=>{
+        this.mouseComponent.mouseEntity.addComponent(new utils.ScaleTransformComponent(Vector3.Zero(), Vector3.One(), 1, ()=>{
             this.mouseComponent.direction = Vector3.Right()
             this.mouseComponent.transform.lookAt(this.mouseComponent.transform.position.add(this.mouseComponent.direction))
-        }, TransformSystem.Interpolation.EASEQUAD))
+        }, utils.InterpolationType.EASEQUAD))
     }
 }
 
@@ -458,11 +446,11 @@ class MouseBubbleStartState extends StateMachine.State{
         //let's make the bubble appear
         this.mouseComponent.bubble.getComponent(SphereShape).visible = true
         //scale the bubble to it's default scale
-        this.mouseComponent.bubble.addComponent(new ScaleTransformComponent(Vector3.Zero(), new Vector3(0.3,0.3,0.3), 1.5,()=>{
+        this.mouseComponent.bubble.addComponent(new utils.ScaleTransformComponent(Vector3.Zero(), new Vector3(0.3,0.3,0.3), 1.5,()=>{
             //when bubble finish scaling up, whe move the mouse up in the air
             let currentPosition = this.mouseComponent.transform.position
             let targetPosition = new Vector3(currentPosition.x, 1.4, currentPosition.z)
-            this.mouseComponent.mouseEntity.addComponent(new MoveTransformComponent(currentPosition, targetPosition, 1, ()=>{
+            this.mouseComponent.mouseEntity.addComponent(new utils.MoveTransformComponent(currentPosition, targetPosition, 1, ()=>{
                 //now mouse is fully up in the air
                 this.isUp = true
             }))
@@ -611,7 +599,7 @@ class MouseBurstBubbleState extends StateMachine.State{
         //set the state as running
         this.isStateRunning = true
         //scale down the bubble
-        this.mouseComponent.bubble.addComponent(new ScaleTransformComponent(new Vector3(0.5,0.5,0.5), Vector3.One(), 0.5, ()=>{
+        this.mouseComponent.bubble.addComponent(new utils.ScaleTransformComponent(new Vector3(0.5,0.5,0.5), Vector3.One(), 0.5, ()=>{
             //the state shuld end now
             this.isStateRunning = false
             //set bubble as invisible
@@ -660,16 +648,16 @@ class MouseFallingState extends StateMachine.State{
         //set state as running
         this.isStateRunning = true
         //move the mouse a little bit up with an ease out
-        this.mouseComponent.mouseEntity.addComponent(new MoveTransformComponent(this.mouseComponent.transform.position, this.mouseComponent.transform.position.add(new Vector3(0,0.1,0)),0.2,
+        this.mouseComponent.mouseEntity.addComponent(new utils.MoveTransformComponent(this.mouseComponent.transform.position, this.mouseComponent.transform.position.add(new Vector3(0,0.1,0)),0.2,
         ()=>{
             //calc position to the floor
             let targetPosition = new Vector3(this.mouseComponent.transform.position.x,1,this.mouseComponent.transform.position.z)
             //move the mouse to the floor
-            this.mouseComponent.mouseEntity.addComponent(new MoveTransformComponent(this.mouseComponent.transform.position, targetPosition, 0.5, ()=>{
+            this.mouseComponent.mouseEntity.addComponent(new utils.MoveTransformComponent(this.mouseComponent.transform.position, targetPosition, 0.5, ()=>{
                 //state should end now
                 this.isStateRunning = false    
-            }, TransformSystem.Interpolation.EASEINQUAD))
-        }, TransformSystem.Interpolation.EASEOUTQUAD))
+            }, utils.InterpolationType.EASEINQUAD))
+        }, utils.InterpolationType.EASEOUTQUAD))
     }
     /**
      * called when state is updated
@@ -690,8 +678,8 @@ class MouseFallingState extends StateMachine.State{
             //if we collide with a PIKE or with a BOX
             if (event.triggerType == StateMachineCollisionEvent.PIKES || event.triggerType == StateMachineCollisionEvent.BOXES){
                 //stop moving down
-                if (this.mouseComponent.mouseEntity.hasComponent(MoveTransformComponent)){
-                    this.mouseComponent.mouseEntity.removeComponent(MoveTransformComponent)
+                if (this.mouseComponent.mouseEntity.hasComponent(utils.MoveTransformComponent)){
+                    this.mouseComponent.mouseEntity.removeComponent(utils.MoveTransformComponent)
                 }
                 //mouse should die
                 event.stateMachine.setState(this.deadState)
@@ -720,13 +708,13 @@ class MouseDeadState extends StateMachine.State{
         //set time for the transfom system's components
         const time = 1.5
         //rotate the mouse
-        this.mouseComponent.mouseEntity.addComponent(new RotateTransformComponent(this.mouseComponent.transform.rotation, 
+        this.mouseComponent.mouseEntity.addComponent(new utils.RotateTransformComponent(this.mouseComponent.transform.rotation, 
             this.mouseComponent.transform.rotation.multiply(Quaternion.Euler(0,270,0)), time))
         //and scale it down
-        this.mouseComponent.mouseEntity.addComponent(new ScaleTransformComponent(this.mouseComponent.transform.scale, Vector3.Zero(), time, ()=>{
+        this.mouseComponent.mouseEntity.addComponent(new utils.ScaleTransformComponent(this.mouseComponent.transform.scale, Vector3.Zero(), time, ()=>{
             //now the state should end
             this.isStateRunning = false
-        }, TransformSystem.Interpolation.EASEINQUAD))
+        }, utils.InterpolationType.EASEINQUAD))
     }
     /**
      * called when state is updated
@@ -764,10 +752,10 @@ class MouseEnterCageState extends StateMachine.State{
         //the state is running
         this.isStateRunning = true
         //let's move the mouse inside the cage
-        this.mouseComponent.mouseEntity.addComponent(new MoveTransformComponent(this.mouseComponent.transform.position, new Vector3(1.85275,1.06965,-0.04), 1.5, ()=>{
+        this.mouseComponent.mouseEntity.addComponent(new utils.MoveTransformComponent(this.mouseComponent.transform.position, new Vector3(1.85275,1.06965,-0.04), 1.5, ()=>{
             //state should end now
             this.isStateRunning = false
-        }, TransformSystem.Interpolation.EASEQUAD))
+        }, utils.InterpolationType.EASEQUAD))
     }
     /**
      * called when state is updated
