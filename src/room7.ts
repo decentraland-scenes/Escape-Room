@@ -1,5 +1,4 @@
 import utils from "../node_modules/decentraland-ecs-utils/index"
-import { TriggerSystem } from "./modules/triggerSystem";
 
 export function CreateRoom7(): void{
     //variable to store how many tiles does the player paint
@@ -70,8 +69,8 @@ export function CreateRoom7(): void{
     engine.addSystem(mouseBehaviorSystem)
 
     //add trigger for mouse
-    mouse1.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.05,0.05,0.05), Vector3.Zero()), 2, 2))
-    mouse2.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.05,0.05,0.05), Vector3.Zero()), 2, 2))
+    mouse1.addComponent(new utils.TriggerComponent(new utils.TriggerBoxShape(new Vector3(0.05,0.05,0.05), Vector3.Zero()), 2, 2))
+    mouse2.addComponent(new utils.TriggerComponent(new utils.TriggerBoxShape(new Vector3(0.05,0.05,0.05), Vector3.Zero()), 2, 2))
 
     //set tiles grid
     const tileSize = new Vector3(0.30,0.30,1)
@@ -113,7 +112,7 @@ export function CreateRoom7(): void{
             //add tile to engine
             engine.addEntity(tileEntity)
             //add tile trigger
-            tileEntity.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.15,0.15,0.15), Vector3.Zero()), 2, 2, 
+            tileEntity.addComponent(new utils.TriggerComponent(new utils.TriggerBoxShape(new Vector3(0.15,0.15,0.15), Vector3.Zero()), 2, 2, 
                 (entityEnter)=>{
                     if (entityEnter.hasComponent(MouseFollowPathComponent)){
                         //check if the tile was painted by player

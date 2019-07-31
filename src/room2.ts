@@ -1,5 +1,4 @@
 import utils from "../node_modules/decentraland-ecs-utils/index"
-import { TriggerSystem } from "./modules/triggerSystem";
 
 export function CreateRoom2() : void{
     //create spikes
@@ -44,7 +43,7 @@ export function CreateRoom2() : void{
     //create proximity trigger for spikes
     let spikeTriggerEntity = new Entity()
     spikeTriggerEntity.addComponent(new Transform({position: new Vector3(25.5,7.17,19.5)}))
-    spikeTriggerEntity.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(4.2,3,8),Vector3.Zero()), 0, 0, null, null, 
+    spikeTriggerEntity.addComponent(new utils.TriggerComponent(new utils.TriggerBoxShape(new Vector3(4.2,3,8),Vector3.Zero()), 0, 0, null, null, 
     ()=>{
         spikes.getComponent(utils.ToggleComponent).set(utils.ToggleState.On)
     },
@@ -71,8 +70,8 @@ export function CreateRoom2() : void{
 
     //listen for click event to toggle spikes state
     button.addComponent(new OnClick(event =>{
-        if (spikeTriggerEntity.getComponent(TriggerSystem.TriggerComponent).enabled){
-            spikeTriggerEntity.getComponent(TriggerSystem.TriggerComponent).enabled = false
+        if (spikeTriggerEntity.getComponent(utils.TriggerComponent).enabled){
+            spikeTriggerEntity.getComponent(utils.TriggerComponent).enabled = false
             spikes.getComponent(utils.ToggleComponent).set(utils.ToggleState.Off)
         }
         button.getComponent(AudioSource).playOnce()

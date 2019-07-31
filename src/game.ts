@@ -7,12 +7,8 @@ import { CreateRoom5 } from "./room5";
 import { CreateRoom6 } from "./room6";
 import { CreateRoom7 } from "./room7";
 import { CreateRoom8 } from "./room8";
-import { TriggerSystem } from "./modules/triggerSystem";
 
 const gameCanvas = new UICanvas()
-
-const tiggerSystem = new TriggerSystem()
-engine.addSystem(tiggerSystem)
 
 const scene = new Entity()
 scene.addComponent(new GLTFShape("models/scene.glb"))
@@ -23,7 +19,7 @@ CreateRoom1()
 CreateRoom2()
 CreateRoom3()
 CreateRoom4(gameCanvas)
-//CreateRoom5(gameCanvas)
+CreateRoom5(gameCanvas)
 CreateRoom6()
 CreateRoom7()
 CreateRoom8()

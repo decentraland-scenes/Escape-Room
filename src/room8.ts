@@ -1,5 +1,4 @@
 import utils from "../node_modules/decentraland-ecs-utils/index"
-import { TriggerSystem } from "./modules/triggerSystem";
 import { StateMachine } from "./modules/stateMachine";
 import { ParticleSystem } from "./modules/particleSystem";
 
@@ -43,11 +42,11 @@ export function CreateRoom8(): void{
     const mouseComponent = new MouseComponent(mouseEntity)
     mouseEntity.addComponent(mouseComponent)
     //add trigger for mouse
-    mouseEntity.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.2,0.1,0.2), new Vector3(0,0,0)),
+    mouseEntity.addComponent(new utils.TriggerComponent(new utils.TriggerBoxShape(new Vector3(0.2,0.1,0.2), new Vector3(0,0,0)),
         MouseLayer, PikesLayer | BoxLayer | FanLayer | CageLayer,
         (entityEnter) =>{
             let triggerType = StateMachineCollisionEvent.BOXES
-            let triggerLayer = entityEnter.getComponent(TriggerSystem.TriggerComponent).layer
+            let triggerLayer = entityEnter.getComponent(utils.TriggerComponent).layer
             if (triggerLayer == PikesLayer){
                 triggerType = StateMachineCollisionEvent.PIKES
             }
@@ -196,7 +195,7 @@ export function CreateRoom8(): void{
         let triggerPosition = new Vector3(0.2,0.65,1.35).rotate(transform.rotation)
         
         //create trigger component
-        let triggerComponent = new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(triggerSize,triggerPosition), FanLayer)
+        let triggerComponent = new utils.TriggerComponent(new utils.TriggerBoxShape(triggerSize,triggerPosition), FanLayer)
         triggerComponent.enabled = false
         fanEntity.addComponent(triggerComponent)
 
@@ -233,20 +232,20 @@ export function CreateRoom8(): void{
     let roomTriggerEntities: Entity[] = [new Entity(),new Entity(),new Entity(),new Entity(),new Entity(),new Entity(),new Entity(),new Entity()]
 
     //create pikes' triggers
-    roomTriggerEntities[0].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.52,0.06,0.52),new Vector3(0.212483,1.15162,-0.04)), PikesLayer))
-    roomTriggerEntities[1].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.52,0.4,0.52),new Vector3(-0.885757,1.17605,-1.14666)), PikesLayer))
-    roomTriggerEntities[2].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.52,0.06,0.52),new Vector3(-0.347696,1.15162,-0.575279)), PikesLayer))
-    roomTriggerEntities[3].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.52,0.4,0.52),new Vector3(0.729466,1.17605,1.08766)), PikesLayer))
-    roomTriggerEntities[4].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.52,0.06,0.52),new Vector3(-0.347696,1.15162,1.08902)), PikesLayer))
+    roomTriggerEntities[0].addComponent(new utils.TriggerComponent(new utils.TriggerBoxShape(new Vector3(0.52,0.06,0.52),new Vector3(0.212483,1.15162,-0.04)), PikesLayer))
+    roomTriggerEntities[1].addComponent(new utils.TriggerComponent(new utils.TriggerBoxShape(new Vector3(0.52,0.4,0.52),new Vector3(-0.885757,1.17605,-1.14666)), PikesLayer))
+    roomTriggerEntities[2].addComponent(new utils.TriggerComponent(new utils.TriggerBoxShape(new Vector3(0.52,0.06,0.52),new Vector3(-0.347696,1.15162,-0.575279)), PikesLayer))
+    roomTriggerEntities[3].addComponent(new utils.TriggerComponent(new utils.TriggerBoxShape(new Vector3(0.52,0.4,0.52),new Vector3(0.729466,1.17605,1.08766)), PikesLayer))
+    roomTriggerEntities[4].addComponent(new utils.TriggerComponent(new utils.TriggerBoxShape(new Vector3(0.52,0.06,0.52),new Vector3(-0.347696,1.15162,1.08902)), PikesLayer))
 
     //create boxes's triggers
-    roomTriggerEntities[5].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.52,0.16,0.52),new Vector3(0.212483,1.04742,-0.04)), BoxLayer))
-    roomTriggerEntities[6].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.52,0.16,0.52),new Vector3(-0.347696,1.04742,-0.575279)), BoxLayer))
-    roomTriggerEntities[7].addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.52,0.16,0.52),new Vector3(-0.347696,1.04742,1.08902)), BoxLayer))
+    roomTriggerEntities[5].addComponent(new utils.TriggerComponent(new utils.TriggerBoxShape(new Vector3(0.52,0.16,0.52),new Vector3(0.212483,1.04742,-0.04)), BoxLayer))
+    roomTriggerEntities[6].addComponent(new utils.TriggerComponent(new utils.TriggerBoxShape(new Vector3(0.52,0.16,0.52),new Vector3(-0.347696,1.04742,-0.575279)), BoxLayer))
+    roomTriggerEntities[7].addComponent(new utils.TriggerComponent(new utils.TriggerBoxShape(new Vector3(0.52,0.16,0.52),new Vector3(-0.347696,1.04742,1.08902)), BoxLayer))
 
     //create cage's trigger
     const cageTrigger = new Entity()
-    cageTrigger.addComponent(new TriggerSystem.TriggerComponent(new TriggerSystem.TriggerBoxShape(new Vector3(0.52,0.16,0.52),new Vector3(1.0331,1.04742,-0.04)), CageLayer))
+    cageTrigger.addComponent(new utils.TriggerComponent(new utils.TriggerBoxShape(new Vector3(0.52,0.16,0.52),new Vector3(1.0331,1.04742,-0.04)), CageLayer))
     cageTrigger.setParent(roomEntity)
 
     //set triggers as child of room entity

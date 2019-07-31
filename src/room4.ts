@@ -207,7 +207,6 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
     postit.addComponent(new Transform({position: new Vector3(21.571,5.50857,25.9534)}))
     postit.addComponent(new OnClick(event =>{
         postitHintRect.visible = true
-        gameCanvas.visible = true
     }))
     engine.addEntity(postit)
 

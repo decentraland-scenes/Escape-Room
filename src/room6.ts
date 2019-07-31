@@ -98,9 +98,7 @@ export function CreateRoom6(): void{
                 buttonAnimator.getClip("Button_Action").play()
                 if (areAllLightBulbsOn()){
                     areButtonsEnabled = false
-                    chestTop.addComponent(new utils.RotateTransformComponent(Quaternion.Euler(0,180,0),Quaternion.Euler(90,180,0),0.5))
-                    chestTop.addComponent(new AudioSource(chestAudioClip))
-                    chestTop.getComponent(AudioSource).playOnce()
+                    tvScreen.addComponentOrReplace(tvHintOn)
                 }
             }
         }))
@@ -120,23 +118,16 @@ export function CreateRoom6(): void{
     }
 
 
-    //create chest that contain muna's statue question hint
-    const chest = new Entity()
-    chest.addComponent(new GLTFShape("models/generic/chestBase.glb"))
-    chest.addComponent(new Transform({position: new Vector3(24.221,0,9.92463), rotation: Quaternion.Euler(0,180,0)}))
-    engine.addEntity(chest)
+    //load gltf for tv screen
+    const tvHintOff = new GLTFShape("models/room6/TVColor.glb")
+    const tvHintOn = new GLTFShape("models/room6/TVOrange.glb")
 
-    //create chest top
-    const chestTop = new Entity()
-    chestTop.addComponent(new GLTFShape("models/generic/chestTop.glb"))
-    chestTop.addComponent(new Transform({position: new Vector3(0,0.36,0.32), rotation: Quaternion.Euler(0,180,0)}))
-    chestTop.setParent(chest)
+    //create tv screen that contain muna's statue question hint
+    const tvScreen = new Entity()
+    tvScreen.addComponent(tvHintOff)
+    tvScreen.addComponent(new Transform({position: new Vector3(26.91,0,10.44), rotation: Quaternion.Euler(0,-19.6,0)}))
+    engine.addEntity(tvScreen)
 
-    //create hint for muna's question
-    const hint = new Entity()
-    hint.addComponent(new PlaneShape())
-    hint.addComponent(new Transform({position: new Vector3(0,0.4,0), rotation: Quaternion.Euler(90,0,90), scale: new Vector3(0.6,0.6,0.6)}))
-    hint.setParent(chest)
 
     //create door entity
     let door = new Entity()

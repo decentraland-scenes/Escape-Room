@@ -209,9 +209,6 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
                     .endOption()
                 .endOptionsGroup()
         .endif()
-        
-    //set callback for whend dialog finish
-    //dialog.setFinishCallback(()=>gameCanvas.visible = false)
 
     //create the numpad lock
     const numPadLock = new Entity()
@@ -219,7 +216,6 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
     numPadLock.addComponent(new Transform({position: new Vector3(-0.6, 1, 0), rotation: Quaternion.Euler(0,90,0)}))
     numPadLock.addComponent(new OnClick(event =>{
         numLockpanelRect.visible = true
-        gameCanvas.visible = true
     }))
     numPadLock.setParent(munaStatue)
     
@@ -256,7 +252,6 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
     panelCloseButton.height = 32
     panelCloseButton.onClick = new OnClick(event=>{
         numLockpanelRect.visible = false
-        gameCanvas.visible = false
     })
 
     //text for numerical pad
