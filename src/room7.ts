@@ -130,7 +130,7 @@ export function CreateRoom7(): void{
     //create hint for muna's question (ticket)
     const ticket = new Entity()
     ticket.addComponent(new GLTFShape("models/room7/Ticket.glb"))
-    ticket.addComponent(new Transform({position: new Vector3(18.28,0.2,11.48)}))
+    ticket.addComponent(new Transform({position: new Vector3(18.1903,0.397274,11.771), rotation: Quaternion.Euler(0,63.6,0)}))
 
     //animator for ticket
     const ticketAnimator = new Animator()

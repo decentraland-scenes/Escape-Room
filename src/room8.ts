@@ -1,6 +1,5 @@
 import utils from "../node_modules/decentraland-ecs-utils/index"
 import { StateMachine } from "./modules/stateMachine";
-import { ParticleSystem } from "./modules/particleSystem";
 
 export function CreateRoom8(): void{
     //set trigger layers
@@ -91,30 +90,6 @@ export function CreateRoom8(): void{
         mouseStateMachine.handleEvent(new StateMachineOnClickEvent(mouseStateMachine, mouseStateBubbleAppear, mouseStateBurstBubble))
     }))
 
-    //create material for bubble particle system
-    const bubbleParticleMaterial = new Material()
-    bubbleParticleMaterial.albedoTexture = new Texture("images/room8/bubbleParticle.png",{hasAlpha:true})
-    bubbleParticleMaterial.hasAlpha = true
-    bubbleParticleMaterial.alpha = 0.5
-    bubbleParticleMaterial.emissiveColor = Color3.White()
-
-    //config emitter for bubble particle system
-    const bubbleParticleEmitter: ParticleSystem.IEmitterConfig = {
-        duration: 0,
-        loop: false,
-        maxParticles: 1,
-        particleLifeTime: 0.3,
-        particleSpawnInterval: 0,
-        sourceSize: Vector3.Zero(),
-        startDelay: 0,
-        particlesBehavior: new ParticleSystem.BasicParticlesBehavior(bubbleParticleMaterial, null, null, Vector3.Zero(), null, null, new Vector3(0.4,0.4,0.4))
-    }
-
-    //create bubble particle system and add it to engine
-    const bubbleParticleSystem = new ParticleSystem(bubbleParticleEmitter)
-    bubbleParticleSystem.setParent(bubbleEntity)
-    engine.addSystem(bubbleParticleSystem)
-
     //create state machine
     const mouseStateMachine = new StateMachine()
     engine.addSystem(mouseStateMachine)
@@ -126,12 +101,12 @@ export function CreateRoom8(): void{
     const mouseStateDie = new MouseDeadState(mouseComponent)
     //state for mouse entering the cage
     const mouseStateEnterCage = new MouseEnterCageState(mouseComponent,()=>{
-        //TODO: end puzzle here
+        drawerClip.play()
     })
     //state for mouse walking
     const mouseStateWalking = new MouseStateWalking(mouseComponent, mouseStateDie, mouseStateEnterCage)
     //state for bursting bubble
-    const mouseStateBurstBubble = new MouseBurstBubbleState(mouseComponent, bubbleParticleSystem)
+    const mouseStateBurstBubble = new MouseBurstBubbleState(mouseComponent)
     //state for mouse floating inside bubble
     const mouseStateBubble = new MouseBubbleState(mouseComponent, mouseStateBurstBubble)
     //state for bubble appearing and going up
@@ -253,8 +228,18 @@ export function CreateRoom8(): void{
         triggerEntity.setParent(roomEntity)
     });
 
+    //create drawer for hint
+    const drawer = new Entity()
+    const drawerClip = new AnimationState("Drawer_Action",{looping: false})
+    const drawerAnimator = new Animator()
+    drawerAnimator.addClip(drawerClip)
+    drawer.addComponent(new GLTFShape("models/room8/Drawer.glb"))
+    drawer.addComponent(new Transform({position: new Vector3(20.5487,0.563795,28.6556)}))
+    drawer.addComponent(drawerAnimator)
+    engine.addEntity(drawer)
+
     //create door entity
-    let door = new Entity()
+    const door = new Entity()
 
     //add gltf shape
     door.addComponent(new GLTFShape("models/room8/Puzzle09_Door.glb"))
@@ -577,19 +562,31 @@ class MouseBubbleState extends StateMachine.State{
 class MouseBurstBubbleState extends StateMachine.State{
     mouseComponent: MouseComponent
     isStateRunning: boolean
-    burstParticleSystem: ParticleSystem
     audioClipPop: AudioClip 
+    burstParticle: Entity
 
     /**
      * create an instance of the state
      * @param mouseComponent mouse component
      * @param burstParticleSystem particle system to use when bubble burst
      */
-    constructor(mouseComponent: MouseComponent, burstParticleSystem: ParticleSystem){
+    constructor(mouseComponent: MouseComponent){
         super()
         this.mouseComponent = mouseComponent
-        this.burstParticleSystem = burstParticleSystem
         this.audioClipPop = new AudioClip("sounds/pop.mp3")
+        
+        const bubbleParticleMaterial = new Material()
+        bubbleParticleMaterial.albedoTexture = new Texture("images/room8/bubbleParticle.png",{hasAlpha:true})
+        bubbleParticleMaterial.hasAlpha = true
+        bubbleParticleMaterial.alpha = 0.5
+        bubbleParticleMaterial.emissiveColor = Color3.White()
+
+        this.burstParticle = new Entity()
+        this.burstParticle.addComponent(new PlaneShape())
+        this.burstParticle.addComponent(new Billboard())
+        this.burstParticle.addComponent(bubbleParticleMaterial)
+        this.burstParticle.addComponent(new Transform({scale: Vector3.Zero()}))
+        this.burstParticle.setParent(mouseComponent.mouseEntity.getParent())
     }
     /**
      * called when state starts
@@ -603,8 +600,13 @@ class MouseBurstBubbleState extends StateMachine.State{
             this.isStateRunning = false
             //set bubble as invisible
             this.mouseComponent.bubble.getComponent(SphereShape).visible = false
-            //play particle system
-            this.burstParticleSystem.start()
+            //set particle position
+            const particleTransform = this.burstParticle.getComponent(Transform)            
+            particleTransform.position = this.mouseComponent.transform.position
+            //play particle effect
+            this.burstParticle.addComponent(new utils.ScaleTransformComponent(Vector3.Zero(), new Vector3(0.4,0.4,0.4),0.3,()=>{
+                particleTransform.scale = Vector3.Zero()
+            }))
             //play audioclip
             let audioSource = new AudioSource(this.audioClipPop)
             this.mouseComponent.mouseEntity.addComponentOrReplace(audioSource)
