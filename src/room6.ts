@@ -125,7 +125,7 @@ export function CreateRoom6(): void{
     //create tv screen that contain muna's statue question hint
     const tvScreen = new Entity()
     tvScreen.addComponent(tvHintOff)
-    tvScreen.addComponent(new Transform({position: new Vector3(26.91,0,10.44), rotation: Quaternion.Euler(0,-19.6,0)}))
+    tvScreen.addComponent(new Transform({position: new Vector3(26.91,0,10.44)}))
     engine.addEntity(tvScreen)
 
 

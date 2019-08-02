@@ -53,9 +53,9 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
             height: "25%",
             textSpeed: 5,
             textIdleTime: 5,
-            textConfig: {fontSize: 16, paddingLeft:10, paddingRight:10},
+            textConfig: {fontSize: 16, paddingLeft:25, paddingRight:25},
             background: new Texture("images/dialogs/textContainer.png"),
-            backgroundConfig: {sourceWidth: 284, sourceHeight:192}
+            backgroundConfig: {sourceWidth: 512, sourceHeight:257}
         },
         optionsContainer:{
             stackOrientation: UIStackOrientation.VERTICAL,
@@ -66,8 +66,8 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
             hAlign: "center",
             positionY: "-65%",
             background: new Texture("images/dialogs/optionsContainer.png"),
-            backgroundConfig: {sourceWidth: 568, sourceHeight: 96},
-            optionsTextConfig: {fontSize: 20, paddingLeft: 10, positionY: "-10%"}
+            backgroundConfig: {sourceWidth: 512, sourceHeight: 79},
+            optionsTextConfig: {fontSize: 20, paddingLeft: 20, positionY: "-35%"}
         }
     }
 
@@ -89,20 +89,20 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
         .if(()=>firstTimeDialog)
             .call(()=>firstTimeDialog = false)
             .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitDefault)
-            .say(()=>"Hello!",{color: Color4.Yellow()})
+            .say(()=>"Hi there stranger!",{color: Color4.Yellow()})
             .showPortrait(SimpleDialog.PortraitIndex.LEFT, playerPortraitSurprised)
             .say(()=>"A talking statue?!",{color: Color4.White()})
             .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
-            .say(()=>"I'm much more than a simple statue!",{color: Color4.Yellow()})
+            .say(()=>"I'm much more than a talking statue!",{color: Color4.Yellow()})
             .showPortrait(SimpleDialog.PortraitIndex.LEFT, playerPortraitThinking)
             .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitDefault)
             .say(()=>"Anyway... if you want to leave this place...",{color: Color4.Yellow()})
             .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitThinking)
-            .say(()=>"You will have to answer three questions about my hidden treasures in the other rooms.",{color: Color4.Yellow()})
+            .say(()=>"You'll have to answer three questions about me in order to pass through me.",{color: Color4.Yellow()})
             .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
             .showPortrait(SimpleDialog.PortraitIndex.LEFT, playerPortraitSurprised)
-            .say(()=>"So GO and find my treasures! then come back and answer my questions!",{color: Color4.Yellow()})
-            .say(()=>"O-kay(?)",{color: Color4.White()})
+            .say(()=>"So GO to the other rooms and solve my ingenious puzzles in order to get the right answers and come back.",{color: Color4.Yellow()})
+            .say(()=>"Who am I to argue.",{color: Color4.White()})
             .wait(3)
         .else()
             .showPortrait(SimpleDialog.PortraitIndex.LEFT, playerPortraitDefault)
@@ -111,7 +111,7 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
                 .say(()=>"We don't have anything else to talk about.\nEnter the code and leave now.",{color: Color4.Yellow()})
                 .wait(3)
             .else()
-                .say(()=>"Did you find my treasures?",{color: Color4.Yellow()})
+                .say(()=>"Did you find and answer?",{color: Color4.Yellow()})
                 .showPortrait(SimpleDialog.PortraitIndex.LEFT, playerPortraitThinking)
                 .beginOptionsGroup()
                     .option(()=>"Why do you think I came all the way down here?")
@@ -123,76 +123,73 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
                         .say(()=>"So... answer me this...",{color: Color4.Yellow()})
                         .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitDefault)
                         .if(()=>!firstOptionCorrect)
-                            .say(()=>"What is my favorite color?",{color: Color4.Yellow()})
+                            .say(()=>"What’s my favorite color?",{color: Color4.Yellow()})
                             .showPortrait(SimpleDialog.PortraitIndex.LEFT, playerPortraitThinking)
                             .beginOptionsGroup()
-                                .option(()=>"Red")
-                                    .say(()=>"It's red",{color: Color4.White()})
+                                .option(()=>"Green.")
+                                    .say(()=>"Is it green?",{color: Color4.White()})
                                     .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
                                     .say(()=>randomWrongAnswers[Math.floor(Math.random()*(randomWrongAnswers.length-1))],{color: Color4.Yellow()})
                                 .endOption()
-                                .option(()=>"Blue")
-                                    .say(()=>"Blue?",{color: Color4.White()})
+                                .option(()=>"Blue.")
+                                    .say(()=>"Blue...",{color: Color4.White()})
+                                    .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
+                                    .say(()=>randomWrongAnswers[Math.floor(Math.random()*(randomWrongAnswers.length-1))],{color: Color4.Yellow()})
+                                .endOption()
+                                .option(()=>"Orange.")
+                                    .say(()=>"Organge!",{color: Color4.White()})
                                     .call(()=>firstOptionCorrect = true)
                                     .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
-                                    .say(()=>"Yes it is...",{color: Color4.Yellow()})
+                                    .say(()=>"That’s right!",{color: Color4.Yellow()})
                                     .say(()=>"\"In the midst of darkness, light persists.\"",{color: Color4.Yellow()})
                                     .call(()=>spotLight1.getComponent(utils.ToggleComponent).set(utils.ToggleState.On))
-                                .endOption()
-                                .option(()=>"Green")
-                                    .say(()=>"Green",{color: Color4.White()})
-                                    .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
-                                    .say(()=>randomWrongAnswers[Math.floor(Math.random()*(randomWrongAnswers.length-1))],{color: Color4.Yellow()})
                                 .endOption()
                             .endOptionsGroup()
                         .else()
                             .if(()=>!secondOptionCorrect)
-                                .say(()=>"What is my favorite book?",{color: Color4.Yellow()})
+                                .say(()=>"What’s my favorite game?",{color: Color4.Yellow()})
                                 .showPortrait(SimpleDialog.PortraitIndex.LEFT, playerPortraitThinking)
                                 .beginOptionsGroup()
-                                    .option(()=>"The one about the young wizzard")
-                                        .say(()=>"The one about the young wizzard!",{color: Color4.White()})
+                                    .option(()=>"Retro arcade games.")
+                                        .say(()=>"Is it retro arcade games?",{color: Color4.White()})
                                         .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
                                         .say(()=>randomWrongAnswers[Math.floor(Math.random()*(randomWrongAnswers.length-1))],{color: Color4.Yellow()})
                                     .endOption()
-                                    .option(()=>"Romeo and Juliet")
-                                        .say(()=>"That tragic romatic comedy about the two lovers than couldn't be together? Romeo and Juliet?",{color: Color4.White()})
-                                        .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
-                                        .say(()=>randomWrongAnswers[Math.floor(Math.random()*(randomWrongAnswers.length-1))],{color: Color4.Yellow()})
-                                    .endOption()
-                                    .option(()=>"Girl falling in love with vampire")
-                                        .say(()=>"The book about a gril falling in love with a vampire...",{color: Color4.White()})
-                                        .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
+                                    .option(()=>"Darts.")
+                                        .say(()=>"Darts?",{color: Color4.White()})
                                         .call(()=>secondOptionCorrect = true)
                                         .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
-                                        .say(()=>"The books are better than the movies...",{color: Color4.Yellow()})
-                                        .say(()=>"...",{color: Color4.White()})
+                                        .say(()=>"Yes it is...",{color: Color4.Yellow()})
                                         .say(()=>"\"Give light, and the darkness will disappear of itself.\"",{color: Color4.Yellow()})
                                         .call(()=>spotLight2.getComponent(utils.ToggleComponent).set(utils.ToggleState.On))
+                                    .endOption()
+                                    .option(()=>"Bowling.")
+                                        .say(()=>"Of course… It’s bowling...",{color: Color4.White()})
+                                        .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
+                                        .say(()=>randomWrongAnswers[Math.floor(Math.random()*(randomWrongAnswers.length-1))],{color: Color4.Yellow()})
                                     .endOption()
                                 .endOptionsGroup()
                             .else()
                                 .if(()=>!thirdOptionCorrect)
-                                    .say(()=>"What was my first pet's name?",{color: Color4.Yellow()})
+                                    .say(()=>"What’s my favorite dessert?",{color: Color4.Yellow()})
                                     .showPortrait(SimpleDialog.PortraitIndex.LEFT, playerPortraitThinking)
                                     .beginOptionsGroup()
-                                        .option(()=>"Bucephalus")
-                                            .say(()=>"Bucephalus! Of course Muna the Great...",{color: Color4.White()})
+                                        .option(()=>"Cheese Cake.")
+                                            .say(()=>"Cheese Cake?",{color: Color4.White()})
                                             .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
                                             .say(()=>randomWrongAnswers[Math.floor(Math.random()*(randomWrongAnswers.length-1))],{color: Color4.Yellow()})
                                         .endOption()
-                                        .option(()=>"Babieca")
-                                            .say(()=>"Babieca?",{color: Color4.White()})
+                                        .option(()=>"Apple Pie.")
+                                            .say(()=>"It's Apple Pie...",{color: Color4.White()})
                                             .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
                                             .say(()=>randomWrongAnswers[Math.floor(Math.random()*(randomWrongAnswers.length-1))],{color: Color4.Yellow()})
                                         .endOption()
-                                        .option(()=>"Marengo")
-                                            .say(()=>"What's the french for Marengo?",{color: Color4.White()})
+                                        .option(()=>"Lemon Pie.")
+                                            .say(()=>"Lemon Pie!",{color: Color4.White()})
                                             .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
                                             .call(()=>thirdOptionCorrect = true)
                                             .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
-                                            .say(()=>"Marengo...",{color: Color4.Yellow()})
-                                            .say(()=>"That answer is correct!",{color: Color4.Yellow()})
+                                            .say(()=>"Very good...",{color: Color4.Yellow()})
                                             .say(()=>"\"Give light and people will find the way.\"")
                                             .call(()=>spotLight3.getComponent(utils.ToggleComponent).set(utils.ToggleState.On))
                                         .endOption()
@@ -205,28 +202,29 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
                         .showPortrait(SimpleDialog.PortraitIndex.LEFT, playerPortraitDefault)
                         .say(()=>"No, not yet",{color: Color4.White()})
                         .showPortrait(SimpleDialog.PortraitIndex.RIGHT, npcPortraitSurprised)
-                        .say(()=>"You are wasting my time",{color: Color4.Yellow()})
+                        .say(()=>"You are wasting my time...",{color: Color4.Yellow()})
                     .endOption()
                 .endOptionsGroup()
         .endif()
 
     //create the numpad lock
     const numPadLock = new Entity()
-    numPadLock.addComponent(new GLTFShape("models/generic/codePad.glb"))
-    numPadLock.addComponent(new Transform({position: new Vector3(-0.6, 1, 0), rotation: Quaternion.Euler(0,90,0)}))
+    numPadLock.addComponent(new BoxShape())
+    numPadLock.getComponent(BoxShape).visible = false
+    numPadLock.addComponent(new Transform({position: new Vector3(27.794, 1.79765, 19.0124), scale: new Vector3(0.4,0.7,0.6)}))
     numPadLock.addComponent(new OnClick(event =>{
-        numLockpanelRect.visible = true
+        panelRect.visible = true
     }))
-    numPadLock.setParent(munaStatue)
+    engine.addEntity(numPadLock)
     
 
     //create rect to contain numerical pad
-    const numLockpanelRect = new UIContainerRect(gameCanvas)
-    numLockpanelRect.positionX = -50
-    numLockpanelRect.positionY = 50
-    numLockpanelRect.width = "100%"
-    numLockpanelRect.height = "100%"
-    numLockpanelRect.visible = false
+    const panelRect = new UIContainerRect(gameCanvas)
+    panelRect.positionX = -50
+    panelRect.positionY = 50
+    panelRect.width = "100%"
+    panelRect.height = "100%"
+    panelRect.visible = false
 
     //create texture for buttons
     const buttonTexture = new Texture("images/codepad/pwdpanel_buttons.png")
@@ -234,40 +232,30 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
     const closeTexture = new Texture("images/codepad/button_close.png")
 
     //background for numerical pad
-    const panelBg = new UIImage(numLockpanelRect, new Texture("images/codepad/pwdpanel_bg.png"))
-    panelBg.sourceWidth = 222
-    panelBg.sourceHeight = 297
+    const panelBg = new UIImage(panelRect, new Texture("images/codepad/pwdpanel_bg.png"))
+    panelBg.sourceWidth = 918
+    panelBg.sourceHeight = 1300
     panelBg.width = 310
     panelBg.height = 420
     panelBg.positionX = 70
     panelBg.positionY = -55
 
     //close button for numerical pad
-    let panelCloseButton = new UIImage(numLockpanelRect, closeTexture)
-    panelCloseButton.sourceWidth = 32
-    panelCloseButton.sourceHeight = 32
-    panelCloseButton.positionX = 204
-    panelCloseButton.positionY = 133
+    let panelCloseButton = new UIImage(panelRect, closeTexture)
+    panelCloseButton.sourceWidth = 92
+    panelCloseButton.sourceHeight = 92
+    panelCloseButton.positionX = 194
+    panelCloseButton.positionY = 108
     panelCloseButton.width = 32
     panelCloseButton.height = 32
     panelCloseButton.onClick = new OnClick(event=>{
-        numLockpanelRect.visible = false
+        panelRect.visible = false
     })
 
-    //text for numerical pad
-    let panelText = new UIText(numLockpanelRect)
-    panelText.positionY = 133
-    panelText.positionX = 16
-    panelText.hTextAlign = "left"
-    panelText.vTextAlign = "center"
-    panelText.fontSize = 30
-    panelText.value = "Enter Code"
-    panelText.isPointerBlocker = false
-
     //set position offset for buttons
-    const panelPosition = new Vector2(0, -12)
+    const panelPosition = new Vector2(12, -24)
     //set buttons size
-    const buttonSize = new Vector2(64, 64)
+    const buttonSize = new Vector2(55, 55)
     //set space between buttons
     const buttonSpace = new Vector2(5, 5)
 
@@ -292,12 +280,12 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
             //at the bottom left we have the "clear" button
             if (col == 0 && row == 3){
                 //create image for button
-                buttonImage = new UIImage(numLockpanelRect, new Texture("images/codepad/pwdpanel_clear.png"))
+                buttonImage = new UIImage(panelRect, new Texture("images/codepad/pwdpanel_clear.png"))
                 //when clicked we reset text values and set digit index to 0
                 buttonImage.onClick = new OnClick(event =>{
                     panelInputs.forEach(inputSlot => {
                         inputSlot.text.value = ""
-                        inputSlot.text.color = Color4.Black()
+                        inputSlot.text.color = Color4.White()
                     });
                     currentInputIdx = 0
                 })
@@ -305,7 +293,7 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
             //bottom right is "enter" button
             else if (col == 2 && row == 3){
                 //create image for button
-                buttonImage = new UIImage(numLockpanelRect, new Texture("images/codepad/pwdpanel_enter.png"))
+                buttonImage = new UIImage(panelRect, new Texture("images/codepad/pwdpanel_enter.png"))
                 //when clicked we check if entered password is correct
                 buttonImage.onClick = new OnClick(event =>{
                     let inputPwd = ""
@@ -320,9 +308,17 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
                         panelInputs[1].text.color = Color4.Green()
                         panelInputs[2].text.value = "!"
                         panelInputs[2].text.color = Color4.Green()
+                        numPadLock.removeComponent(OnClick)
                         numPadLock.addComponentOrReplace(new AudioSource(audioAccessGranted))
-                        numPadLock.getComponent(AudioSource).playOnce() 
-                        //TODO: make something happen
+                        numPadLock.getComponent(AudioSource).playOnce()
+                        const openDoorTimer = new Entity()
+                        openDoorTimer.addComponent(new utils.ExpireIn(2000,()=>{
+                            panelRect.visible = false
+                            doorAnimator.getClip("Door_Open").play()
+                            door.getComponent(AudioSource).playOnce()
+                        }))
+                        engine.addEntity(openDoorTimer)
+
                     }
                     //if password is incorrect
                     else{
@@ -341,9 +337,9 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
             //if it is a numerical button
             else{
                 //create image for button
-                buttonImage = new UIImage(numLockpanelRect, buttonTexture)
+                buttonImage = new UIImage(panelRect, buttonTexture)
                 //create text for button
-                numberText = new UIText(numLockpanelRect)
+                numberText = new UIText(panelRect)
                 numberText.isPointerBlocker = false
                 //if clicked we set it value to the input boxes
                 buttonImage.onClick = new OnClick(event =>{
@@ -362,8 +358,8 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
                 })
             }
             //set image
-            buttonImage.sourceWidth = 64
-            buttonImage.sourceHeight = 64
+            buttonImage.sourceWidth = 171
+            buttonImage.sourceHeight = 171
             buttonImage.width = buttonSize.x
             buttonImage.height = buttonSize.y
             buttonImage.positionX = panelPosition.x + col * (buttonSpace.x + buttonSize.x)
@@ -386,18 +382,18 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
     //create the input boxes to show the digits entered by the user
     let panelInputs: {image: UIImage, text: UIText}[] = []
     for (let i=0; i<3; i++){
-        let inputSlot = {image: new UIImage(numLockpanelRect, inputTexture), text: new UIText(numLockpanelRect)}
-        inputSlot.image.sourceWidth = 64
-        inputSlot.image.sourceHeight = 64
+        let inputSlot = {image: new UIImage(panelRect, inputTexture), text: new UIText(panelRect)}
+        inputSlot.image.sourceWidth = 173
+        inputSlot.image.sourceHeight = 173
         inputSlot.image.width = inputSlot.text.width = buttonSize.x
         inputSlot.image.height = inputSlot.text.height = buttonSize.y
-        inputSlot.image.positionX = inputSlot.text.positionX = i * (buttonSpace.x + buttonSize.x)
-        inputSlot.image.positionY = inputSlot.text.positionY = 65
+        inputSlot.image.positionX = inputSlot.text.positionX = (i * (buttonSpace.x + buttonSize.x)) + 5
+        inputSlot.image.positionY = inputSlot.text.positionY = 45
         inputSlot.image.isPointerBlocker = inputSlot.text.isPointerBlocker = false
         inputSlot.text.fontAutoSize = true
         inputSlot.text.hTextAlign = "center"
         inputSlot.text.value = ""
-        inputSlot.text.color = Color4.Black()
+        inputSlot.text.color = Color4.White()
         panelInputs.push(inputSlot)
     }
 
@@ -419,12 +415,6 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
     //create audio source component, set audio clip and add it to door entity
     let doorAudioSource = new AudioSource(new AudioClip("sounds/door_squeak.mp3"))
     door.addComponent(doorAudioSource)
-
-    //listen to onclick event to toggle door state
-    door.addComponent(new OnClick(event =>{ //TODO: remove later
-        doorAnimator.getClip("Door_Open").play()
-        door.getComponent(AudioSource).playOnce()
-    }))
 
     //add door to engine
     engine.addEntity(door)
