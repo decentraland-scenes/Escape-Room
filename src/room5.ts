@@ -21,6 +21,7 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
             dialog.runDialogTree(dialogTree)
         }
     }))
+    munaStatue.addComponent(new AudioSource(new AudioClip("sounds/move_object1.mp3")))
     engine.addEntity(munaStatue)
 
     //load textures for dialog
@@ -311,6 +312,9 @@ export function CreateRoom5(gameCanvas: UICanvas) : void{
                         numPadLock.removeComponent(OnClick)
                         numPadLock.addComponentOrReplace(new AudioSource(audioAccessGranted))
                         numPadLock.getComponent(AudioSource).playOnce()
+                        munaStatue.getComponent(AudioSource).playOnce()
+                        munaStatue.addComponent(new utils.MoveTransformComponent(munaStatue.getComponent(Transform).position,
+                            munaStatue.getComponent(Transform).position.add(new Vector3(0,0,2)), 1.5))
                         const openDoorTimer = new Entity()
                         openDoorTimer.addComponent(new utils.ExpireIn(2000,()=>{
                             panelRect.visible = false
