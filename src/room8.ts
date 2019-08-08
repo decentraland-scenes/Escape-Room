@@ -134,12 +134,12 @@ export function CreateRoom8(): void{
 
     //create fans transfrom
     const fansTransform: Transform[] = [
-        new Transform({position: new Vector3(-3.18875,1.01502,-0.57951), rotation: Quaternion.Euler(0,90,0)}),
-        new Transform({position: new Vector3(-3.18875,1.01502,0.02), rotation: Quaternion.Euler(0,90,0)}), 
-        new Transform({position: new Vector3(0.169518,1.01502,-2.94794)}), 
-        new Transform({position: new Vector3(0.75203,1.01502,-2.94794)}), 
-        new Transform({position: new Vector3(-0.873027,1.01502,3.0735), rotation: Quaternion.Euler(0,180,0)}), 
-        new Transform({position: new Vector3(1.9556,1.01502,1.08835), rotation: Quaternion.Euler(0,-90,0)}),
+        new Transform({position: new Vector3(-3.18875,1.01502,-0.57951), rotation: Quaternion.Euler(0,90,0), scale: new Vector3(0.6,0.6,0.6)}),
+        new Transform({position: new Vector3(-3.18875,1.01502,0.02), rotation: Quaternion.Euler(0,90,0), scale: new Vector3(0.6,0.6,0.6)}), 
+        new Transform({position: new Vector3(0.169518,1.01502,-2.94794), scale: new Vector3(0.6,0.6,0.6)}), 
+        new Transform({position: new Vector3(0.75203,1.01502,-2.94794), scale: new Vector3(0.6,0.6,0.6)}), 
+        new Transform({position: new Vector3(-0.873027,1.01502,3.0735), rotation: Quaternion.Euler(0,180,0), scale: new Vector3(0.6,0.6,0.6)}), 
+        new Transform({position: new Vector3(1.9556,1.01502,1.08835), rotation: Quaternion.Euler(0,-90,0), scale: new Vector3(0.6,0.6,0.6)}),
     ]
 
     fansTransform.forEach(transform => {
