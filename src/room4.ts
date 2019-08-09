@@ -267,10 +267,7 @@ export function CreateRoom4(gameCanvas: UICanvas) : void{
 
     //create the numpad lock
     const numPadLock = new Entity()
-    const lockShape = new BoxShape()
-    numPadLock.addComponent(lockShape)
-    lockShape.visible = false
-    numPadLock.addComponent(new Transform({position: new Vector3(19.6486,7,23.142), scale: new Vector3(0.2,0.6,0.4)}))
+    numPadLock.addComponent(new GLTFShape("models/room4/Numpad1.glb"))
     numPadLock.addComponent(new OnClick(event =>{
         panelRect.visible = true
     }))
